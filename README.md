@@ -16,32 +16,9 @@
 
 ## 📚 Complete Project Documentation Suite
 
+* 📜 [**Complete Discussion & Brainstorming Archive**](docs/FULL_DISCUSSION_LOG.md): Full historical record and transcript of all ideas, grilling Q&As, and decisions made.
 * ⚡ [**Zero-Effort Automation & Lifelong Financial Journey**](docs/AUTOMATED_LIFELONG_TRACKING.md): How the app tracks wealth automatically with 0 manual typing and guides users from age 20 to 60+.
 * 💡 [**What I Understood From You (Discussion Summary)**](docs/WHAT_YOU_GOT_FROM_ME.md): Plain-English, step-by-step summary of our brainstorming session and product vision.
 * 📖 [**Deep Project Analysis & Strategic Blueprint**](docs/PROJECT_ANALYSIS.md): Problem breakdown, competitive moat, user personas, and feature backlog.
 * 📋 [**Product Requirements Document (PRD) & Architecture**](docs/PRD.md): Technical feature specs, sequence diagrams, and phased roadmap.
 * 🤝 [**Team Git Collaboration & Branching Guide**](docs/TEAM_WORKFLOW.md): Step-by-step guide for team members to create branches, make PRs, and push code.
-
----
-
-## 🛠️ Quickstart for Team Members
-
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/Anshhh0306/Finance.git
-   cd Finance
-   ```
-
-2. **Create Your Feature Branch:**
-   ```bash
-   git checkout -b feature/<your-feature-name>
-   ```
-
-3. **Commit & Push Your Work:**
-   ```bash
-   git add .
-   git commit -m "feat: describe your change"
-   git push -u origin feature/<your-feature-name>
-   ```
-
-4. **Submit a Pull Request on GitHub** to merge your code into `main`.
