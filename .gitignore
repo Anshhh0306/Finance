@@ -1,0 +1,12 @@
+# Graphify dynamic artifacts
+graphify-out/
+.graphify/
+
+# Environment & Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.env
+.venv
+dist/
+build/
