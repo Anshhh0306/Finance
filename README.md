@@ -13,10 +13,11 @@
 
 ---
 
-## 📚 Project Documentation
+## 📚 Complete Project Documentation
 
-* [**Product Requirements Document (PRD) & Architecture**](docs/PRD.md): In-depth breakdown of features, data flow, and phased roadmap.
-* [**Team Git Collaboration Guide**](docs/TEAM_WORKFLOW.md): Branching conventions, PR processes, and team task distribution.
+* 📖 [**Deep Project Analysis & Strategic Blueprint**](docs/PROJECT_ANALYSIS.md): Detailed problem breakdown, competitive moat, user personas, and feature backlog.
+* 📋 [**Product Requirements Document (PRD) & Architecture**](docs/PRD.md): Technical feature specs, sequence diagrams, and phased roadmap.
+* 🤝 [**Team Git Collaboration & Branching Guide**](docs/TEAM_WORKFLOW.md): Step-by-step guide for team members to create branches, make PRs, and push code.
 
 ---
 
