@@ -13,6 +13,22 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
   const COMMITGUARD_HOST_ID = 'commitguard-extension-root';
 
+  type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH';
+
+  function detectSurfaceType(): InterceptorSurface {
+    const host = window.location.hostname.toLowerCase();
+    if (host.includes('makemytrip') || host.includes('cleartrip') || host.includes('yatra') || host.includes('goibibo')) {
+      return 'TRAVEL';
+    }
+    if (host.includes('upgrad') || host.includes('scaler') || host.includes('simplilearn') || host.includes('coursera')) {
+      return 'EDTECH';
+    }
+    return 'ECOMMERCE';
+  }
+
+  const CURRENT_SURFACE = detectSurfaceType();
+  console.log(`🛡️ CommitGuard Surface Detected: [${CURRENT_SURFACE}] on ${window.location.hostname}`);
+
   interface ScrapedOffer {
     id: string;
     bankOrCard: string;
@@ -24,8 +40,9 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     recommended: boolean;
   }
 
-  // Helper to extract cart / product info and active card/bank offers from Flipkart or Amazon DOM
+  // Universal Live Scraper adapting to variations in wording across Flipkart, Amazon, MakeMyTrip, Cleartrip, and UpGrad
   function extractProductInfo(): {
+    surfaceType: InterceptorSurface;
     price: number;
     originalPrice?: number;
     discountPercent?: number;
@@ -39,7 +56,161 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     let detectedName = '';
     let detectedEmi: number | undefined;
 
-    // 1. Try finding product title on Flipkart / Amazon
+    const bodyText = document.body ? document.body.innerText : '';
+
+    // ==========================================
+    // 1. SURFACE: TRAVEL (MakeMyTrip / Cleartrip)
+    // ==========================================
+    if (CURRENT_SURFACE === 'TRAVEL') {
+      // Look for flight / hotel destination headers
+      const travelTitleSelectors = [
+        '.flight-details',
+        '.header-title',
+        'h1',
+        'h2',
+        '.itinerary-header',
+        '.sector-info',
+        '.hotel-name',
+        '#booking-summary',
+      ];
+      for (const sel of travelTitleSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const t = el.textContent.trim();
+          if (t.length > 5) {
+            detectedName = t.slice(0, 60);
+            break;
+          }
+        }
+      }
+      if (!detectedName) {
+        const cityMatch = bodyText.match(/(?:Flight to|Booking for|Hotel in|Trip to)\s+([A-Za-z\s]+)/i);
+        detectedName = cityMatch ? `MakeMyTrip: ${cityMatch[1].trim()}` : 'MakeMyTrip Flight & Hotel Booking';
+      }
+
+      // Live Scrape travel total amount / fare
+      const fareMatch = bodyText.match(/(?:Total Amount|Total Fare|Grand Total|Due Now|Payable Amount|Trip Total)[^\d₹]*₹\s*([0-9,]+)/i);
+      if (fareMatch && fareMatch[1]) {
+        const num = parseInt(fareMatch[1].replace(/,/g, ''), 10);
+        if (!isNaN(num) && num > 1000) detectedPrice = num;
+      }
+      if (!detectedPrice) {
+        // Scan standard price tags in MMT
+        const fareEls = document.querySelectorAll('[class*="fare"], [class*="price"], [class*="total"]');
+        for (const el of Array.from(fareEls)) {
+          const text = el.textContent || '';
+          if (text.includes('₹')) {
+            const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(num) && num >= 3000 && num <= 1000000) {
+              detectedPrice = num;
+              break;
+            }
+          }
+        }
+      }
+
+      const travelPrice = detectedPrice > 0 ? detectedPrice : 28500;
+      const travelOffers: ScrapedOffer[] = [
+        {
+          id: 'sip-liquid',
+          bankOrCard: '6-Month Liquid Fund SIP (Recommended)',
+          description: `Accumulate ₹${Math.round(travelPrice / 6).toLocaleString('en-IN')}/mo in an RBI-compliant 7.10% liquid portfolio`,
+          effectiveBenefit: 'Yields +₹612 interest; 0% debt liability',
+          rating: 'BEST',
+          reason: 'Take the trip completely debt-free without risking credit score or TNPL defaults.',
+          netPrice: travelPrice,
+          recommended: true,
+        },
+        {
+          id: 'upi-travel',
+          bankOrCard: 'UPI / Direct Bank Transfer',
+          description: 'Single-tranche direct payment from checking account',
+          effectiveBenefit: 'Saves 100% of BNPL late fee exposure',
+          rating: 'BEST',
+          reason: 'Zero interest, zero processing fees, zero penalty exposure.',
+          netPrice: travelPrice,
+          recommended: true,
+        },
+        {
+          id: 'tnpl-trip',
+          bankOrCard: 'Travel Now, Pay Later (TNPL / Sanctioned BNPL)',
+          description: '3 to 6 Months deferred installment loan',
+          effectiveBenefit: `₹${Math.round(travelPrice / 6).toLocaleString('en-IN')}/mo with 28.4% APR risk`,
+          rating: 'AVOID',
+          reason: 'Exposes user to 24%-36% penalty APRs plus ₹450-₹850 bounce fees if post-vacation cash is tight.',
+          netPrice: travelPrice + Math.round(travelPrice * 0.14),
+          recommended: false,
+        },
+      ];
+
+      return {
+        surfaceType: 'TRAVEL',
+        price: travelPrice,
+        name: detectedName,
+        offers: travelOffers,
+      };
+    }
+
+    // ==========================================
+    // 2. SURFACE: EDTECH (UpGrad / Scaler)
+    // ==========================================
+    if (CURRENT_SURFACE === 'EDTECH') {
+      const edTechTitleSelectors = ['h1', '.program-title', '.course-title', '.cohort-header', '.hero-title'];
+      for (const sel of edTechTitleSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const t = el.textContent.trim();
+          if (t.length > 5) {
+            detectedName = t.slice(0, 60);
+            break;
+          }
+        }
+      }
+      if (!detectedName) detectedName = 'UpGrad Executive Certification & Degree';
+
+      // Scrape tuition / program fee
+      const tuitionMatch = bodyText.match(/(?:Program Fee|Total Tuition|Total Fee|Course Price|Admission Fee)[^\d₹]*₹\s*([0-9,]+)/i);
+      if (tuitionMatch && tuitionMatch[1]) {
+        const num = parseInt(tuitionMatch[1].replace(/,/g, ''), 10);
+        if (!isNaN(num) && num > 10000) detectedPrice = num;
+      }
+      const edTechPrice = detectedPrice > 0 ? detectedPrice : 225000;
+      const subventionSurcharge = Math.round(edTechPrice * 0.045); // 4.5% hidden subvention markup
+
+      const edTechOffers: ScrapedOffer[] = [
+        {
+          id: 'upfront-edtech',
+          bankOrCard: 'Upfront NEFT/UPI with Corporate Sponsorship Discount',
+          description: 'Single full tuition payment via direct bank wire',
+          effectiveBenefit: `Save ₹${subventionSurcharge.toLocaleString('en-IN')} upfront discount`,
+          rating: 'BEST',
+          reason: 'Negotiate the 4.5% merchant subvention fee directly off the course sticker price.',
+          netPrice: edTechPrice - subventionSurcharge,
+          recommended: true,
+        },
+        {
+          id: 'subvention-loan',
+          bankOrCard: '0% Interest Education NBFC Loan (Propelld / LiquiLoans)',
+          description: '18-24 Month NBFC subvention loan contract',
+          effectiveBenefit: `₹${Math.round(edTechPrice / 18).toLocaleString('en-IN')}/mo with hidden subvention drag`,
+          rating: 'AVOID',
+          reason: `Hidden 4.5% (₹${subventionSurcharge.toLocaleString('en-IN')}) subvention cost baked into course price + processing fees.`,
+          netPrice: edTechPrice + 3500,
+          recommended: false,
+        },
+      ];
+
+      return {
+        surfaceType: 'EDTECH',
+        price: edTechPrice,
+        name: detectedName,
+        offers: edTechOffers,
+      };
+    }
+
+    // ==========================================
+    // 3. SURFACE: E-COMMERCE (Flipkart / Amazon)
+    // ==========================================
     const titleSelectors = [
       'h1',
       'span.B_NuCI',
@@ -58,9 +229,9 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
     }
 
-    // 2. Extract primary selling price from main Flipkart price elements
+    // Extract primary selling price from main Flipkart price elements
     const priceSelectors = [
-      'div.Nx9bqj.CxhGGd', // Flipkart product page primary highlighted price (e.g. ₹5,399)
+      'div.Nx9bqj.CxhGGd',
       'div.Nx9bqj',
       'div._30jeq3._16Jk6d',
       'div._30jeq3',
@@ -78,8 +249,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
     }
 
-    // 3. Scan for "Buy at ₹4,524" or "Buy now at ₹..." in buttons/headings
-    const bodyText = document.body ? document.body.innerText : '';
+    // Scan for "Buy at ₹4,524" or "Buy now at ₹..." in buttons/headings
     if (!detectedPrice) {
       const buyAtMatch = bodyText.match(/(?:Buy at|Buy now at|Total Amount|Payable Amount|Total Price)[^\d₹]*₹\s*([0-9,]+)/i);
       if (buyAtMatch && buyAtMatch[1]) {
@@ -90,7 +260,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
     }
 
-    // 4. Scan original struck-through MRP (e.g. ₹19,999 or 73% off)
+    // Scan original struck-through MRP (e.g. ₹19,999 or 73% off)
     const mrpSelectors = ['div.yRaY8j.A68rqU', 'div._3I9_wc._2p6lqe', 'span.a-price.a-text-price'];
     for (const sel of mrpSelectors) {
       const el = document.querySelector(sel);
@@ -103,13 +273,13 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
     }
 
-    // Check discount percentage (e.g. 73% or 15%)
+    // Check discount percentage
     const discountMatch = bodyText.match(/(\d+)%\s*off/i);
     if (discountMatch && discountMatch[1]) {
       detectedDiscount = parseInt(discountMatch[1], 10);
     }
 
-    // Check for "Buy with EMI From ₹5,166/m" or "₹X,XXX/m"
+    // Check for "Buy with EMI From ₹5,166/m"
     const emiMonthlyMatch = bodyText.match(/(?:From|Pay|EMI)\s*₹\s*([0-9,]+)\s*(?:\/\s*m|per month|monthly)/i);
     if (emiMonthlyMatch && emiMonthlyMatch[1]) {
       detectedEmi = parseInt(emiMonthlyMatch[1].replace(/,/g, ''), 10);
@@ -117,12 +287,10 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
     const finalPrice = detectedPrice > 0 ? detectedPrice : 5399;
 
-    // 5. INTEL OFFER SCRAPER & COMPARISON ENGINE
-    // Detect active bank/card offers on page (Axis, AU Bank, HDFC, ICICI, SuperCoins)
+    // Detect active bank/card offers on page
     const offers: ScrapedOffer[] = [];
     const hasAxisCard = /Flipkart Axis Bank|Axis Bank Credit Card|Axis/i.test(bodyText);
     const hasAuBank = /AU Small Finance|AU Bank|AU Credit Card/i.test(bodyText);
-    const hasHdfc = /HDFC Bank|HDFC/i.test(bodyText);
     const hasSuperCoins = /SuperCoins/i.test(bodyText);
 
     // 1. Direct UPI / Debit Card Baseline (Zero Drag)
@@ -196,6 +364,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     }
 
     return {
+      surfaceType: 'ECOMMERCE',
       price: finalPrice,
       originalPrice: detectedOriginalPrice > 0 ? detectedOriginalPrice : undefined,
       discountPercent: detectedDiscount > 0 ? detectedDiscount : undefined,
@@ -212,6 +381,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
   // Mount the CommitGuard Modal inside Shadow Root
   function injectShadowModal(
+    surfaceType: InterceptorSurface,
     productPrice: number,
     productName: string,
     offers: ScrapedOffer[],
@@ -298,6 +468,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
     reactRoot.render(
       <ExtensionCommitGuardModal
+        surfaceType={surfaceType}
         productPrice={productPrice}
         productName={productName}
         originalPrice={originalPrice}
@@ -313,6 +484,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       chrome.runtime.sendMessage({
         type: 'CHECKOUT_INTERCEPTED',
         payload: {
+          surface: surfaceType,
           price: productPrice,
           name: productName,
           effectiveApr: 19.93,
@@ -325,10 +497,13 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     }
   }
 
-  // Keywords that represent checkout commitment on Flipkart & Amazon
-  const INTERCEPT_KEYWORDS = [
+  // Multi-Surface Universal Keywords and Fuzzy Intent Matchers
+  // Seamlessly handles wording variations across Flipkart, Amazon, MakeMyTrip, Cleartrip, UpGrad
+  const UNIVERSAL_INTERCEPT_KEYWORDS = [
+    // 1. E-Commerce (Flipkart, Amazon)
     'continue with emi',
     'buy with emi',
+    'pay with emi',
     'select plan and continue',
     'place order',
     'place your order',
@@ -336,14 +511,38 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     'proceed to retail checkout',
     'credit card emi',
     'complete payment',
-    'pay now',
+    'buy now',
+
+    // 2. Travel (MakeMyTrip, Cleartrip, Yatra)
+    'travel now pay later',
+    'travel now, pay later',
+    'trip on emi',
+    'book now pay later',
+    'book now, pay later',
+    'pay with trip money',
+    'pay in emi',
+    'easy emi',
+    'continue to payment',
+    'book flight',
+    'pay & book now',
+
+    // 3. Ed-Tech (UpGrad, Scaler, Simplilearn)
+    'education loan',
+    'apply for education loan',
+    'pay with loan',
+    'pay in installments',
+    '0% interest emi',
+    'no cost emi options',
+    'enroll with emi',
+    'apply for loan',
+    'finance options',
   ];
 
-  // Helper to check if an element or its ancestors match target intent
+  // Helper to check if an element or its ancestors match target intent across ANY non-financial surface
   function findInterceptTarget(element: HTMLElement | null): HTMLElement | null {
     let curr = element;
     let depth = 0;
-    while (curr && depth < 6 && curr !== document.body) {
+    while (curr && depth < 7 && curr !== document.body) {
       // Check data attribute bypass
       if (curr.getAttribute('data-commitguard-authorized') === 'true') {
         return null;
@@ -353,17 +552,26 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       const text = (curr.innerText || curr.textContent || '').trim().toLowerCase();
       const tagName = curr.tagName.toUpperCase();
 
-      for (const keyword of INTERCEPT_KEYWORDS) {
-        if (text === keyword || (text.length < 50 && text.includes(keyword))) {
+      // Direct & Fuzzy Keyword Match
+      for (const keyword of UNIVERSAL_INTERCEPT_KEYWORDS) {
+        if (text === keyword || (text.length < 60 && text.includes(keyword))) {
           return curr;
         }
+      }
+
+      // Dynamic Regex Matcher: Catches custom wording variations like "Book now (Pay in 6 EMIs)"
+      if (
+        /(\bemi\b|\bloan\b|\btnpl\b|pay\s*later|installment|subvention|place\s*order|proceed\s*to\s*pay)/i.test(text) &&
+        (tagName === 'BUTTON' || tagName === 'A' || curr.getAttribute('role') === 'button' || curr.classList.toString().includes('btn'))
+      ) {
+        return curr;
       }
 
       // Check input elements (e.g., input[type="submit"], input[name="placeYourOrder1"])
       if (tagName === 'INPUT') {
         const inputVal = ((curr as HTMLInputElement).value || '').toLowerCase();
         const inputName = ((curr as HTMLInputElement).name || '').toLowerCase();
-        for (const keyword of INTERCEPT_KEYWORDS) {
+        for (const keyword of UNIVERSAL_INTERCEPT_KEYWORDS) {
           if (inputVal.includes(keyword) || inputName.includes(keyword)) {
             return curr;
           }
@@ -372,7 +580,14 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
       // Check button classes or IDs
       const idStr = (curr.id || '').toLowerCase();
-      if (idStr.includes('placeorder') || idStr.includes('place-order') || idStr.includes('proceedtopay')) {
+      const classStr = (curr.className || '').toString().toLowerCase();
+      if (
+        idStr.includes('placeorder') ||
+        idStr.includes('proceedtopay') ||
+        idStr.includes('emipayment') ||
+        classStr.includes('paylater') ||
+        classStr.includes('emiselection')
+      ) {
         return curr;
       }
 
@@ -408,6 +623,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       console.log('🛡️ CommitGuard Scraped Product Info & Offers:', productInfo);
 
       injectShadowModal(
+        productInfo.surfaceType,
         productInfo.price,
         productInfo.name,
         productInfo.offers,

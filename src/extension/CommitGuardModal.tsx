@@ -15,8 +15,16 @@ import {
   ThumbsDown,
   Sparkles,
   Percent,
+  TrendingUp,
+  PiggyBank,
+  Landmark,
+  Plane,
+  GraduationCap,
+  Scale,
 } from 'lucide-react';
 import { calculateNoCostEmiDrag } from '../lib/financial-engine';
+
+export type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH';
 
 export interface ScrapedOffer {
   id: string;
@@ -30,16 +38,18 @@ export interface ScrapedOffer {
 }
 
 export interface ExtensionModalProps {
+  surfaceType?: InterceptorSurface;
   productPrice?: number;
   productName?: string;
   originalPrice?: number;
   discountPercent?: number;
   scrapedOffers?: ScrapedOffer[];
-  onProceedAndContinue: () => void; // Proceeds to host site action (e.g. Next page / Card details)
-  onCancelStayOnPage: () => void;   // Closes modal and keeps user on CURRENT page without navigation
+  onProceedAndContinue: () => void; // Proceeds to host site action
+  onCancelStayOnPage: () => void;   // Closes modal and keeps user on CURRENT page
 }
 
 export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
+  surfaceType = 'ECOMMERCE',
   productPrice = 5399,
   productName = 'Identified Flipkart Item',
   originalPrice,
@@ -54,8 +64,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
   const [sliderIndex, setSliderIndex] = useState<number>(3); // Default to 12 months (index 3)
   const tenure = TENURE_OPTIONS[sliderIndex];
 
-  // Active view tab: 'EMI_FRICTION' vs 'CARD_OFFERS'
-  const [activeTab, setActiveTab] = useState<'CARD_OFFERS' | 'EMI_FRICTION'>('CARD_OFFERS');
+  // Active view tab: 'CARD_OFFERS' vs 'EMI_FRICTION' vs 'RECOVERY_COMPOUNDING'
+  const [activeTab, setActiveTab] = useState<'CARD_OFFERS' | 'EMI_FRICTION' | 'RECOVERY_COMPOUNDING'>('CARD_OFFERS');
   const [isProofOpen, setIsProofOpen] = useState(false);
   const processingFee = 199;
   const nominalRate = 15.0;
@@ -72,6 +82,36 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
       bankNominalInterestRate: nominalRate,
     });
   }, [productPrice, productName, tenure, processingFee, nominalRate]);
+
+  // Compounding Preserved Wealth calculation (Sovereign T-Bill / Liquid Fund at 7.10% annualized)
+  const recoveryCompounding = useMemo(() => {
+    const savedFriction = mathResult.totalHiddenFriction; // processing fee + 18% GST
+    const tbillRate = 0.071; // 7.10% RBI Sovereign 364-Day T-Bill benchmark yield
+    
+    // Future Value after 1, 3, 5 years if saved friction is invested instead of leaked to bank/GST:
+    // FV = P * (1 + r)^t
+    const fv1Year = Math.round(savedFriction * Math.pow(1 + tbillRate, 1));
+    const fv3Year = Math.round(savedFriction * Math.pow(1 + tbillRate, 3));
+    const fv5Year = Math.round(savedFriction * Math.pow(1 + tbillRate, 5));
+
+    // Also compare monthly SIP alternative: If user invested the monthly EMI into Liquid Fund instead
+    const monthlyEmi = mathResult.monthlyBaseEmi;
+    const rMonthly = tbillRate / 12;
+    // SIP FV = P * [((1 + r)^n - 1) / r] * (1 + r)
+    const sipFv = Math.round(monthlyEmi * ((Math.pow(1 + rMonthly, tenure) - 1) / rMonthly) * (1 + rMonthly));
+    const sipGain = sipFv - (monthlyEmi * tenure);
+
+    return {
+      savedFriction,
+      tbillRate: 7.10,
+      fv1Year,
+      fv3Year,
+      fv5Year,
+      compoundedGain5Y: fv5Year - savedFriction,
+      sipFv,
+      sipGain,
+    };
+  }, [mathResult, tenure]);
 
   // Fallback offers if none scraped
   const displayOffers: ScrapedOffer[] = useMemo(() => {
@@ -134,13 +174,31 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         {/* Header Bar with explicit Cancel / Stay on page 'X' */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white">
           <div className="flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg">
-            <div className="p-1.5 rounded-lg bg-emerald-600 text-white shadow-sm">
-              <Sparkles className="w-5 h-5" />
+            <div className={`p-1.5 rounded-lg text-white shadow-sm ${
+              surfaceType === 'TRAVEL' ? 'bg-sky-600' : surfaceType === 'EDTECH' ? 'bg-indigo-600' : 'bg-emerald-600'
+            }`}>
+              {surfaceType === 'TRAVEL' ? (
+                <Plane className="w-5 h-5" />
+              ) : surfaceType === 'EDTECH' ? (
+                <GraduationCap className="w-5 h-5" />
+              ) : (
+                <Sparkles className="w-5 h-5" />
+              )}
             </div>
             <div>
-              <span className="text-slate-900">CommitGuard Smart Checkout Intel</span>
+              <span className="text-slate-900">
+                {surfaceType === 'TRAVEL'
+                  ? 'CommitGuard Travel: TNPL & EMI Reality Check'
+                  : surfaceType === 'EDTECH'
+                  ? 'CommitGuard EdTech: Education Loan Subvention Truth'
+                  : 'CommitGuard Smart Checkout Intel'}
+              </span>
               <div className="text-[11px] text-slate-500 font-normal">
-                Live Card & EMI Optimization for Flipkart & Amazon
+                {surfaceType === 'TRAVEL'
+                  ? 'MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP'
+                  : surfaceType === 'EDTECH'
+                  ? 'UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI'
+                  : 'Live Card & EMI Optimization for Flipkart & Amazon'}
               </div>
             </div>
           </div>
@@ -325,10 +383,28 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
                 <div className="font-bold text-slate-900 flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>CommitGuard Recommendation:</span>
+                  <span>
+                    {surfaceType === 'TRAVEL'
+                      ? 'CommitGuard Travel Advisory (TNPL Warning):'
+                      : surfaceType === 'EDTECH'
+                      ? 'CommitGuard EdTech Advisory (Subvention Reality):'
+                      : 'CommitGuard Recommendation:'}
+                  </span>
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed">
-                  If you hold a <strong>Flipkart Axis Bank Card</strong>, pay in full to lock an unconditional <strong>5% statement cashback</strong>. If you use <strong>No-Cost EMI</strong>, you will lose ~₹{mathResult.totalHiddenFriction.toLocaleString('en-IN')} to non-refundable 18% GST and processing fees.
+                  {surfaceType === 'TRAVEL' ? (
+                    <>
+                      <strong>Travel Now, Pay Later (TNPL)</strong> advertises low monthly tranches but triggers <strong>24% to 36% penalty APRs</strong> and compounding bounce fees if any installment is missed post-trip. <strong>Recommended Alternative:</strong> Start a <strong>6-month Liquid Fund SIP</strong> at 7.10% yield to book your trip 100% debt-free.
+                    </>
+                  ) : surfaceType === 'EDTECH' ? (
+                    <>
+                      <strong>Education Loan "0% Subvention"</strong> packages frequently embed an upfront <strong>3% to 5% institutional subvention surcharge</strong> into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.
+                    </>
+                  ) : (
+                    <>
+                      If you hold a <strong>Flipkart Axis Bank Card</strong>, pay in full to lock an unconditional <strong>5% statement cashback</strong>. If you use <strong>No-Cost EMI</strong>, you will lose ~₹{mathResult.totalHiddenFriction.toLocaleString('en-IN')} to non-refundable 18% GST and processing fees.
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -466,6 +542,79 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                         {opt}m
                       </button>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 🌟 1. Friction Recovery & Compounding Matrix (Prompt Req 1) */}
+              <div className="p-4 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/50 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded-md bg-emerald-600 text-white">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                        Friction Recovery & Compounding Matrix
+                      </h4>
+                      <p className="text-[10px] text-slate-500">
+                        Preserve leaked bank fees & GST by paying upfront into a <strong>7.10% Sovereign T-Bill</strong>
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    RBI Benchmark 7.10%
+                  </span>
+                </div>
+
+                {/* Compounding Comparison Columns */}
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <div className="p-2.5 rounded-lg bg-white border border-emerald-100 shadow-2xs text-center">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase">1 Year T-Bill</div>
+                    <div className="text-sm sm:text-base font-black text-slate-900 mt-0.5">
+                      ₹{recoveryCompounding.fv1Year.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[9px] text-emerald-700 font-semibold mt-0.5">
+                      Preserves ₹{recoveryCompounding.savedFriction.toLocaleString('en-IN')}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-white border border-emerald-100 shadow-2xs text-center">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase">3 Year Compound</div>
+                    <div className="text-sm sm:text-base font-black text-emerald-700 mt-0.5">
+                      ₹{recoveryCompounding.fv3Year.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[9px] text-emerald-600 font-semibold mt-0.5">
+                      +₹{(recoveryCompounding.fv3Year - recoveryCompounding.savedFriction).toLocaleString('en-IN')} yield
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-emerald-900 text-white shadow-2xs text-center">
+                    <div className="text-[10px] font-bold text-emerald-300 uppercase">5 Year Wealth</div>
+                    <div className="text-sm sm:text-base font-black text-white mt-0.5">
+                      ₹{recoveryCompounding.fv5Year.toLocaleString('en-IN')}
+                    </div>
+                    <div className="text-[9px] text-emerald-200 font-semibold mt-0.5">
+                      +₹{recoveryCompounding.compoundedGain5Y.toLocaleString('en-IN')} pure gain
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pre-Commitment Liquid SIP Comparison */}
+                <div className="p-2.5 rounded-lg bg-slate-900 text-white text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <PiggyBank className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span className="text-[11px] text-slate-200">
+                      Invest ₹{mathResult.monthlyBaseEmi.toLocaleString('en-IN')}/mo in Liquid Fund SIP instead:
+                    </span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-xs font-black text-emerald-400">
+                      ₹{recoveryCompounding.sipFv.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[9px] text-slate-400 block font-mono">
+                      (+₹{recoveryCompounding.sipGain.toLocaleString('en-IN')} yield vs -₹{recoveryCompounding.savedFriction} leak)
+                    </span>
                   </div>
                 </div>
               </div>

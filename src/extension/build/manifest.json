@@ -9,7 +9,10 @@
   ],
   "host_permissions": [
     "*://*.amazon.in/*",
-    "*://*.flipkart.com/*"
+    "*://*.flipkart.com/*",
+    "*://*.makemytrip.com/*",
+    "*://*.cleartrip.com/*",
+    "*://*.upgrad.com/*"
   ],
   "background": {
     "service_worker": "background.js",
@@ -19,7 +22,10 @@
     {
       "matches": [
         "*://*.amazon.in/*",
-        "*://*.flipkart.com/*"
+        "*://*.flipkart.com/*",
+        "*://*.makemytrip.com/*",
+        "*://*.cleartrip.com/*",
+        "*://*.upgrad.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
@@ -35,7 +41,10 @@
       ],
       "matches": [
         "*://*.amazon.in/*",
-        "*://*.flipkart.com/*"
+        "*://*.flipkart.com/*",
+        "*://*.makemytrip.com/*",
+        "*://*.cleartrip.com/*",
+        "*://*.upgrad.com/*"
       ]
     }
   ]
