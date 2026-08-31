@@ -23,6 +23,7 @@ import {
   Scale,
   BookOpen,
   ShoppingBag,
+  Edit3,
 } from 'lucide-react';
 import { calculateNoCostEmiDrag } from '../lib/financial-engine';
 
@@ -73,8 +74,102 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [compoundingHorizon, setCompoundingHorizon] = useState<'1Y' | '3Y' | '5Y'>('5Y');
   const [isProofOpen, setIsProofOpen] = useState(false);
+
+  // Quick-Switcher / Payment Input States (Option A)
+  const [isCustomSwitcherOpen, setIsCustomSwitcherOpen] = useState<boolean>(false);
+  const [customType, setCustomType] = useState<'UPI' | 'NO_COST' | 'CREDIT_EMI' | 'DEBIT_EMI' | 'BNPL'>('CREDIT_EMI');
+  const [customBank, setCustomBank] = useState<string>('HDFC Bank');
+  const [customTenure, setCustomTenure] = useState<number>(12);
+  const [customSimulatedOffer, setCustomSimulatedOffer] = useState<ScrapedOffer | null>(null);
+
   const processingFee = 199;
   const nominalRate = 15.0;
+
+  // Handler to apply simulated custom payment method
+  const handleApplyCustomSimulation = (type: 'UPI' | 'NO_COST' | 'CREDIT_EMI' | 'DEBIT_EMI' | 'BNPL', bank: string, tenureMonths: number) => {
+    setCustomType(type);
+    setCustomBank(bank);
+    setCustomTenure(tenureMonths);
+
+    if (type === 'UPI') {
+      const offer: ScrapedOffer = {
+        id: 'simulated-upi',
+        bankOrCard: 'UPI / Direct Debit (Zero Debt)',
+        description: `Single-tranche direct payment of ₹${productPrice.toLocaleString('en-IN')}`,
+        effectiveBenefit: 'Saves 100% of GST & bank processing fees',
+        rating: 'BEST',
+        reason: 'Zero interest, zero processing fee, keeps credit limit 100% free with instant confirmation.',
+        netPrice: productPrice,
+        recommended: true,
+        isSelected: true,
+      };
+      setCustomSimulatedOffer(offer);
+      setSelectedOfferId('simulated-upi');
+      return;
+    }
+
+    if (type === 'NO_COST') {
+      const monthly = Math.round(productPrice / tenureMonths);
+      const estGst = Math.round(199 + (productPrice * 0.15 * (tenureMonths / 12) * 0.18));
+      const offer: ScrapedOffer = {
+        id: `simulated-nocost-${bank}-${tenureMonths}`,
+        bankOrCard: `${bank} (${tenureMonths}M No-Cost EMI)`,
+        description: `${tenureMonths} Months installment plan with upfront interest offset`,
+        effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} Hidden GST/Fee Drag`,
+        rating: 'AVOID',
+        reason: `Even with merchant interest discount, ${bank} charges ₹199 processing fee + monthly 18% GST on the interest component.`,
+        netPrice: productPrice + estGst,
+        recommended: false,
+        isSelected: true,
+      };
+      setCustomSimulatedOffer(offer);
+      setSelectedOfferId(offer.id);
+      return;
+    }
+
+    if (type === 'CREDIT_EMI' || type === 'DEBIT_EMI') {
+      const isDebit = type === 'DEBIT_EMI';
+      const aprRate = isDebit ? 16.0 : 15.0;
+      const statedInterest = Math.round(productPrice * (aprRate / 100) * (tenureMonths / 12));
+      const monthly = Math.round((productPrice + statedInterest) / tenureMonths);
+      const gstOnInterest = Math.round(statedInterest * 0.18);
+      const bankFee = Math.round(199 * 1.18); // ₹235
+      const trueOutflow = productPrice + statedInterest + gstOnInterest + bankFee;
+
+      const offer: ScrapedOffer = {
+        id: `simulated-emi-${bank}-${tenureMonths}`,
+        bankOrCard: `${bank} (${tenureMonths}M ${isDebit ? 'Debit Card' : 'Credit Card'} EMI @ ${aprRate}%)`,
+        description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised Total: ₹${(productPrice + statedInterest).toLocaleString('en-IN')})`,
+        effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gstOnInterest + bankFee).toLocaleString('en-IN')} Hidden Drag`,
+        rating: 'AVOID',
+        reason: `Checkout advertises ₹${(productPrice + statedInterest).toLocaleString('en-IN')}, but ${bank} additionally bills non-refundable 18% GST (₹${gstOnInterest}) on interest + ₹${bankFee} fee (+GST), making your true outflow ₹${trueOutflow.toLocaleString('en-IN')}.`,
+        netPrice: trueOutflow,
+        recommended: false,
+        isSelected: true,
+      };
+      setCustomSimulatedOffer(offer);
+      setSelectedOfferId(offer.id);
+      return;
+    }
+
+    if (type === 'BNPL') {
+      const penaltyFee = Math.round(productPrice * 0.14);
+      const offer: ScrapedOffer = {
+        id: `simulated-bnpl-${bank}`,
+        bankOrCard: `${bank} (Pay Later / BNPL Loan)`,
+        description: `Deferred split payment with 28.4% APR penalty risk`,
+        effectiveBenefit: `Exposes credit score to late fees and penalty APR`,
+        rating: 'AVOID',
+        reason: `Exposes user to 24%-36% penalty APRs plus ₹450-₹850 bounce fees if post-purchase cash is tight.`,
+        netPrice: productPrice + penaltyFee,
+        recommended: false,
+        isSelected: true,
+      };
+      setCustomSimulatedOffer(offer);
+      setSelectedOfferId(offer.id);
+      return;
+    }
+  };
 
   // Real-time deterministic recalculation (<1.2ms)
   const mathResult = useMemo(() => {
@@ -215,19 +310,31 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
     ];
   }, [scrapedOffers, surfaceType, productPrice, tenure, mathResult, processingFee]);
 
+  // Merge scraped/display offers with custom simulated offer if generated
+  const allOffers = useMemo(() => {
+    let list = [...displayOffers];
+    if (customSimulatedOffer && !list.some((o) => o.id === customSimulatedOffer.id)) {
+      list = [customSimulatedOffer, ...list];
+    }
+    return list;
+  }, [displayOffers, customSimulatedOffer]);
+
   // Find user's selected offer or fallback to first
   const selectedOffer = useMemo(() => {
+    if (customSimulatedOffer && selectedOfferId === customSimulatedOffer.id) {
+      return customSimulatedOffer;
+    }
     if (selectedOfferId) {
-      const found = displayOffers.find((o) => o.id === selectedOfferId);
+      const found = allOffers.find((o) => o.id === selectedOfferId);
       if (found) return found;
     }
-    return displayOffers.find((o) => o.isSelected) || displayOffers[0];
-  }, [displayOffers, selectedOfferId]);
+    return allOffers.find((o) => o.isSelected) || allOffers[0];
+  }, [allOffers, selectedOfferId, customSimulatedOffer]);
 
   // Other available offers
   const otherOffers = useMemo(() => {
-    return displayOffers.filter((o) => o.id !== selectedOffer?.id);
-  }, [displayOffers, selectedOffer]);
+    return allOffers.filter((o) => o.id !== selectedOffer?.id);
+  }, [allOffers, selectedOffer]);
 
   return (
     <div
@@ -379,6 +486,132 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
           {/* TAB 1: CARD & PAYMENT INTEL (Shows User's Selected Method First, plus Expandable Comparison) */}
           {activeTab === 'CARD_OFFERS' && (
             <div className="space-y-4">
+              
+              {/* 0. INTERACTIVE PAYMENT METHOD QUICK-SWITCHER BAR (Option A) */}
+              <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
+                <div className="px-4 py-2.5 bg-slate-50/90 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-bold text-slate-700 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Simulate / Switch Payment Method:</span>
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[11px] font-bold truncate max-w-[200px] sm:max-w-xs shadow-xs">
+                      {selectedOffer?.bankOrCard || 'Auto-Detected'}
+                    </span>
+                  </div>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setIsCustomSwitcherOpen(!isCustomSwitcherOpen)}
+                    className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <Edit3 className="w-3 h-3 text-emerald-600" />
+                    <span>{isCustomSwitcherOpen ? 'Hide Switcher' : 'Change / Simulate Card'}</span>
+                    {isCustomSwitcherOpen ? <ChevronUp className="w-3 h-3 text-slate-500" /> : <ChevronDown className="w-3 h-3 text-slate-500" />}
+                  </button>
+                </div>
+
+                {/* Expanded Switcher Panel */}
+                {isCustomSwitcherOpen && (
+                  <div className="p-4 bg-gradient-to-b from-slate-50 to-white space-y-3.5 animate-in fade-in duration-150">
+                    
+                    {/* 1. Payment Type Selection */}
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                        <span>1. Choose Payment Type</span>
+                        <span className="text-[10px] text-emerald-700 font-mono font-normal">Instant Recalculation</span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+                        {[
+                          { id: 'UPI' as const, label: '🟢 UPI / Full Pay', desc: '0% Interest, ₹0 Fees' },
+                          { id: 'NO_COST' as const, label: '🎁 No-Cost EMI', desc: 'Subvention Offset' },
+                          { id: 'CREDIT_EMI' as const, label: '💳 Credit Card EMI', desc: 'Standard Bank APR' },
+                          { id: 'DEBIT_EMI' as const, label: '🏦 Debit Card EMI', desc: 'Pre-Approved Limits' },
+                          { id: 'BNPL' as const, label: '⏳ Pay Later / BNPL', desc: 'Deferred Credit' },
+                        ].map((type) => (
+                          <button
+                            key={type.id}
+                            type="button"
+                            onClick={() => handleApplyCustomSimulation(type.id, customBank, customTenure)}
+                            className={`p-2 rounded-lg text-left border transition-all cursor-pointer ${
+                              customType === type.id
+                                ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-200 text-emerald-950 font-bold shadow-xs'
+                                : 'bg-white hover:bg-slate-100/80 border-slate-200 text-slate-700 font-medium'
+                            }`}
+                          >
+                            <div className="text-[11px] font-bold truncate">{type.label}</div>
+                            <div className="text-[9px] text-slate-500 truncate">{type.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. Bank / Provider Selector (shown if not direct UPI) */}
+                    {customType !== 'UPI' && (
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                          2. Select Bank or Card Provider
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            'HDFC Bank',
+                            'ICICI Bank',
+                            'Axis Bank',
+                            'State Bank of India (SBI)',
+                            'Kotak Mahindra Bank',
+                            'American Express',
+                            'OneCard',
+                            'Federal Bank',
+                            'Bajaj Finserv',
+                            'AU Small Finance Bank',
+                            'IDFC FIRST Bank',
+                            'IndusInd Bank',
+                          ].map((bank) => (
+                            <button
+                              key={bank}
+                              type="button"
+                              onClick={() => handleApplyCustomSimulation(customType, bank, customTenure)}
+                              className={`px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer border ${
+                                customBank === bank
+                                  ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-xs'
+                                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                              }`}
+                            >
+                              {bank}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 3. Tenure Selection (shown for EMI / No-Cost types) */}
+                    {(customType === 'NO_COST' || customType === 'CREDIT_EMI' || customType === 'DEBIT_EMI') && (
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                          3. Select EMI Tenure
+                        </label>
+                        <div className="flex items-center gap-2">
+                          {[3, 6, 9, 12, 18, 24].map((m) => (
+                            <button
+                              key={m}
+                              type="button"
+                              onClick={() => handleApplyCustomSimulation(customType, customBank, m)}
+                              className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border ${
+                                customTenure === m
+                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                              }`}
+                            >
+                              {m}m
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+                )}
+              </div>
               
               {/* 1. HERO CARD: USER'S SELECTED PAYMENT OPTION */}
               {selectedOffer && (
