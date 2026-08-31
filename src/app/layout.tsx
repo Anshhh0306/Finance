@@ -20,9 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${inter.variable}`}>
-      <body className={`${inter.className} antialiased selection:bg-brand-500 selection:text-white`}>
-        <div className="relative min-h-screen flex flex-col">
+    <html lang="en" className={inter.variable}>
+      <body className={`${inter.className} antialiased bg-slate-100 text-slate-900`}>
+        <div className="relative min-h-screen flex flex-col bg-slate-100">
           {/* Subtle ambient lighting effects */}
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-accent-emerald/10 rounded-full blur-3xl pointer-events-none" />

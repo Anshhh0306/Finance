@@ -9,8 +9,8 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: radial-gradient(circle at 50% 0%, #141c2e 0%, #080c14 100%);
+  color: #0f172a;
+  background: #f8fafc;
   min-height: 100vh;
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow-x: hidden;
