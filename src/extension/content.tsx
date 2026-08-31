@@ -143,7 +143,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         }
       }
 
-      const travelPrice = detectedPrice > 0 ? detectedPrice : 13147;
+      const travelPrice = detectedPrice > 0 ? detectedPrice : 13006;
 
       // =========================================================================
       // UNIVERSAL DYNAMIC DOM BANK & CARD EXTRACTOR (100% Free of Hardcoded Lists)
@@ -152,8 +152,15 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       function cleanBankText(raw: string): string {
         if (!raw) return '';
         return raw
+          .replace(/CREDIT\s*CARD/gi, '')
+          .replace(/DEBIT\s*CARD/gi, '')
+          .replace(/CARDLESS\s*EMI/gi, '')
+          .replace(/\bEMI\b/gi, '')
           .replace(/NO\s*COST\s*EMI/gi, '')
           .replace(/No\s*Cost\s*EMI/gi, '')
+          .replace(/ALL\s*BANKS/gi, '')
+          .replace(/POPULAR\s*BANKS/gi, '')
+          .replace(/BANKS\s*UNAVAILABLE[^\n]*/gi, '')
           .replace(/Starts?\s*at\s*₹?\s*[0-9,.]+/gi, '')
           .replace(/Starting\s*at\s*₹?\s*[0-9,.]+/gi, '')
           .replace(/₹\s*[0-9,.]+/gi, '')
@@ -183,13 +190,14 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
 
       let detectedBankName = '';
+      let detectedCategory = ''; // 'Debit Card' | 'Credit Card' | 'Cardless EMI' | ''
       let isExplicitUpi = false;
       let isExplicitTnpl = false;
       let isExplicitNoCost = false;
 
       // Strategy 1: Check clicked element directly (short text only)
       if (clickedEl) {
-        const rowEl = clickedEl.closest('li, label, tr, [role="radio"], [role="button"], [class*="item"], [class*="bank"], [class*="option"]') || clickedEl;
+        const rowEl = clickedEl.closest('li, label, tr, [role="radio"], [role="button"], [role="tab"], [class*="tab"], [class*="item"], [class*="bank"], [class*="option"]') || clickedEl;
         const rawRowText = (rowEl.textContent || '').trim();
         
         if (/scan\s*to\s*pay|qr|upi|google\s*pay|phonepe|paytm/i.test(rawRowText) && rawRowText.length < 100) {
@@ -200,9 +208,28 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           isExplicitNoCost = true;
         }
 
+        if (/debit\s*card/i.test(rawRowText)) {
+          detectedCategory = 'Debit Card';
+        } else if (/cardless/i.test(rawRowText)) {
+          detectedCategory = 'Cardless EMI';
+        } else if (/credit\s*card/i.test(rawRowText)) {
+          detectedCategory = 'Credit Card';
+        }
+
         const cleaned = cleanBankText(rawRowText);
         if (cleaned && cleaned.length >= 2 && cleaned.length <= 45 && !isGenericNoise(cleaned)) {
           detectedBankName = cleaned;
+        }
+      }
+
+      // Check active tab if category not yet determined
+      if (!detectedCategory) {
+        const activeTabEl = document.querySelector('[class*="tab"][class*="active"], [class*="tab"][class*="selected"], [role="tab"][aria-selected="true"], button[class*="active"], div[class*="active"]');
+        if (activeTabEl) {
+          const tabText = (activeTabEl.textContent || '').trim();
+          if (/debit/i.test(tabText)) detectedCategory = 'Debit Card';
+          else if (/cardless/i.test(tabText)) detectedCategory = 'Cardless EMI';
+          else if (/credit/i.test(tabText)) detectedCategory = 'Credit Card';
         }
       }
 
@@ -252,7 +279,17 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         }
       }
 
-      const finalBankName = detectedBankName || 'Selected Bank / Card';
+      // Build clean final bank display title
+      let finalBankName = 'Selected Bank / Card';
+      if (detectedBankName) {
+        if (detectedCategory && !detectedBankName.toLowerCase().includes(detectedCategory.toLowerCase())) {
+          finalBankName = `${detectedBankName} (${detectedCategory} EMI)`;
+        } else {
+          finalBankName = detectedBankName;
+        }
+      } else if (detectedCategory) {
+        finalBankName = `${detectedCategory} EMI`;
+      }
 
       // =========================================================================
       // DYNAMIC DOM TENURE & INTEREST EXTRACTION

@@ -7950,7 +7950,7 @@
       if (CURRENT_SURFACE === "TRAVEL") {
         let cleanBankText2 = function(raw) {
           if (!raw) return "";
-          return raw.replace(/NO\s*COST\s*EMI/gi, "").replace(/No\s*Cost\s*EMI/gi, "").replace(/Starts?\s*at\s*₹?\s*[0-9,.]+/gi, "").replace(/Starting\s*at\s*₹?\s*[0-9,.]+/gi, "").replace(/₹\s*[0-9,.]+/gi, "").replace(/CHANGE/gi, "").replace(/Select tenure/gi, "").replace(/Select your bank/gi, "").replace(/Below is the list.*/gi, "").replace(/Search here.*/gi, "").replace(/[\n\r\t]/g, " ").replace(/\s+/g, " ").trim();
+          return raw.replace(/CREDIT\s*CARD/gi, "").replace(/DEBIT\s*CARD/gi, "").replace(/CARDLESS\s*EMI/gi, "").replace(/\bEMI\b/gi, "").replace(/NO\s*COST\s*EMI/gi, "").replace(/No\s*Cost\s*EMI/gi, "").replace(/ALL\s*BANKS/gi, "").replace(/POPULAR\s*BANKS/gi, "").replace(/BANKS\s*UNAVAILABLE[^\n]*/gi, "").replace(/Starts?\s*at\s*₹?\s*[0-9,.]+/gi, "").replace(/Starting\s*at\s*₹?\s*[0-9,.]+/gi, "").replace(/₹\s*[0-9,.]+/gi, "").replace(/CHANGE/gi, "").replace(/Select tenure/gi, "").replace(/Select your bank/gi, "").replace(/Below is the list.*/gi, "").replace(/Search here.*/gi, "").replace(/[\n\r\t]/g, " ").replace(/\s+/g, " ").trim();
         }, isGenericNoise2 = function(text) {
           const lower = text.toLowerCase();
           return lower.includes("below is the list") || lower.includes("search here") || lower.includes("select your bank") || lower.includes("select tenure") || lower.includes("all banks") || lower.includes("convenience fee") || lower.includes("total due") || lower.includes("provide card details") || lower.length < 2;
@@ -8006,13 +8006,14 @@
             }
           }
         }
-        const travelPrice = detectedPrice > 0 ? detectedPrice : 13147;
+        const travelPrice = detectedPrice > 0 ? detectedPrice : 13006;
         let detectedBankName = "";
+        let detectedCategory = "";
         let isExplicitUpi = false;
         let isExplicitTnpl = false;
         let isExplicitNoCost = false;
         if (clickedEl) {
-          const rowEl = clickedEl.closest('li, label, tr, [role="radio"], [role="button"], [class*="item"], [class*="bank"], [class*="option"]') || clickedEl;
+          const rowEl = clickedEl.closest('li, label, tr, [role="radio"], [role="button"], [role="tab"], [class*="tab"], [class*="item"], [class*="bank"], [class*="option"]') || clickedEl;
           const rawRowText = (rowEl.textContent || "").trim();
           if (/scan\s*to\s*pay|qr|upi|google\s*pay|phonepe|paytm/i.test(rawRowText) && rawRowText.length < 100) {
             isExplicitUpi = true;
@@ -8021,9 +8022,25 @@
           } else if (/no\s*cost\s*emi/i.test(rawRowText) && rawRowText.length < 100) {
             isExplicitNoCost = true;
           }
+          if (/debit\s*card/i.test(rawRowText)) {
+            detectedCategory = "Debit Card";
+          } else if (/cardless/i.test(rawRowText)) {
+            detectedCategory = "Cardless EMI";
+          } else if (/credit\s*card/i.test(rawRowText)) {
+            detectedCategory = "Credit Card";
+          }
           const cleaned = cleanBankText2(rawRowText);
           if (cleaned && cleaned.length >= 2 && cleaned.length <= 45 && !isGenericNoise2(cleaned)) {
             detectedBankName = cleaned;
+          }
+        }
+        if (!detectedCategory) {
+          const activeTabEl = document.querySelector('[class*="tab"][class*="active"], [class*="tab"][class*="selected"], [role="tab"][aria-selected="true"], button[class*="active"], div[class*="active"]');
+          if (activeTabEl) {
+            const tabText = (activeTabEl.textContent || "").trim();
+            if (/debit/i.test(tabText)) detectedCategory = "Debit Card";
+            else if (/cardless/i.test(tabText)) detectedCategory = "Cardless EMI";
+            else if (/credit/i.test(tabText)) detectedCategory = "Credit Card";
           }
         }
         if (!detectedBankName && !isExplicitUpi && !isExplicitTnpl) {
@@ -8066,7 +8083,16 @@
             }
           }
         }
-        const finalBankName = detectedBankName || "Selected Bank / Card";
+        let finalBankName = "Selected Bank / Card";
+        if (detectedBankName) {
+          if (detectedCategory && !detectedBankName.toLowerCase().includes(detectedCategory.toLowerCase())) {
+            finalBankName = `${detectedBankName} (${detectedCategory} EMI)`;
+          } else {
+            finalBankName = detectedBankName;
+          }
+        } else if (detectedCategory) {
+          finalBankName = `${detectedCategory} EMI`;
+        }
         let emiTenureMonths = 12;
         let emiMonthlyAmount = Math.round(travelPrice / 12);
         let statedInterestAmount = Math.round(travelPrice * 0.077);
