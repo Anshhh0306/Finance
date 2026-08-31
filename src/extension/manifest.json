@@ -2,21 +2,41 @@
   "manifest_version": 3,
   "name": "CommitGuard - Embedded Pre-Commitment Interceptor",
   "version": "1.0.0",
-  "description": "Deterministic trade-off clarity at the point of sale and checkout. Intercepts No-Cost EMI and lock-in traps in <50ms.",
-  "permissions": ["activeTab", "storage"],
+  "description": "Embedded financial pre-commitment interceptor for checkout and banking flows. Halts high-friction No-Cost EMI and lock-in traps in <2ms with deterministic math clarity.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.amazon.in/*",
+    "*://*.flipkart.com/*"
+  ],
+  "background": {
+    "service_worker": "src/extension/background.ts",
+    "type": "module"
+  },
   "content_scripts": [
     {
       "matches": [
-        "https://*.amazon.in/*",
-        "https://*.flipkart.com/*",
-        "https://*.hdfcbank.com/*",
-        "https://*.icicibank.com/*"
+        "*://*.amazon.in/*",
+        "*://*.flipkart.com/*"
       ],
-      "js": ["content.js"],
+      "js": ["src/extension/content.tsx"],
       "run_at": "document_idle"
     }
   ],
   "action": {
-    "default_title": "CommitGuard Active"
-  }
+    "default_title": "CommitGuard Active (Monitoring Checkouts)"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/extension/styles.css"
+      ],
+      "matches": [
+        "*://*.amazon.in/*",
+        "*://*.flipkart.com/*"
+      ]
+    }
+  ]
 }
