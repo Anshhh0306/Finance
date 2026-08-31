@@ -286,7 +286,11 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
             }`}
           >
             <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <span>No-Cost EMI Friction ({mathResult.effectiveAnnualPercentageRate}% APR)</span>
+            <span>
+              {surfaceType === 'UDEMY'
+                ? `Installment / BNPL Friction (Save ₹${recoveryCompounding.savedFriction})`
+                : `No-Cost EMI Friction (${mathResult.effectiveAnnualPercentageRate}% APR)`}
+            </span>
           </button>
         </div>
 

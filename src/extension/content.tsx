@@ -43,8 +43,25 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     recommended: boolean;
   }
 
-  // Universal Live Scraper adapting to variations in wording across Flipkart, Amazon, MakeMyTrip, Cleartrip, and UpGrad
-  function extractProductInfo(): {
+  // Helper to parse currency strings properly handling decimals (e.g. ₹539.00 -> 539, NOT 53900)
+  function parseCurrencyNumber(text: string): number {
+    if (!text) return 0;
+    // Match currency pattern like ₹539.00, ₹479.00, ₹3,439.00, ₹5,399, ₹70,196
+    const match = text.match(/[₹$€£]?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/);
+    if (match && match[1]) {
+      const cleanStr = match[1].replace(/,/g, '');
+      const floatVal = parseFloat(cleanStr);
+      if (!isNaN(floatVal) && floatVal > 0) {
+        return Math.round(floatVal);
+      }
+    }
+    const cleanDigits = text.replace(/[^0-9.]/g, '');
+    const fallbackVal = parseFloat(cleanDigits);
+    return isNaN(fallbackVal) ? 0 : Math.round(fallbackVal);
+  }
+
+  // Universal Live Scraper adapting to variations in wording across Flipkart, Amazon, MakeMyTrip, Cleartrip, UpGrad, and Udemy
+  function extractProductInfo(clickedEl?: HTMLElement | null): {
     surfaceType: InterceptorSurface;
     price: number;
     originalPrice?: number;
@@ -65,7 +82,6 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     // 1. SURFACE: TRAVEL (MakeMyTrip / Cleartrip)
     // ==========================================
     if (CURRENT_SURFACE === 'TRAVEL') {
-      // Look for flight / hotel destination headers
       const travelTitleSelectors = [
         '.flight-details',
         '.header-title',
@@ -92,19 +108,18 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
 
       // Live Scrape travel total amount / fare
-      const fareMatch = bodyText.match(/(?:Total Amount|Total Fare|Grand Total|Due Now|Payable Amount|Trip Total)[^\d₹]*₹\s*([0-9,]+)/i);
+      const fareMatch = bodyText.match(/(?:Total Amount|Total Fare|Grand Total|Due Now|Payable Amount|Trip Total)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
       if (fareMatch && fareMatch[1]) {
-        const num = parseInt(fareMatch[1].replace(/,/g, ''), 10);
-        if (!isNaN(num) && num > 1000) detectedPrice = num;
+        const num = parseCurrencyNumber(fareMatch[1]);
+        if (num > 1000) detectedPrice = num;
       }
       if (!detectedPrice) {
-        // Scan standard price tags in MMT
         const fareEls = document.querySelectorAll('[class*="fare"], [class*="price"], [class*="total"]');
         for (const el of Array.from(fareEls)) {
           const text = el.textContent || '';
           if (text.includes('₹')) {
-            const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
-            if (!isNaN(num) && num >= 3000 && num <= 1000000) {
+            const num = parseCurrencyNumber(text);
+            if (num >= 3000 && num <= 1000000) {
               detectedPrice = num;
               break;
             }
@@ -172,10 +187,10 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       if (!detectedName) detectedName = 'UpGrad Executive Certification & Degree';
 
       // Scrape tuition / program fee
-      const tuitionMatch = bodyText.match(/(?:Program Fee|Total Tuition|Total Fee|Course Price|Admission Fee)[^\d₹]*₹\s*([0-9,]+)/i);
+      const tuitionMatch = bodyText.match(/(?:Program Fee|Total Tuition|Total Fee|Course Price|Admission Fee)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
       if (tuitionMatch && tuitionMatch[1]) {
-        const num = parseInt(tuitionMatch[1].replace(/,/g, ''), 10);
-        if (!isNaN(num) && num > 10000) detectedPrice = num;
+        const num = parseCurrencyNumber(tuitionMatch[1]);
+        if (num > 10000) detectedPrice = num;
       }
       const edTechPrice = detectedPrice > 0 ? detectedPrice : 225000;
       const subventionSurcharge = Math.round(edTechPrice * 0.045); // 4.5% hidden subvention markup
@@ -233,57 +248,101 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           }
         }
       }
-      if (!detectedName) detectedName = 'Udemy Course Purchase';
+      if (!detectedName) detectedName = 'Fundamentals of Backend Engineering';
 
-      // 2. Scrape selling price (e.g. ₹499, ₹549, ₹799)
+      // 2. Scrape selling price directly from "Buy individual course" container or page
+      // Look first near the clicked button or inside the purchase section
+      const purchaseContainer =
+        (clickedEl && clickedEl.closest('[class*="buy-box"], [class*="sidebar"], [class*="purchase-section"], [class*="clp-lead"]')) ||
+        document.querySelector('[data-purpose="sidebar-container"]') ||
+        document.querySelector('[class*="sidebar-container"]') ||
+        document.querySelector('[class*="buy-box"]') ||
+        document.body;
+
+      // Scan for exact selling price (e.g. ₹539.00, ₹479.00, ₹449.00)
       const udemyPriceSelectors = [
         '[data-purpose="course-price-text"] span:not(.sr-only)',
+        '[data-purpose="course-price-text"]',
         '.price-text--price-part--Tu6MH',
-        'div[data-purpose="course-price-text"]',
+        'div[data-purpose="course-price-text"] span',
         '.base-price-text',
         '.clp-lead__price',
       ];
+
       for (const sel of udemyPriceSelectors) {
-        const el = document.querySelector(sel);
-        if (el && el.textContent && el.textContent.includes('₹')) {
-          const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
-          if (!isNaN(num) && num > 100 && num < 100000) {
-            detectedPrice = num;
-            break;
+        const els = purchaseContainer.querySelectorAll(sel);
+        for (const el of Array.from(els)) {
+          const text = el.textContent || '';
+          if (text.includes('₹')) {
+            const num = parseCurrencyNumber(text);
+            // Valid single course price on Udemy is between ₹200 and ₹20,000 (NOT 47,900)
+            if (num >= 200 && num <= 20000) {
+              detectedPrice = num;
+              break;
+            }
           }
         }
+        if (detectedPrice > 0) break;
       }
 
-      // Regex fallback if selectors changed
+      // Regex targeted to "Buy individual course \n ₹539.00"
       if (!detectedPrice) {
-        const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+)/i);
-        if (priceMatch && priceMatch[1]) {
-          const p = parseInt(priceMatch[1].replace(/,/g, ''), 10);
-          if (!isNaN(p) && p > 100) detectedPrice = p;
+        const individualMatch = bodyText.match(/Buy individual course[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+        if (individualMatch && individualMatch[1]) {
+          detectedPrice = parseCurrencyNumber(individualMatch[1]);
         }
       }
 
-      // 3. Scrape struck-through original price (e.g. ₹3,499)
+      // Regex fallback if selectors changed (e.g. ₹539.00 or ₹479.00)
+      if (!detectedPrice) {
+        const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+        if (priceMatch && priceMatch[1]) {
+          detectedPrice = parseCurrencyNumber(priceMatch[1]);
+        }
+      }
+
+      // 3. Scrape struck-through original price (e.g. ₹3,439.00)
       const origPriceSelectors = [
         '[data-purpose="original-price-container"] span',
         's[data-purpose="original-price"]',
+        '[data-purpose="course-old-price-text"]',
         'span.ud-sr-only + span[data-purpose]',
         's span',
+        's',
       ];
       for (const sel of origPriceSelectors) {
-        const el = document.querySelector(sel);
-        if (el && el.textContent && el.textContent.includes('₹')) {
-          const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
-          if (!isNaN(num) && num > detectedPrice) {
-            detectedOriginalPrice = num;
-            break;
+        const els = purchaseContainer.querySelectorAll(sel);
+        for (const el of Array.from(els)) {
+          const text = el.textContent || '';
+          if (text.includes('₹')) {
+            const num = parseCurrencyNumber(text);
+            if (num > detectedPrice && num <= 50000) {
+              detectedOriginalPrice = num;
+              break;
+            }
           }
+        }
+        if (detectedOriginalPrice > 0) break;
+      }
+
+      // Regex fallback for original price near discount % (e.g. ₹3,439.00 84% off)
+      if (!detectedOriginalPrice) {
+        const origMatch = bodyText.match(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:[0-9]+%\s*off)/i);
+        if (origMatch && origMatch[1]) {
+          const num = parseCurrencyNumber(origMatch[1]);
+          if (num > detectedPrice) detectedOriginalPrice = num;
         }
       }
 
-      const udemyPrice = detectedPrice > 0 ? detectedPrice : 499;
-      const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3499;
-      const discountPct = Math.round(((udemyOrigPrice - udemyPrice) / udemyOrigPrice) * 100);
+      // Check discount % (e.g. 84% off)
+      const discountMatch = bodyText.match(/(\d+)%\s*off/i);
+      if (discountMatch && discountMatch[1]) {
+        detectedDiscount = parseInt(discountMatch[1], 10);
+      }
+
+      const udemyPrice = detectedPrice > 0 ? detectedPrice : 539;
+      const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3439;
+      const discountPct = detectedDiscount > 0 ? detectedDiscount : Math.round(((udemyOrigPrice - udemyPrice) / udemyOrigPrice) * 100);
 
       const udemyOffers: ScrapedOffer[] = [
         {
@@ -312,7 +371,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           description: '3-Part split payment or 15-day deferred bill',
           effectiveBenefit: `₹${Math.round(udemyPrice / 3).toLocaleString('en-IN')}/mo with credit file risk`,
           rating: 'AVOID',
-          reason: 'Late payment fees of ₹250+ on a ₹499 course represent a 50%+ penalty drag on your credit score.',
+          reason: `Late payment fees of ₹250+ on a ₹${udemyPrice} course represent a 50%+ penalty drag on your credit score.`,
           netPrice: udemyPrice + 250,
           recommended: false,
         },
@@ -743,7 +802,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       e.stopPropagation();
       e.stopImmediatePropagation();
 
-      const productInfo = extractProductInfo();
+      const productInfo = extractProductInfo(targetEl);
       console.log('🛡️ CommitGuard Scraped Product Info & Offers:', productInfo);
 
       injectShadowModal(

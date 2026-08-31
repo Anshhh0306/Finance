@@ -7722,7 +7722,7 @@
           className: `flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${activeTab === "EMI_FRICTION" ? "bg-white text-slate-900 shadow-sm border border-slate-200" : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"}`
         },
         /* @__PURE__ */ import_react3.default.createElement(TriangleAlert, { className: "w-4 h-4 text-amber-500" }),
-        /* @__PURE__ */ import_react3.default.createElement("span", null, "No-Cost EMI Friction (", mathResult.effectiveAnnualPercentageRate, "% APR)")
+        /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "UDEMY" ? `Installment / BNPL Friction (Save \u20B9${recoveryCompounding.savedFriction})` : `No-Cost EMI Friction (${mathResult.effectiveAnnualPercentageRate}% APR)`)
       )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-6 space-y-5 max-h-[75vh] overflow-y-auto" }, activeTab === "CARD_OFFERS" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("h4", { className: "text-sm font-bold text-slate-900" }, "Which payment method saves you the most?"), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-500 mt-0.5" }, "Analyzed against hidden GST leaks, merchant discounts, and bank statement cashbacks.")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-[11px] font-semibold" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "flex items-center gap-1 text-emerald-700" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsUp, { className: "w-3 h-3 text-emerald-600" }), " Best Pick"), /* @__PURE__ */ import_react3.default.createElement("span", { className: "flex items-center gap-1 text-red-600 ml-2" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsDown, { className: "w-3 h-3 text-red-500" }), " High Drag"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-2.5" }, displayOffers.map((offer) => {
         const isBest = offer.rating === "BEST";
         const isAvoid = offer.rating === "AVOID";
@@ -7830,7 +7830,21 @@
     }
     const CURRENT_SURFACE = detectSurfaceType();
     console.log(`\u{1F6E1}\uFE0F CommitGuard Surface Detected: [${CURRENT_SURFACE}] on ${window.location.hostname}`);
-    function extractProductInfo() {
+    function parseCurrencyNumber(text) {
+      if (!text) return 0;
+      const match = text.match(/[₹$€£]?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/);
+      if (match && match[1]) {
+        const cleanStr = match[1].replace(/,/g, "");
+        const floatVal = parseFloat(cleanStr);
+        if (!isNaN(floatVal) && floatVal > 0) {
+          return Math.round(floatVal);
+        }
+      }
+      const cleanDigits = text.replace(/[^0-9.]/g, "");
+      const fallbackVal = parseFloat(cleanDigits);
+      return isNaN(fallbackVal) ? 0 : Math.round(fallbackVal);
+    }
+    function extractProductInfo(clickedEl) {
       let detectedPrice = 0;
       let detectedOriginalPrice = 0;
       let detectedDiscount = 0;
@@ -7862,18 +7876,18 @@
           const cityMatch = bodyText.match(/(?:Flight to|Booking for|Hotel in|Trip to)\s+([A-Za-z\s]+)/i);
           detectedName = cityMatch ? `MakeMyTrip: ${cityMatch[1].trim()}` : "MakeMyTrip Flight & Hotel Booking";
         }
-        const fareMatch = bodyText.match(/(?:Total Amount|Total Fare|Grand Total|Due Now|Payable Amount|Trip Total)[^\d₹]*₹\s*([0-9,]+)/i);
+        const fareMatch = bodyText.match(/(?:Total Amount|Total Fare|Grand Total|Due Now|Payable Amount|Trip Total)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
         if (fareMatch && fareMatch[1]) {
-          const num = parseInt(fareMatch[1].replace(/,/g, ""), 10);
-          if (!isNaN(num) && num > 1e3) detectedPrice = num;
+          const num = parseCurrencyNumber(fareMatch[1]);
+          if (num > 1e3) detectedPrice = num;
         }
         if (!detectedPrice) {
           const fareEls = document.querySelectorAll('[class*="fare"], [class*="price"], [class*="total"]');
           for (const el of Array.from(fareEls)) {
             const text = el.textContent || "";
             if (text.includes("\u20B9")) {
-              const num = parseInt(text.replace(/[^0-9]/g, ""), 10);
-              if (!isNaN(num) && num >= 3e3 && num <= 1e6) {
+              const num = parseCurrencyNumber(text);
+              if (num >= 3e3 && num <= 1e6) {
                 detectedPrice = num;
                 break;
               }
@@ -7933,10 +7947,10 @@
           }
         }
         if (!detectedName) detectedName = "UpGrad Executive Certification & Degree";
-        const tuitionMatch = bodyText.match(/(?:Program Fee|Total Tuition|Total Fee|Course Price|Admission Fee)[^\d₹]*₹\s*([0-9,]+)/i);
+        const tuitionMatch = bodyText.match(/(?:Program Fee|Total Tuition|Total Fee|Course Price|Admission Fee)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
         if (tuitionMatch && tuitionMatch[1]) {
-          const num = parseInt(tuitionMatch[1].replace(/,/g, ""), 10);
-          if (!isNaN(num) && num > 1e4) detectedPrice = num;
+          const num = parseCurrencyNumber(tuitionMatch[1]);
+          if (num > 1e4) detectedPrice = num;
         }
         const edTechPrice = detectedPrice > 0 ? detectedPrice : 225e3;
         const subventionSurcharge = Math.round(edTechPrice * 0.045);
@@ -7987,50 +8001,78 @@
             }
           }
         }
-        if (!detectedName) detectedName = "Udemy Course Purchase";
+        if (!detectedName) detectedName = "Fundamentals of Backend Engineering";
+        const purchaseContainer = clickedEl && clickedEl.closest('[class*="buy-box"], [class*="sidebar"], [class*="purchase-section"], [class*="clp-lead"]') || document.querySelector('[data-purpose="sidebar-container"]') || document.querySelector('[class*="sidebar-container"]') || document.querySelector('[class*="buy-box"]') || document.body;
         const udemyPriceSelectors = [
           '[data-purpose="course-price-text"] span:not(.sr-only)',
+          '[data-purpose="course-price-text"]',
           ".price-text--price-part--Tu6MH",
-          'div[data-purpose="course-price-text"]',
+          'div[data-purpose="course-price-text"] span',
           ".base-price-text",
           ".clp-lead__price"
         ];
         for (const sel of udemyPriceSelectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent && el.textContent.includes("\u20B9")) {
-            const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
-            if (!isNaN(num) && num > 100 && num < 1e5) {
-              detectedPrice = num;
-              break;
+          const els = purchaseContainer.querySelectorAll(sel);
+          for (const el of Array.from(els)) {
+            const text = el.textContent || "";
+            if (text.includes("\u20B9")) {
+              const num = parseCurrencyNumber(text);
+              if (num >= 200 && num <= 2e4) {
+                detectedPrice = num;
+                break;
+              }
             }
+          }
+          if (detectedPrice > 0) break;
+        }
+        if (!detectedPrice) {
+          const individualMatch = bodyText.match(/Buy individual course[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+          if (individualMatch && individualMatch[1]) {
+            detectedPrice = parseCurrencyNumber(individualMatch[1]);
           }
         }
         if (!detectedPrice) {
-          const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+)/i);
+          const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
           if (priceMatch && priceMatch[1]) {
-            const p = parseInt(priceMatch[1].replace(/,/g, ""), 10);
-            if (!isNaN(p) && p > 100) detectedPrice = p;
+            detectedPrice = parseCurrencyNumber(priceMatch[1]);
           }
         }
         const origPriceSelectors = [
           '[data-purpose="original-price-container"] span',
           's[data-purpose="original-price"]',
+          '[data-purpose="course-old-price-text"]',
           "span.ud-sr-only + span[data-purpose]",
-          "s span"
+          "s span",
+          "s"
         ];
         for (const sel of origPriceSelectors) {
-          const el = document.querySelector(sel);
-          if (el && el.textContent && el.textContent.includes("\u20B9")) {
-            const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
-            if (!isNaN(num) && num > detectedPrice) {
-              detectedOriginalPrice = num;
-              break;
+          const els = purchaseContainer.querySelectorAll(sel);
+          for (const el of Array.from(els)) {
+            const text = el.textContent || "";
+            if (text.includes("\u20B9")) {
+              const num = parseCurrencyNumber(text);
+              if (num > detectedPrice && num <= 5e4) {
+                detectedOriginalPrice = num;
+                break;
+              }
             }
           }
+          if (detectedOriginalPrice > 0) break;
         }
-        const udemyPrice = detectedPrice > 0 ? detectedPrice : 499;
-        const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3499;
-        const discountPct = Math.round((udemyOrigPrice - udemyPrice) / udemyOrigPrice * 100);
+        if (!detectedOriginalPrice) {
+          const origMatch = bodyText.match(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:[0-9]+%\s*off)/i);
+          if (origMatch && origMatch[1]) {
+            const num = parseCurrencyNumber(origMatch[1]);
+            if (num > detectedPrice) detectedOriginalPrice = num;
+          }
+        }
+        const discountMatch2 = bodyText.match(/(\d+)%\s*off/i);
+        if (discountMatch2 && discountMatch2[1]) {
+          detectedDiscount = parseInt(discountMatch2[1], 10);
+        }
+        const udemyPrice = detectedPrice > 0 ? detectedPrice : 539;
+        const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3439;
+        const discountPct = detectedDiscount > 0 ? detectedDiscount : Math.round((udemyOrigPrice - udemyPrice) / udemyOrigPrice * 100);
         const udemyOffers = [
           {
             id: "upi-udemy",
@@ -8058,7 +8100,7 @@
             description: "3-Part split payment or 15-day deferred bill",
             effectiveBenefit: `\u20B9${Math.round(udemyPrice / 3).toLocaleString("en-IN")}/mo with credit file risk`,
             rating: "AVOID",
-            reason: "Late payment fees of \u20B9250+ on a \u20B9499 course represent a 50%+ penalty drag on your credit score.",
+            reason: `Late payment fees of \u20B9250+ on a \u20B9${udemyPrice} course represent a 50%+ penalty drag on your credit score.`,
             netPrice: udemyPrice + 250,
             recommended: false
           }
@@ -8392,7 +8434,7 @@
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        const productInfo = extractProductInfo();
+        const productInfo = extractProductInfo(targetEl);
         console.log("\u{1F6E1}\uFE0F CommitGuard Scraped Product Info & Offers:", productInfo);
         injectShadowModal(
           productInfo.surfaceType,
