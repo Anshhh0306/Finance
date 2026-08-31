@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "CommitGuard - Embedded Pre-Commitment Interceptor",
+  "version": "1.0.0",
+  "description": "Embedded financial pre-commitment interceptor for checkout and banking flows. Halts high-friction No-Cost EMI and lock-in traps in <2ms with deterministic math clarity.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.amazon.in/*",
+    "*://*.flipkart.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.amazon.in/*",
+        "*://*.flipkart.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "CommitGuard Active"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "styles.css"
+      ],
+      "matches": [
+        "*://*.amazon.in/*",
+        "*://*.flipkart.com/*"
+      ]
+    }
+  ]
+}
