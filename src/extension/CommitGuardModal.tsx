@@ -75,593 +75,66 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
   const [compoundingHorizon, setCompoundingHorizon] = useState<'1Y' | '3Y' | '5Y'>('5Y');
   const [isProofOpen, setIsProofOpen] = useState(false);
 
-  // =========================================================================
-  // PLATFORM-SPECIFIC ISOLATED CONFIGURATIONS (Zero Cross-Site Pollution)
-  // =========================================================================
-  interface PlatformOptionConfig {
-    categories: Array<{ id: string; label: string; desc: string }>;
-    providers: string[];
-    tenures: number[];
-  }
-
-  const PLATFORM_CONFIGS: Record<InterceptorSurface, PlatformOptionConfig> = {
-    FLIPKART: {
-      categories: [
-        { id: 'UPI', label: '🟢 UPI / Direct Pay', desc: '0% Interest, ₹0 Fees' },
-        { id: 'AXIS_CASHBACK', label: '💳 Flipkart Axis (5%)', desc: '5% Statement Cashback' },
-        { id: 'NO_COST', label: '🎁 No-Cost EMI', desc: 'Subvention Offset' },
-        { id: 'BANK_EMI', label: '🏦 Bank Card EMI', desc: 'BOBCARD / Kotak / HDFC' },
-        { id: 'FLIPKART_PAY_LATER', label: '⚡ Flipkart Pay Later', desc: 'Credit Line up to ₹1L' },
-      ],
-      providers: [
-        'Flipkart Axis Bank',
-        'ICICI Bank',
-        'HDFC Bank',
-        'State Bank of India (SBI)',
-        'Kotak Mahindra Bank',
-        'BOBCARD',
-        'Bajaj Finance',
-        'AU Small Finance Bank',
-      ],
-      tenures: [3, 6, 9, 12, 18, 24, 36],
-    },
-    TRAVEL: {
-      categories: [
-        { id: 'SCAN_TO_PAY', label: '🟢 Scan to Pay (QR)', desc: 'Instant UPI, Zero Debt' },
-        { id: 'LIQUID_SIP', label: '🌱 6M Liquid Fund SIP', desc: '7.10% Yield Alternative' },
-        { id: 'CREDIT_EMI', label: '💳 Credit Card EMI', desc: 'Amex / Kotak / Federal' },
-        { id: 'DEBIT_EMI', label: '🏦 Debit Card EMI', desc: 'Federal / HDFC / ICICI' },
-        { id: 'CARDLESS_EMI', label: '🎁 Cardless EMI', desc: 'Bajaj Finserv / TVS' },
-        { id: 'TNPL', label: '⏳ TripMoney / TNPL', desc: '28.4% Penalty APR Risk' },
-      ],
-      providers: [
-        'American Express',
-        'Federal Bank',
-        'Kotak Mahindra Bank',
-        'HDFC Bank',
-        'ICICI Bank',
-        'Axis Bank',
-        'State Bank of India (SBI)',
-        'OneCard',
-        'AU Small Finance Bank',
-        'Bajaj Finserv',
-        'TVS Credit',
-      ],
-      tenures: [3, 6, 9, 12],
-    },
-    AMAZON: {
-      categories: [
-        { id: 'AMAZON_UPI', label: '🟢 Amazon Pay UPI', desc: 'Zero Debt, Instant Pay' },
-        { id: 'AMAZON_ICICI', label: '💳 Amazon Pay ICICI (5%)', desc: '5% Unlimited Cashback' },
-        { id: 'BANK_DISCOUNT', label: '🏷️ Instant Bank Discount', desc: 'Up to ₹1,500 Off' },
-        { id: 'NO_COST', label: '🎁 No-Cost EMI', desc: 'Upfront Interest Discount' },
-        { id: 'AMAZON_PAY_LATER', label: '⚡ Amazon Pay Later', desc: 'Axio / Karur Vysya' },
-        { id: 'GST_INVOICE', label: '💼 GST Business Invoice', desc: '18% Input Tax Credit' },
-      ],
-      providers: [
-        'Amazon Pay ICICI',
-        'HDFC Bank',
-        'State Bank of India (SBI)',
-        'ICICI Bank',
-        'Axis Bank',
-        'Kotak Mahindra Bank',
-        'Axio Pay Later',
-      ],
-      tenures: [3, 6, 9, 12],
-    },
-    UDEMY: {
-      categories: [
-        { id: 'UPI_DIRECT', label: '🟢 UPI / Full Pay', desc: '0% Interest, Single Pay' },
-        { id: 'COOL_OFF_FUND', label: '🛡️ 30-Day Cool-Off Fund', desc: 'Test Learning Commitment' },
-        { id: 'MICRO_BNPL', label: '⏳ Micro-BNPL (LazyPay/Simpl)', desc: '15-Day Deferred Bill' },
-      ],
-      providers: ['UPI / Google Pay / PhonePe', 'Debit / Credit Card', 'Net Banking', 'LazyPay', 'Simpl'],
-      tenures: [1],
-    },
-    EDTECH: {
-      categories: [
-        { id: 'UPFRONT_CASH', label: '🟢 Upfront Cash (5% Rebate)', desc: 'Save 5% Subvention Fee' },
-        { id: 'ZERO_SUBVENTION', label: '🎁 0% NBFC Subvention', desc: 'Propelld / Liquiloans' },
-        { id: 'LONG_LOAN', label: '🏦 Long-Tenure Loan (12-36M)', desc: '12.5%–18% APR' },
-        { id: 'CORP_SPONSOR', label: '💼 Corporate Sponsorship', desc: 'Section 80E Tax Relief' },
-      ],
-      providers: ['Direct NEFT / UPI', 'Propelld', 'Liquiloans', 'Avanse Edu', 'HDFC Bank Education', 'ICICI Bank'],
-      tenures: [6, 9, 12, 18, 24, 36],
-    },
-    ECOMMERCE: {
-      categories: [
-        { id: 'UPI', label: '🟢 UPI / Direct Pay', desc: '0% Interest, ₹0 Fees' },
-        { id: 'NO_COST', label: '🎁 No-Cost EMI', desc: 'Subvention Offset' },
-        { id: 'CREDIT_EMI', label: '💳 Credit Card EMI', desc: 'Standard Bank APR' },
-        { id: 'BNPL', label: '⏳ Pay Later / BNPL', desc: 'Deferred Credit' },
-      ],
-      providers: ['HDFC Bank', 'ICICI Bank', 'Axis Bank', 'SBI', 'Kotak Mahindra Bank', 'OneCard'],
-      tenures: [3, 6, 9, 12],
-    },
-  };
-
-  const currentPlatformConfig = PLATFORM_CONFIGS[surfaceType] || PLATFORM_CONFIGS.FLIPKART;
-
-  // Quick-Switcher States
-  const [isCustomSwitcherOpen, setIsCustomSwitcherOpen] = useState<boolean>(false);
-  const [customCategoryId, setCustomCategoryId] = useState<string>(currentPlatformConfig.categories[0]?.id || 'UPI');
-  const [customBank, setCustomBank] = useState<string>(currentPlatformConfig.providers[0] || 'Default Provider');
-  const [customTenure, setCustomTenure] = useState<number>(currentPlatformConfig.tenures[0] || 12);
-  const [customSimulatedOffer, setCustomSimulatedOffer] = useState<ScrapedOffer | null>(null);
+  // Dynamic Tenure Simulator for active scraped payment option
+  const [customTenure, setCustomTenure] = useState<number>(12);
+  const [simulatedTenureOffer, setSimulatedTenureOffer] = useState<ScrapedOffer | null>(null);
 
   const processingFee = 199;
   const nominalRate = 15.0;
 
-  // Helper for bank-accurate APR and processing fees
-  function getBankRates(bankName: string, isDebit = false) {
-    if (/american express|amex/i.test(bankName)) return { apr: 14.0, fee: 235 };
-    if (/federal/i.test(bankName)) return { apr: isDebit ? 16.0 : 13.5, fee: 199 };
-    if (/onecard/i.test(bankName)) return { apr: 14.0, fee: 199 };
-    if (/kotak/i.test(bankName)) return { apr: isDebit ? 16.0 : 14.0, fee: 199 };
-    if (/sbi|state bank/i.test(bankName)) return { apr: 14.5, fee: 199 };
-    if (/hdfc/i.test(bankName)) return { apr: isDebit ? 16.0 : 15.0, fee: 235 };
-    if (/icici/i.test(bankName)) return { apr: isDebit ? 16.0 : 15.0, fee: 235 };
-    if (/axis/i.test(bankName)) return { apr: 15.0, fee: 235 };
-    if (/bobcard|bob/i.test(bankName)) return { apr: 16.0, fee: 199 };
-    if (/au small|au bank/i.test(bankName)) return { apr: 15.5, fee: 199 };
-    if (/idfc/i.test(bankName)) return { apr: 14.5, fee: 199 };
-    if (/indusind/i.test(bankName)) return { apr: 15.5, fee: 235 };
-    if (/bajaj/i.test(bankName)) return { apr: 0.0, fee: 199 };
-    if (/tvs/i.test(bankName)) return { apr: 18.0, fee: 199 };
-    return { apr: isDebit ? 16.0 : 15.0, fee: 199 };
-  }
+  // Real-time deterministic tenure simulator on whatever offer is active
+  const handleSimulateTenure = (months: number, baseOffer: ScrapedOffer) => {
+    setCustomTenure(months);
 
-  // Handler to apply simulated platform-specific payment method
-  const handleApplyPlatformSimulation = (categoryId: string, bank: string, tenureMonths: number) => {
-    // If user clicked a bank while in a non-bank category (like UPI or Pay Later), auto-switch to Bank EMI
-    let effectiveCategory = categoryId;
-    if (
-      (categoryId === 'UPI' || categoryId === 'FLIPKART_PAY_LATER' || categoryId === 'AXIS_CASHBACK' || categoryId === 'SCAN_TO_PAY' || categoryId === 'AMAZON_UPI' || categoryId === 'UPI_DIRECT' || categoryId === 'COOL_OFF_FUND' || categoryId === 'UPFRONT_CASH') &&
-      bank !== customBank
-    ) {
-      if (surfaceType === 'FLIPKART') effectiveCategory = 'BANK_EMI';
-      else if (surfaceType === 'TRAVEL') effectiveCategory = 'CREDIT_EMI';
-      else if (surfaceType === 'AMAZON') effectiveCategory = 'NO_COST';
-      else if (surfaceType === 'EDTECH') effectiveCategory = 'ZERO_SUBVENTION';
+    // Extract stated APR or determine from offer description
+    let apr = 15.0;
+    const aprMatch = baseOffer.bankOrCard.match(/@\s*([0-9.]+)%/i) || baseOffer.reason.match(/([0-9.]+)%\s*APR/i);
+    if (aprMatch && aprMatch[1]) {
+      apr = parseFloat(aprMatch[1]);
+    } else if (/axis\s*cashback|flipkart\s*axis/i.test(baseOffer.bankOrCard)) {
+      apr = 0;
+    } else if (/no\s*cost/i.test(baseOffer.bankOrCard)) {
+      apr = 0;
+    } else if (/pay\s*later|tnpl/i.test(baseOffer.bankOrCard)) {
+      apr = 24.0;
+    } else if (/debit/i.test(baseOffer.bankOrCard)) {
+      apr = 16.0;
     }
 
-    setCustomCategoryId(effectiveCategory);
-    setCustomBank(bank);
-    setCustomTenure(tenureMonths);
+    const isNoCost = apr === 0;
+    let interest = 0;
+    let gst = 0;
+    let fee = /axis\s*cashback/i.test(baseOffer.bankOrCard) ? 0 : 235;
 
-    // 1. FLIPKART
-    if (surfaceType === 'FLIPKART') {
-      if (effectiveCategory === 'UPI') {
-        const offer: ScrapedOffer = {
-          id: 'sim-fk-upi',
-          bankOrCard: 'UPI / Direct Debit (Zero Debt)',
-          description: `Single-tranche payment of ₹${productPrice.toLocaleString('en-IN')}`,
-          effectiveBenefit: 'Saves 100% of GST & bank fees',
-          rating: 'BEST',
-          reason: 'Zero interest, zero processing fee, keeps credit limit 100% free with instant confirmation.',
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'AXIS_CASHBACK') {
-        const cb = Math.round(productPrice * 0.05);
-        const offer: ScrapedOffer = {
-          id: 'sim-fk-axis',
-          bankOrCard: 'Flipkart Axis Bank Credit Card',
-          description: '5% Unlimited Cashback credited directly to statement',
-          effectiveBenefit: `Save ₹${cb.toLocaleString('en-IN')} upfront`,
-          rating: 'BEST',
-          reason: `Gives ₹${cb.toLocaleString('en-IN')} unconditional statement cashback without any tenure lock-in.`,
-          netPrice: productPrice - cb,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'NO_COST') {
-        const monthly = Math.round(productPrice / tenureMonths);
-        const estInterest = Math.round(productPrice * 0.15 * (tenureMonths / 12));
-        const estGst = Math.round(199 + (estInterest * 0.18));
-        const offer: ScrapedOffer = {
-          id: `sim-fk-nocost-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M No-Cost EMI)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised Total: ₹${productPrice.toLocaleString('en-IN')})`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
-          rating: 'AVOID',
-          reason: `Flipkart discounts the interest, but ${bank} charges ₹199 processing fee + non-refundable 18% GST (₹${Math.round(estInterest * 0.18)}) on monthly interest.`,
-          netPrice: productPrice + estGst,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'BANK_EMI') {
-        const bankRate = getBankRates(bank, false);
-        const interest = Math.round(productPrice * (bankRate.apr / 100) * (tenureMonths / 12));
-        const gst = Math.round(interest * 0.18);
-        const fee = bankRate.fee;
-        const total = productPrice + interest + gst + fee;
-        const monthly = Math.round((productPrice + interest) / tenureMonths);
-        const offer: ScrapedOffer = {
-          id: `sim-fk-bankemi-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M Credit Card EMI @ ${bankRate.apr.toFixed(1)}%)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised: ₹${(productPrice + interest).toLocaleString('en-IN')})`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gst + fee).toLocaleString('en-IN')} Hidden Drag`,
-          rating: 'AVOID',
-          reason: `Long-tenure EMIs lock credit limit and incur compounding ${bankRate.apr.toFixed(1)}% APR + 18% non-refundable GST (₹${gst}) on interest + ₹${fee} fee.`,
-          netPrice: total,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'FLIPKART_PAY_LATER') {
-        const apr = 0.24;
-        const interest = Math.round(productPrice * apr * (tenureMonths / 12));
-        const monthly = Math.round((productPrice + interest) / tenureMonths);
-        const total = productPrice + interest;
-        const offer: ScrapedOffer = {
-          id: `sim-fk-paylater-${tenureMonths}`,
-          bankOrCard: `Flipkart Pay Later (${tenureMonths}M Monthly EMI @ 24% APR)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Total: ₹${total.toLocaleString('en-IN')})`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${interest.toLocaleString('en-IN')} 24% APR Drag`,
-          rating: 'AVOID',
-          reason: `Carries 24% reducing APR plus credit bureau inquiry and ₹350–₹750 late payment penalty risk.`,
-          netPrice: total,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
+    if (isNoCost) {
+      const implicitInterest = Math.round(productPrice * 0.15 * (months / 12));
+      gst = Math.round(implicitInterest * 0.18);
+    } else {
+      interest = Math.round(productPrice * (apr / 100) * (months / 12));
+      gst = Math.round(interest * 0.18);
     }
 
-    // 2. TRAVEL (MakeMyTrip / Cleartrip)
-    if (surfaceType === 'TRAVEL') {
-      if (effectiveCategory === 'SCAN_TO_PAY') {
-        const offer: ScrapedOffer = {
-          id: 'sim-tr-qr',
-          bankOrCard: 'Scan to Pay / QR (UPI - Zero Debt)',
-          description: `Single-tranche direct payment of ₹${productPrice.toLocaleString('en-IN')}`,
-          effectiveBenefit: 'Saves 100% of interest, bank fees & GST',
-          rating: 'BEST',
-          reason: 'Zero interest, zero processing fees, keeps credit limit 100% free with instant confirmation.',
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'LIQUID_SIP') {
-        const offer: ScrapedOffer = {
-          id: 'sim-tr-sip',
-          bankOrCard: '6-Month Liquid Fund SIP Alternative',
-          description: `Save ₹${Math.round(productPrice / 6).toLocaleString('en-IN')}/mo in an RBI-compliant 7.10% liquid portfolio`,
-          effectiveBenefit: 'Earns +₹275 interest gain; 0% debt liability',
-          rating: 'BEST',
-          reason: 'Travel completely debt-free and earn returns instead of leaking ~₹1,600 to bank interest and statutory GST.',
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'CREDIT_EMI' || effectiveCategory === 'DEBIT_EMI') {
-        const isDebit = effectiveCategory === 'DEBIT_EMI';
-        const bankRate = getBankRates(bank, isDebit);
-        const apr = bankRate.apr;
-        const interest = Math.round(productPrice * (apr / 100) * (tenureMonths / 12));
-        const gst = Math.round(interest * 0.18);
-        const fee = bankRate.fee;
-        const total = productPrice + interest + gst + fee;
-        const monthly = Math.round((productPrice + interest) / tenureMonths);
-        const offer: ScrapedOffer = {
-          id: `sim-tr-emi-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M ${isDebit ? 'Debit Card' : 'Credit Card'} EMI @ ${apr.toFixed(1)}%)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised Total: ₹${(productPrice + interest).toLocaleString('en-IN')})`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gst + fee).toLocaleString('en-IN')} Hidden Drag`,
-          rating: 'AVOID',
-          reason: `MakeMyTrip shows ₹${(productPrice + interest).toLocaleString('en-IN')}, but ${bank} additionally bills non-refundable 18% GST (₹${gst}) on interest + ₹${fee} fee (+GST), making true outflow ₹${total.toLocaleString('en-IN')}.`,
-          netPrice: total,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'CARDLESS_EMI') {
-        const isBajaj = /bajaj/i.test(bank);
-        const estInterest = isBajaj ? 0 : Math.round(productPrice * 0.18 * (tenureMonths / 12));
-        const estGst = Math.round(199 + (estInterest * 0.18));
-        const monthly = Math.round((productPrice + estInterest) / tenureMonths);
-        const total = productPrice + estInterest + estGst;
-        const offer: ScrapedOffer = {
-          id: `sim-tr-cardless-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M Cardless EMI Network)`,
-          description: `${tenureMonths} Months installment plan (₹${monthly.toLocaleString('en-IN')}/mo)`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
-          rating: 'AVOID',
-          reason: `Requires active cardless line and bills ₹199 convenience fee + monthly 18% GST.`,
-          netPrice: total,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'TNPL') {
-        const penalty = Math.round(productPrice * 0.14);
-        const monthly = Math.round(productPrice / 3);
-        const offer: ScrapedOffer = {
-          id: `sim-tr-tnpl-${tenureMonths}`,
-          bankOrCard: 'TripMoney / Travel Now, Pay Later (TNPL)',
-          description: `3 to 6 Months deferred installment loan (₹${monthly.toLocaleString('en-IN')}/mo) with 28.4% APR penalty risk`,
-          effectiveBenefit: 'High penalty APR if post-trip cash flow is tight',
-          rating: 'AVOID',
-          reason: 'Exposes user to 24%-36% penalty APRs plus ₹450-₹850 bounce fees if post-vacation cash is tight.',
-          netPrice: productPrice + penalty,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-    }
+    const total = productPrice + interest + gst + fee;
+    const monthly = Math.round((productPrice + interest) / months);
 
-    // 3. AMAZON
-    if (surfaceType === 'AMAZON') {
-      if (effectiveCategory === 'AMAZON_UPI') {
-        const offer: ScrapedOffer = {
-          id: 'sim-amz-upi',
-          bankOrCard: 'Amazon Pay UPI / Direct Debit (Zero Debt)',
-          description: `Single-tranche direct payment of ₹${productPrice.toLocaleString('en-IN')}`,
-          effectiveBenefit: 'Saves 100% of GST & bank processing fees',
-          rating: 'BEST',
-          reason: 'Zero interest, zero processing fee, keeps credit limit 100% free.',
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'AMAZON_ICICI') {
-        const cb = Math.round(productPrice * 0.05);
-        const offer: ScrapedOffer = {
-          id: 'sim-amz-icici',
-          bankOrCard: 'Amazon Pay ICICI Bank Credit Card',
-          description: '5% Unlimited Cashback credited to Amazon Pay Balance',
-          effectiveBenefit: `Save ₹${cb.toLocaleString('en-IN')} cashback`,
-          rating: 'BEST',
-          reason: `Earns ₹${cb.toLocaleString('en-IN')} unconditional Amazon Pay balance without any tenure lock-in.`,
-          netPrice: productPrice - cb,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'BANK_DISCOUNT') {
-        const disc = Math.min(Math.round(productPrice * 0.1), 1500);
-        const offer: ScrapedOffer = {
-          id: `sim-amz-bankdisc-${bank}`,
-          bankOrCard: `Bank Offer (${bank} Credit Cards)`,
-          description: `Instant discount up to ₹${disc.toLocaleString('en-IN')} on select credit cards`,
-          effectiveBenefit: `Save ₹${disc.toLocaleString('en-IN')} upfront`,
-          rating: 'GOOD',
-          reason: 'Direct instant price reduction at checkout if paid in full single tranche.',
-          netPrice: productPrice - disc,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'NO_COST') {
-        const monthly = Math.round(productPrice / tenureMonths);
-        const estInterest = Math.round(productPrice * 0.15 * (tenureMonths / 12));
-        const estGst = Math.round(199 + (estInterest * 0.18));
-        const offer: ScrapedOffer = {
-          id: `sim-amz-nocost-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M No-Cost EMI)`,
-          description: `${tenureMonths} Months installment plan (₹${monthly.toLocaleString('en-IN')}/mo)`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
-          rating: 'AVOID',
-          reason: `Charges ₹199 bank fee + non-refundable 18% GST on monthly interest.`,
-          netPrice: productPrice + estGst,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'AMAZON_PAY_LATER') {
-        const fee = Math.round(productPrice * 0.16);
-        const monthly = Math.round((productPrice + fee) / tenureMonths);
-        const offer: ScrapedOffer = {
-          id: `sim-amz-paylater-${tenureMonths}`,
-          bankOrCard: `Amazon Pay Later (${tenureMonths}M EMI via Axio)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Total: ₹${(productPrice + fee).toLocaleString('en-IN')})`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo with credit limit hold`,
-          rating: 'AVOID',
-          reason: 'Carries 18%–24% reducing APR + credit bureau inquiry.',
-          netPrice: productPrice + fee,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'GST_INVOICE') {
-        const itc = Math.round(productPrice * 0.18);
-        const offer: ScrapedOffer = {
-          id: 'sim-amz-gst',
-          bankOrCard: 'Amazon Business GST Invoice',
-          description: 'Claim Input Tax Credit (ITC) for business purchases',
-          effectiveBenefit: `Save up to ₹${itc.toLocaleString('en-IN')} (18% GST ITC)`,
-          rating: 'GOOD',
-          reason: 'Valid for registered GSTIN businesses to offset output tax liability.',
-          netPrice: productPrice - itc,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-    }
+    // Clean bank name without old tenure
+    const baseBankName = baseOffer.bankOrCard.replace(/\(\d+M[^)]*\)/g, '').trim();
 
-    // 4. UDEMY (Low-ticket courses, zero 24-month loans)
-    if (surfaceType === 'UDEMY') {
-      if (effectiveCategory === 'UPI_DIRECT') {
-        const offer: ScrapedOffer = {
-          id: 'sim-ud-upi',
-          bankOrCard: 'UPI / Debit Card (Immediate Full Pay)',
-          description: 'Single payment without BNPL debt or credit file inquiries',
-          effectiveBenefit: 'Zero interest, zero processing friction',
-          rating: 'BEST',
-          reason: 'Never finance small educational purchases under ₹2,000 with consumer credit.',
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'COOL_OFF_FUND') {
-        const offer: ScrapedOffer = {
-          id: 'sim-ud-cooloff',
-          bankOrCard: 'Sovereign Liquid Fund / 30-Day Cool-Off',
-          description: 'Park course fee for 30 days to test real learning commitment',
-          effectiveBenefit: 'Saves 100% of price on uncompleted impulse buys',
-          rating: 'BEST',
-          reason: 'Over 87% of impulse-bought self-paced courses are abandoned after Lecture 2.',
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'MICRO_BNPL') {
-        const latePenalty = 250;
-        const offer: ScrapedOffer = {
-          id: `sim-ud-bnpl-${bank}`,
-          bankOrCard: `${bank} (Micro-BNPL / 15-Day Split)`,
-          description: '3-Part split payment or 15-day deferred bill',
-          effectiveBenefit: `₹${Math.round(productPrice / 3).toLocaleString('en-IN')}/mo with credit file risk`,
-          rating: 'AVOID',
-          reason: `Late payment fees of ₹250+ on a ₹${productPrice} course represent a 50%+ penalty drag on your credit score.`,
-          netPrice: productPrice + latePenalty,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-    }
+    const simOffer: ScrapedOffer = {
+      id: `${baseOffer.id}-sim-${months}m`,
+      bankOrCard: `${baseBankName} (${months}M ${isNoCost ? 'No-Cost EMI' : `EMI @ ${apr.toFixed(1)}%`})`,
+      description: `${months} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised Total: ₹${(productPrice + interest).toLocaleString('en-IN')})`,
+      effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gst + fee).toLocaleString('en-IN')} Hidden Drag`,
+      rating: isNoCost ? 'GOOD' : 'AVOID',
+      reason: isNoCost
+        ? `Flipkart/Merchant discounts interest, but bank levies ₹199 processing fee + non-refundable 18% GST (₹${gst}) on interest.`
+        : `Long-tenure EMIs lock credit limit and incur compounding ${apr.toFixed(1)}% APR + 18% non-refundable GST (₹${gst}) on interest + ₹${fee} fee.`,
+      netPrice: total,
+      recommended: isNoCost,
+      isSelected: true,
+    };
 
-    // 5. EDTECH (UpGrad / Scaler)
-    if (surfaceType === 'EDTECH') {
-      if (effectiveCategory === 'UPFRONT_CASH') {
-        const rebate = Math.round(productPrice * 0.05);
-        const offer: ScrapedOffer = {
-          id: 'sim-ed-upfront',
-          bankOrCard: 'Direct Upfront Cash / NEFT / UPI (5% Rebate)',
-          description: 'Bypass institutional subvention loan surcharges',
-          effectiveBenefit: `Save ₹${rebate.toLocaleString('en-IN')} cash discount`,
-          rating: 'BEST',
-          reason: 'Negotiate the 5% cash discount directly since the provider avoids 3-5% NBFC commission.',
-          netPrice: productPrice - rebate,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'ZERO_SUBVENTION') {
-        const subventionFee = Math.round(productPrice * 0.045) + 1500;
-        const monthly = Math.round(productPrice / tenureMonths);
-        const offer: ScrapedOffer = {
-          id: `sim-ed-subv-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M "0% Interest" Subvention Loan)`,
-          description: `${tenureMonths} Months installment package with embedded surcharge`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${subventionFee.toLocaleString('en-IN')} Subvention Drag`,
-          rating: 'AVOID',
-          reason: 'Embedded 3%–5% institutional subvention surcharge + ₹1,500 file processing charge.',
-          netPrice: productPrice + subventionFee,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'LONG_LOAN') {
-        const interest = Math.round(productPrice * 0.14 * (tenureMonths / 12));
-        const fee = 2500;
-        const total = productPrice + interest + fee;
-        const monthly = Math.round((productPrice + interest) / tenureMonths);
-        const offer: ScrapedOffer = {
-          id: `sim-ed-loan-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M Education Loan @ 14.0%)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo`,
-          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo with ₹${interest.toLocaleString('en-IN')} interest drag`,
-          rating: 'AVOID',
-          reason: 'Carries 14.0% reducing interest with pre-closure penalty lock-in.',
-          netPrice: total,
-          recommended: false,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (effectiveCategory === 'CORP_SPONSOR') {
-        const taxBenefit = Math.round(productPrice * 0.30);
-        const offer: ScrapedOffer = {
-          id: 'sim-ed-corp',
-          bankOrCard: 'Corporate Sponsorship / Section 80E Tax Relief',
-          description: 'Employer L&D reimbursement or tax-exempt skill expense',
-          effectiveBenefit: `Save up to ₹${taxBenefit.toLocaleString('en-IN')} in tax relief`,
-          rating: 'BEST',
-          reason: 'Valid for full tax exemption under employer upskilling policies.',
-          netPrice: productPrice - taxBenefit,
-          recommended: true,
-          isSelected: true,
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-    }
+    setSimulatedTenureOffer(simOffer);
   };
 
   // Real-time deterministic recalculation (<1.2ms)
@@ -803,26 +276,26 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
     ];
   }, [scrapedOffers, surfaceType, productPrice, tenure, mathResult, processingFee]);
 
-  // Merge scraped/display offers with custom simulated offer if generated
+  // Merge scraped/display offers with simulated tenure offer if user tweaked tenure
   const allOffers = useMemo(() => {
     let list = [...displayOffers];
-    if (customSimulatedOffer && !list.some((o) => o.id === customSimulatedOffer.id)) {
-      list = [customSimulatedOffer, ...list];
+    if (simulatedTenureOffer) {
+      list = [simulatedTenureOffer, ...list.filter((o) => !o.id.includes('sim-'))];
     }
     return list;
-  }, [displayOffers, customSimulatedOffer]);
+  }, [displayOffers, simulatedTenureOffer]);
 
   // Find user's selected offer or fallback to first
   const selectedOffer = useMemo(() => {
-    if (customSimulatedOffer && selectedOfferId === customSimulatedOffer.id) {
-      return customSimulatedOffer;
+    if (simulatedTenureOffer && (selectedOfferId === simulatedTenureOffer.id || !selectedOfferId)) {
+      return simulatedTenureOffer;
     }
     if (selectedOfferId) {
       const found = allOffers.find((o) => o.id === selectedOfferId);
       if (found) return found;
     }
     return allOffers.find((o) => o.isSelected) || allOffers[0];
-  }, [allOffers, selectedOfferId, customSimulatedOffer]);
+  }, [allOffers, selectedOfferId, simulatedTenureOffer]);
 
   // Other available offers
   const otherOffers = useMemo(() => {
@@ -885,12 +358,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   : surfaceType === 'EDTECH'
                   ? 'UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI'
                   : surfaceType === 'UDEMY'
-                  ? 'Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay'
-                  : surfaceType === 'AMAZON'
-                  ? 'Amazon.in: Live Amazon Pay ICICI 5% Cashback vs Hidden EMI GST'
-                  : surfaceType === 'FLIPKART'
-                  ? 'Flipkart.com: Live Flipkart Axis 5% Cashback vs Hidden EMI GST'
-                  : 'Live Card & EMI Optimization for E-Commerce'}
+                  ? '30-Day Cool-Off & Micro-BNPL Fee Elimination'
+                  : 'Live Scraped Banking & Friction Engine'}
               </div>
             </div>
           </div>
@@ -980,115 +449,62 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
           {activeTab === 'CARD_OFFERS' && (
             <div className="space-y-4">
               
-              {/* 0. INTERACTIVE PAYMENT METHOD QUICK-SWITCHER BAR (Option A) */}
-              <div className="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
-                <div className="px-4 py-2.5 bg-slate-50/90 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60">
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="font-bold text-slate-700 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Simulate / Switch Payment Method:</span>
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[11px] font-bold truncate max-w-[200px] sm:max-w-xs shadow-xs">
-                      {selectedOffer?.bankOrCard || 'Auto-Detected'}
-                    </span>
-                  </div>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setIsCustomSwitcherOpen(!isCustomSwitcherOpen)}
-                    className="px-3 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
-                  >
-                    <Edit3 className="w-3 h-3 text-emerald-600" />
-                    <span>{isCustomSwitcherOpen ? 'Hide Switcher' : 'Change / Simulate Card'}</span>
-                    {isCustomSwitcherOpen ? <ChevronUp className="w-3 h-3 text-slate-500" /> : <ChevronDown className="w-3 h-3 text-slate-500" />}
-                  </button>
+              {/* 0. LIVE DISCOVERED PAYMENT METHODS SELECTOR */}
+              <div className="rounded-xl border border-slate-200 bg-white shadow-xs p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Payment Methods Discovered on Page:</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-700 font-mono font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    Live Scraped
+                  </span>
                 </div>
 
-                {/* Expanded Switcher Panel */}
-                {isCustomSwitcherOpen && (
-                  <div className="p-4 bg-gradient-to-b from-slate-50 to-white space-y-3.5 animate-in fade-in duration-150">
-                    
-                    {/* 1. Platform-Specific Category Selection */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                        <span>1. Choose Method ({surfaceType})</span>
-                        <span className="text-[10px] text-emerald-700 font-mono font-normal">Live Dynamic Math</span>
-                      </div>
-                      <div className={`grid gap-1.5 ${
-                        currentPlatformConfig.categories.length <= 3
-                          ? 'grid-cols-1 sm:grid-cols-3'
-                          : currentPlatformConfig.categories.length <= 4
-                          ? 'grid-cols-2 sm:grid-cols-4'
-                          : 'grid-cols-2 sm:grid-cols-5'
-                      }`}>
-                        {currentPlatformConfig.categories.map((cat) => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => handleApplyPlatformSimulation(cat.id, customBank, customTenure)}
-                            className={`p-2 rounded-lg text-left border transition-all cursor-pointer ${
-                              customCategoryId === cat.id
-                                ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-200 text-emerald-950 font-bold shadow-xs'
-                                : 'bg-white hover:bg-slate-100/80 border-slate-200 text-slate-700 font-medium'
-                            }`}
-                          >
-                            <div className="text-[11px] font-bold truncate">{cat.label}</div>
-                            <div className="text-[9px] text-slate-500 truncate">{cat.desc}</div>
-                          </button>
-                        ))}
-                      </div>
+                {/* Chips for all discovered offers */}
+                <div className="flex flex-wrap gap-1.5">
+                  {allOffers.map((offer) => (
+                    <button
+                      key={offer.id}
+                      type="button"
+                      onClick={() => {
+                        setSimulatedTenureOffer(null);
+                        setSelectedOfferId(offer.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                        selectedOffer?.id === offer.id
+                          ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                      }`}
+                    >
+                      <span>{offer.bankOrCard}</span>
+                      {offer.rating === 'BEST' && <span className="text-emerald-400 text-[10px]">★</span>}
+                    </button>
+                  ))}
+                </div>
+
+                {/* If selected offer supports tenures, render dynamic tenure chips */}
+                {selectedOffer && !/upi|direct|cool-off/i.test(selectedOffer.bankOrCard) && (
+                  <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                      <span>Simulate EMI Tenure on this Card:</span>
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {[3, 6, 9, 12, 18, 24, 36].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => handleSimulateTenure(m, selectedOffer)}
+                          className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-bold transition-all cursor-pointer border ${
+                            customTenure === m && simulatedTenureOffer
+                              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                              : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {m}m
+                        </button>
+                      ))}
                     </div>
-
-                    {/* 2. Platform-Specific Bank / Provider Selector */}
-                    {customCategoryId !== 'UPI' && customCategoryId !== 'SCAN_TO_PAY' && customCategoryId !== 'AMAZON_UPI' && customCategoryId !== 'UPI_DIRECT' && customCategoryId !== 'COOL_OFF_FUND' && (
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                          2. Select Provider on {surfaceType === 'TRAVEL' ? 'MakeMyTrip / Cleartrip' : surfaceType}
-                        </label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {currentPlatformConfig.providers.map((bank) => (
-                            <button
-                              key={bank}
-                              type="button"
-                              onClick={() => handleApplyPlatformSimulation(customCategoryId, bank, customTenure)}
-                              className={`px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer border ${
-                                customBank === bank
-                                  ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-xs'
-                                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 font-medium'
-                              }`}
-                            >
-                              {bank}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 3. Platform-Specific Tenure Selection (only if platform has > 1 tenure) */}
-                    {currentPlatformConfig.tenures.length > 1 && (
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-                          3. Select EMI Tenure
-                        </label>
-                        <div className="flex items-center gap-2">
-                          {currentPlatformConfig.tenures.map((m) => (
-                            <button
-                              key={m}
-                              type="button"
-                              onClick={() => handleApplyPlatformSimulation(customCategoryId, customBank, m)}
-                              className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border ${
-                                customTenure === m
-                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
-                                  : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
-                              }`}
-                            >
-                              {m}m
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                   </div>
                 )}
               </div>
