@@ -27,6 +27,9 @@ next-env.d.ts
 # Tool caches (Graphify etc.)
 graphify-out/
 
+# Generated/test artifacts
+public/test-*.css
+
 # IDE
 .vscode/
 .idea/
