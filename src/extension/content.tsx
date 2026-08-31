@@ -145,129 +145,174 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
       const travelPrice = detectedPrice > 0 ? detectedPrice : 13147;
 
-      // 1. Comprehensive list of supported banks
-      const BANK_MATCH_REGEX = /(American Express|Amex|Federal Bank|Kotak Mahindra Bank|Kotak|HDFC Bank|HDFC|ICICI Bank|ICICI|Axis Bank|Axis|Bajaj Finserv|Bajaj|AU Small Finance Bank|AU Bank|MakeMyTrip ICICI Bank|State Bank of India|SBI|IDFC FIRST Bank|IDFC|IndusInd Bank|Standard Chartered|Yes Bank|RBL Bank|Bank of Baroda|Canara Bank|Union Bank|Punjab National Bank|PNB|Citibank|HSBC|DBS Bank|South Indian Bank|Home Credit|TVS Credit|OneCard|Scapia)/i;
+      // =========================================================================
+      // UNIVERSAL DYNAMIC DOM BANK & CARD EXTRACTOR (100% Free of Hardcoded Lists)
+      // Automatically reads any bank (OneCard, Amex, Fi, Federal, Kotak, etc.) from live DOM
+      // =========================================================================
+      function cleanBankText(raw: string): string {
+        if (!raw) return '';
+        return raw
+          .replace(/NO\s*COST\s*EMI/gi, '')
+          .replace(/No\s*Cost\s*EMI/gi, '')
+          .replace(/Starts?\s*at\s*₹?\s*[0-9,.]+/gi, '')
+          .replace(/Starting\s*at\s*₹?\s*[0-9,.]+/gi, '')
+          .replace(/₹\s*[0-9,.]+/gi, '')
+          .replace(/CHANGE/gi, '')
+          .replace(/Select tenure/gi, '')
+          .replace(/Select your bank/gi, '')
+          .replace(/Below is the list.*/gi, '')
+          .replace(/Search here.*/gi, '')
+          .replace(/[\n\r\t]/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
 
-      // 2. Identify the selected bank with multiple fallback strategies
-      let detectedBankRaw = '';
+      function isGenericNoise(text: string): boolean {
+        const lower = text.toLowerCase();
+        return (
+          lower.includes('below is the list') ||
+          lower.includes('search here') ||
+          lower.includes('select your bank') ||
+          lower.includes('select tenure') ||
+          lower.includes('all banks') ||
+          lower.includes('convenience fee') ||
+          lower.includes('total due') ||
+          lower.includes('provide card details') ||
+          lower.length < 2
+        );
+      }
+
+      let detectedBankName = '';
       let isExplicitUpi = false;
       let isExplicitTnpl = false;
       let isExplicitNoCost = false;
 
-      // Strategy A: Check clicked element if it's a specific button / bank option (short text only)
+      // Strategy 1: Check clicked element directly (short text only)
       if (clickedEl) {
-        const directText = (clickedEl.textContent || '').trim();
-        if (directText.length < 100) {
-          if (/scan\s*to\s*pay|qr|upi|google\s*pay|phonepe|paytm/i.test(directText)) {
-            isExplicitUpi = true;
-          } else if (/tnpl|travel\s*now\s*pay\s*later|trip\s*money/i.test(directText)) {
-            isExplicitTnpl = true;
-          } else if (/no\s*cost\s*emi/i.test(directText)) {
-            isExplicitNoCost = true;
-          }
+        const rowEl = clickedEl.closest('li, label, tr, [role="radio"], [role="button"], [class*="item"], [class*="bank"], [class*="option"]') || clickedEl;
+        const rawRowText = (rowEl.textContent || '').trim();
+        
+        if (/scan\s*to\s*pay|qr|upi|google\s*pay|phonepe|paytm/i.test(rawRowText) && rawRowText.length < 100) {
+          isExplicitUpi = true;
+        } else if (/tnpl|travel\s*now\s*pay\s*later|trip\s*money/i.test(rawRowText) && rawRowText.length < 100) {
+          isExplicitTnpl = true;
+        } else if (/no\s*cost\s*emi/i.test(rawRowText) && rawRowText.length < 100) {
+          isExplicitNoCost = true;
+        }
 
-          const directMatch = directText.match(BANK_MATCH_REGEX);
-          if (directMatch && directMatch[1]) {
-            detectedBankRaw = directMatch[1].trim();
-          }
+        const cleaned = cleanBankText(rawRowText);
+        if (cleaned && cleaned.length >= 2 && cleaned.length <= 45 && !isGenericNoise(cleaned)) {
+          detectedBankName = cleaned;
         }
       }
 
-      // Strategy B: Match MakeMyTrip's Step 1 Selected Bank: "Select your bank\n<Bank Name>\nCHANGE"
-      if (!detectedBankRaw && !isExplicitUpi && !isExplicitTnpl) {
-        const step1Match = bodyText.match(/Select your bank\s*\n*\s*([A-Za-z0-9\s&.-]+?)(?:\s*CHANGE|\s*Change|\s*\n\s*Select tenure|\s*Select tenure)/i);
-        if (step1Match && step1Match[1]) {
-          const cand = step1Match[1].trim();
-          if (!cand.toLowerCase().includes('below is the list') && !cand.toLowerCase().includes('search here') && cand.length < 50) {
-            detectedBankRaw = cand;
-          }
-        }
-      }
-
-      // Strategy C: Check active / selected elements in DOM
-      if (!detectedBankRaw && !isExplicitUpi && !isExplicitTnpl) {
-        const activeEls = document.querySelectorAll('[class*="selected"], [class*="active"], input[type="radio"]:checked, [aria-checked="true"]');
-        for (const el of Array.from(activeEls)) {
-          const text = (el.textContent || '').trim();
-          if (text.length < 80) {
-            const m = text.match(BANK_MATCH_REGEX);
-            if (m && m[1]) {
-              detectedBankRaw = m[1].trim();
-              break;
+      // Strategy 2: Look at Step 1 Selected Bank area in the DOM (e.g. MakeMyTrip Step 1 header)
+      if (!detectedBankName && !isExplicitUpi && !isExplicitTnpl) {
+        const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6, div, span, p, label');
+        for (const el of Array.from(allHeadings)) {
+          const txt = (el.textContent || '').trim();
+          if (/select your bank/i.test(txt) && txt.length < 120) {
+            const parent = el.closest('div, section') || el.parentElement;
+            if (parent) {
+              const pText = (parent.textContent || '').trim();
+              const m = pText.match(/Select your bank\s*\n*\s*([^\n\r]+?)(?:\s*CHANGE|\s*Change|\s*Select tenure|\s*\n)/i);
+              if (m && m[1]) {
+                const cleaned = cleanBankText(m[1]);
+                if (cleaned && cleaned.length >= 2 && cleaned.length <= 45 && !isGenericNoise(cleaned)) {
+                  detectedBankName = cleaned;
+                  break;
+                }
+              }
             }
           }
         }
       }
 
-      // Strategy D: Fallback to searching body text near "Select your bank"
-      if (!detectedBankRaw && !isExplicitUpi && !isExplicitTnpl) {
-        const nearBankMatch = bodyText.match(/(?:Select your bank|Selected bank)[\s\S]{1,100}?(American Express|Amex|Federal Bank|Kotak Mahindra Bank|Kotak|HDFC Bank|HDFC|ICICI Bank|ICICI|Axis Bank|Axis|Bajaj Finserv|Bajaj|AU Small Finance Bank|AU Bank|MakeMyTrip ICICI Bank|State Bank of India|SBI|IDFC FIRST Bank|IDFC|IndusInd Bank|Standard Chartered|Yes Bank|RBL Bank|Bank of Baroda|Canara Bank|Union Bank|Home Credit|TVS Credit)/i);
-        if (nearBankMatch && nearBankMatch[1]) {
-          detectedBankRaw = nearBankMatch[1].trim();
+      // Strategy 3: Global text matching for "Select your bank\n<ANY BANK NAME>\nCHANGE"
+      if (!detectedBankName && !isExplicitUpi && !isExplicitTnpl) {
+        const step1Match = bodyText.match(/Select your bank\s*\n*\s*([^\n\r]+?)(?:\s*CHANGE|\s*Change|\s*Select tenure|\s*\n\s*Select tenure)/i);
+        if (step1Match && step1Match[1]) {
+          const cleaned = cleanBankText(step1Match[1]);
+          if (cleaned && cleaned.length >= 2 && cleaned.length <= 45 && !isGenericNoise(cleaned)) {
+            detectedBankName = cleaned;
+          }
         }
       }
 
-      // Format canonical bank name
-      let finalBankName = 'Selected Bank';
-      if (/american express|amex/i.test(detectedBankRaw)) finalBankName = 'American Express';
-      else if (/federal/i.test(detectedBankRaw)) finalBankName = 'Federal Bank';
-      else if (/kotak/i.test(detectedBankRaw)) finalBankName = 'Kotak Mahindra Bank';
-      else if (/hdfc/i.test(detectedBankRaw)) finalBankName = 'HDFC Bank';
-      else if (/makemytrip.*icici|icici.*makemytrip/i.test(detectedBankRaw)) finalBankName = 'MakeMyTrip ICICI Bank Credit Card';
-      else if (/icici/i.test(detectedBankRaw)) finalBankName = 'ICICI Bank';
-      else if (/axis/i.test(detectedBankRaw)) finalBankName = 'Axis Bank';
-      else if (/bajaj/i.test(detectedBankRaw)) finalBankName = 'Bajaj Finserv';
-      else if (/au small|au bank/i.test(detectedBankRaw)) finalBankName = 'AU Small Finance Bank';
-      else if (/idfc/i.test(detectedBankRaw)) finalBankName = 'IDFC FIRST Bank';
-      else if (/sbi|state bank/i.test(detectedBankRaw)) finalBankName = 'State Bank of India (SBI)';
-      else if (/indusind/i.test(detectedBankRaw)) finalBankName = 'IndusInd Bank';
-      else if (/standard chartered/i.test(detectedBankRaw)) finalBankName = 'Standard Chartered Bank';
-      else if (/yes bank/i.test(detectedBankRaw)) finalBankName = 'Yes Bank';
-      else if (/rbl/i.test(detectedBankRaw)) finalBankName = 'RBL Bank';
-      else if (/baroda/i.test(detectedBankRaw)) finalBankName = 'Bank of Baroda';
-      else if (/canara/i.test(detectedBankRaw)) finalBankName = 'Canara Bank';
-      else if (/union bank/i.test(detectedBankRaw)) finalBankName = 'Union Bank of India';
-      else if (/home credit/i.test(detectedBankRaw)) finalBankName = 'Home Credit Ujjwal EMI Card';
-      else if (/tvs/i.test(detectedBankRaw)) finalBankName = 'TVS Credit';
-      else if (detectedBankRaw) finalBankName = detectedBankRaw;
+      // Strategy 4: Checked radio buttons or active list elements in payment view
+      if (!detectedBankName && !isExplicitUpi && !isExplicitTnpl) {
+        const activeEls = document.querySelectorAll('input[type="radio"]:checked, [aria-checked="true"], [class*="selected"], [class*="active"]');
+        for (const el of Array.from(activeEls)) {
+          const parentRow = el.closest('li, label, tr, div') || el;
+          const cleaned = cleanBankText(parentRow.textContent || '');
+          if (cleaned && cleaned.length >= 2 && cleaned.length <= 45 && !isGenericNoise(cleaned)) {
+            detectedBankName = cleaned;
+            break;
+          }
+        }
+      }
 
-      // Extract specific tenure and interest rates from MakeMyTrip Step 2
+      const finalBankName = detectedBankName || 'Selected Bank / Card';
+
+      // =========================================================================
+      // DYNAMIC DOM TENURE & INTEREST EXTRACTION
+      // Dynamically reads the exact tenure, monthly EMI, interest %, and total payable
+      // =========================================================================
       let emiTenureMonths = 12;
       let emiMonthlyAmount = Math.round(travelPrice / 12);
       let statedInterestAmount = Math.round(travelPrice * 0.077);
       let statedInterestRate = '14.0';
       let statedTotalPayable = travelPrice + statedInterestAmount;
 
-      // Match exact tenure lines (e.g., "12 months x ₹ 1,180" with "Incl. ₹ 1,018 interest @14.0%" and "₹ 14,165 Total payable")
-      const tenureMatches = Array.from(bodyText.matchAll(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/gi));
-      if (tenureMatches.length > 0) {
-        // Look for checked/clicked tenure or default to the 12-month or longest tenure
-        const lastTenure = tenureMatches[tenureMatches.length - 1];
-        if (lastTenure && lastTenure[1] && lastTenure[2]) {
-          emiTenureMonths = parseInt(lastTenure[1], 10);
-          emiMonthlyAmount = parseCurrencyNumber(lastTenure[2]);
-        }
-      }
+      // Extract from clicked element if user clicked a tenure card
+      const clickedRowText = clickedEl ? (clickedEl.closest('li, label, tr, div')?.textContent || '') : '';
+      const clickedTenureMatch = clickedRowText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+      
+      if (clickedTenureMatch && clickedTenureMatch[1] && clickedTenureMatch[2]) {
+        emiTenureMonths = parseInt(clickedTenureMatch[1], 10);
+        emiMonthlyAmount = parseCurrencyNumber(clickedTenureMatch[2]);
 
-      // Scrape interest line (e.g. "Incl. ₹ 1,018 interest @14.0%")
-      const interestMatches = Array.from(bodyText.matchAll(/Incl\.\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*interest\s*@\s*([0-9.]+)%/gi));
-      if (interestMatches.length > 0) {
-        const lastInterest = interestMatches[interestMatches.length - 1];
-        if (lastInterest && lastInterest[1] && lastInterest[2]) {
-          statedInterestAmount = parseCurrencyNumber(lastInterest[1]);
-          statedInterestRate = lastInterest[2];
+        const intMatch = clickedRowText.match(/Incl\.\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*interest\s*(?:@\s*([0-9.]+)%)?/i);
+        if (intMatch && intMatch[1]) {
+          statedInterestAmount = parseCurrencyNumber(intMatch[1]);
+          if (intMatch[2]) statedInterestRate = intMatch[2];
         }
-      }
 
-      // Scrape total payable line (e.g. "₹ 14,165 Total payable")
-      const totalPayableMatches = Array.from(bodyText.matchAll(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*Total payable/gi));
-      if (totalPayableMatches.length > 0) {
-        const lastTotal = totalPayableMatches[totalPayableMatches.length - 1];
-        if (lastTotal && lastTotal[1]) {
-          statedTotalPayable = parseCurrencyNumber(lastTotal[1]);
+        const totMatch = clickedRowText.match(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*Total payable/i);
+        if (totMatch && totMatch[1]) {
+          statedTotalPayable = parseCurrencyNumber(totMatch[1]);
+        } else {
+          statedTotalPayable = (emiMonthlyAmount * emiTenureMonths);
         }
       } else {
-        statedTotalPayable = travelPrice + statedInterestAmount;
+        // Find all tenures listed on the page
+        const tenureMatches = Array.from(bodyText.matchAll(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/gi));
+        if (tenureMatches.length > 0) {
+          const lastTenure = tenureMatches[tenureMatches.length - 1];
+          if (lastTenure && lastTenure[1] && lastTenure[2]) {
+            emiTenureMonths = parseInt(lastTenure[1], 10);
+            emiMonthlyAmount = parseCurrencyNumber(lastTenure[2]);
+          }
+        }
+
+        const interestMatches = Array.from(bodyText.matchAll(/Incl\.\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*interest\s*@\s*([0-9.]+)%/gi));
+        if (interestMatches.length > 0) {
+          const lastInterest = interestMatches[interestMatches.length - 1];
+          if (lastInterest && lastInterest[1] && lastInterest[2]) {
+            statedInterestAmount = parseCurrencyNumber(lastInterest[1]);
+            statedInterestRate = lastInterest[2];
+          }
+        }
+
+        const totalPayableMatches = Array.from(bodyText.matchAll(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*Total payable/gi));
+        if (totalPayableMatches.length > 0) {
+          const lastTotal = totalPayableMatches[totalPayableMatches.length - 1];
+          if (lastTotal && lastTotal[1]) {
+            statedTotalPayable = parseCurrencyNumber(lastTotal[1]);
+          }
+        } else {
+          statedTotalPayable = travelPrice + statedInterestAmount;
+        }
       }
 
       // Deterministic calculation of hidden GST on interest (18%) + statutory bank processing fee (₹199 + 18% GST = ₹235)
@@ -313,7 +358,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         },
         {
           id: 'nocost-travel-emi',
-          bankOrCard: 'No-Cost EMI (Bajaj Finserv / AU Bank)',
+          bankOrCard: `No-Cost EMI (${finalBankName !== 'Selected Bank / Card' ? finalBankName : 'Partner Banks'})`,
           description: `${emiTenureMonths} Months installment plan with upfront interest offset`,
           effectiveBenefit: `₹${Math.round(travelPrice / emiTenureMonths).toLocaleString('en-IN')}/mo + ₹${Math.round(199 + (travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18))} GST drag`,
           rating: 'AVOID',
