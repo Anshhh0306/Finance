@@ -1,5 +1,12 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: 'CommitGuard | Embedded Pre-Commitment Interceptor',
@@ -13,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased selection:bg-brand-500 selection:text-white">
+    <html lang="en" className={`dark ${inter.variable}`}>
+      <body className={`${inter.className} antialiased selection:bg-brand-500 selection:text-white`}>
         <div className="relative min-h-screen flex flex-col">
           {/* Subtle ambient lighting effects */}
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
