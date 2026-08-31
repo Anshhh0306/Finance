@@ -60,7 +60,11 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
   let reactRoot: ReactDOM.Root | null = null;
 
   // Mount the CommitGuard Modal inside Shadow Root
-  function injectShadowModal(productPrice: number, onCompleteCallback: () => void) {
+  function injectShadowModal(
+    productPrice: number,
+    onProceedCallback: () => void,
+    onCancelCallback: () => void
+  ) {
     if (document.getElementById(COMMITGUARD_HOST_ID)) {
       return; // Already open
     }
@@ -116,7 +120,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     // 6. Mount React component inside Shadow Root
     reactRoot = ReactDOM.createRoot(mountPoint);
 
-    const handleDismiss = () => {
+    const cleanUpModal = () => {
       if (reactRoot) {
         reactRoot.unmount();
         reactRoot = null;
@@ -125,14 +129,23 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         hostContainer.parentNode.removeChild(hostContainer);
         hostContainer = null;
       }
-      onCompleteCallback();
+    };
+
+    const handleProceed = () => {
+      cleanUpModal();
+      onProceedCallback();
+    };
+
+    const handleCancel = () => {
+      cleanUpModal();
+      onCancelCallback();
     };
 
     reactRoot.render(
       <ExtensionCommitGuardModal
         productPrice={productPrice}
-        onProceedAndClose={handleDismiss}
-        onAbort={handleDismiss}
+        onProceedAndContinue={handleProceed}
+        onCancelStayOnPage={handleCancel}
       />
     );
 
@@ -233,12 +246,19 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
       const price = extractCartAmount();
 
-      injectShadowModal(price, () => {
-        // Mark as authorized so the next click goes through to host site
-        targetEl.setAttribute('data-commitguard-authorized', 'true');
-        console.log('🛡️ CommitGuard Authorized: Continuing original payment action');
-        targetEl.click();
-      });
+      injectShadowModal(
+        price,
+        // On Proceed: mark as authorized and let the click advance to next page
+        () => {
+          targetEl.setAttribute('data-commitguard-authorized', 'true');
+          console.log('🛡️ CommitGuard Authorized: Continuing original payment action');
+          targetEl.click();
+        },
+        // On Cancel: do NOT mark authorized, do NOT click target, stay on current page
+        () => {
+          console.log('🛡️ CommitGuard Cancelled: User remains on current page to modify terms');
+        }
+      );
     },
     true // CAPTURING PHASE: Guarantees we execute before Flipkart / Amazon handlers
   );

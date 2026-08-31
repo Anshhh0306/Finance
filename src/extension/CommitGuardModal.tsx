@@ -8,24 +8,29 @@ import {
   ShieldCheck,
   Zap,
   ArrowRight,
-  Lock,
+  RotateCcw,
 } from 'lucide-react';
 import { calculateNoCostEmiDrag } from '../lib/financial-engine';
 
 export interface ExtensionModalProps {
   productPrice?: number;
   productName?: string;
-  onProceedAndClose: () => void;
-  onAbort?: () => void;
+  onProceedAndContinue: () => void; // Proceeds to host site action (e.g. Next page / Card details)
+  onCancelStayOnPage: () => void;   // Closes modal and keeps user on CURRENT page without navigation
 }
 
 export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
-  productPrice = 80000,
-  productName = 'Cart Product (12M No-Cost EMI)',
-  onProceedAndClose,
-  onAbort,
+  productPrice = 70196,
+  productName = 'Flipkart Acer Aspire Laptop (No-Cost EMI)',
+  onProceedAndContinue,
+  onCancelStayOnPage,
 }) => {
-  const [tenure, setTenure] = useState<number>(12);
+  // Discrete snap tenure points: 3, 6, 9, 12, 18, 24 months
+  const TENURE_OPTIONS = [3, 6, 9, 12, 18, 24];
+  // Map index [0..5] for perfect proportional visual slider placement
+  const [sliderIndex, setSliderIndex] = useState<number>(3); // Default to 12 months (index 3)
+  const tenure = TENURE_OPTIONS[sliderIndex];
+
   const [isProofOpen, setIsProofOpen] = useState(false);
   const processingFee = 199;
   const nominalRate = 15.0;
@@ -47,12 +52,13 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
     <div
       className="commitguard-backdrop"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onProceedAndClose();
+        // Clicking outside cancels and stays on page
+        if (e.target === e.currentTarget) onCancelStayOnPage();
       }}
     >
       <div className="commitguard-card">
         
-        {/* Header Bar */}
+        {/* Header Bar with explicit Cancel / Stay on page 'X' */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-amber-100 bg-amber-50/90">
           <div className="flex items-center gap-2.5 text-amber-950 font-bold text-base sm:text-lg">
             <div className="p-1.5 rounded-lg bg-amber-500 text-white shadow-sm">
@@ -67,10 +73,11 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
               <span>&lt;1.2ms On-Device Engine</span>
             </span>
 
+            {/* 'X' Close button stays on page */}
             <button
-              onClick={onProceedAndClose}
-              title="Close & Proceed (Escape)"
-              aria-label="Close"
+              onClick={onCancelStayOnPage}
+              title="Cancel & Stay on Page (Escape)"
+              aria-label="Cancel"
               className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors"
             >
               <X className="w-5 h-5" />
@@ -87,7 +94,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
               ₹{productPrice.toLocaleString('en-IN')} Checkout Halted
             </h3>
             <p className="text-xs text-slate-500">
-              CommitGuard intercepted your <strong>0% No-Cost EMI</strong> checkout selection before your credit line is committed.
+              CommitGuard intercepted your <strong>No-Cost EMI</strong> checkout selection before your monthly credit limit is locked.
             </p>
           </div>
 
@@ -115,7 +122,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                 ₹{mathResult.totalHiddenFriction.toLocaleString('en-IN')}
               </div>
               <div className="text-[10px] text-amber-800/80 mt-0.5">
-                ₹{processingFee} fee + ₹{mathResult.totalGstOnInterest.toFixed(0)} GST
+                ₹{processingFee} fee + ₹{mathResult.totalGstOnInterest.toFixed(2)} GST
               </div>
             </div>
 
@@ -145,14 +152,14 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                 <span className="w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" />
                 <span>
                   <strong className="text-red-700 font-bold">19.93% Effective APR Reality: </strong>
-                  Even though the retailer discounts the interest upfront, the non-refundable ₹{processingFee} bank fee and statutory 18% GST turn 0% into <strong>{mathResult.effectiveAnnualPercentageRate}% Effective APR</strong>.
+                  Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into <strong>{mathResult.effectiveAnnualPercentageRate}% Effective APR</strong>.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" />
                 <span>
                   <strong className="text-slate-900 font-bold">Unrecoverable Monthly Drag: </strong>
-                  Every month, your credit card statement bills statutory GST on the interest component. You incur a guaranteed <strong>₹{mathResult.totalHiddenFriction.toLocaleString('en-IN')}</strong> in pure administrative leak.
+                  Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed <strong>₹{mathResult.totalHiddenFriction.toLocaleString('en-IN')}</strong> in pure administrative leak.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
@@ -165,40 +172,46 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
             </ul>
           </div>
 
-          {/* Interactive Slider to Adjust EMI Tenure */}
+          {/* Perfectly Aligned Discrete Slider with Clickable Steps */}
           <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3">
             <div className="flex items-center justify-between text-xs">
               <label htmlFor="ext-tenure-slider" className="font-bold text-slate-900 flex items-center gap-1.5">
                 <Sliders className="w-4 h-4 text-emerald-600" />
                 <span>Adjust EMI Tenure: <strong className="text-emerald-700 text-sm">{tenure} Months</strong></span>
               </label>
-              <span className="text-[11px] text-slate-500 font-mono">Snap options: 3m - 24m</span>
+              <span className="text-[11px] text-slate-500 font-mono">Click any tenure step</span>
             </div>
 
-            <input
-              id="ext-tenure-slider"
-              type="range"
-              min={3}
-              max={24}
-              step={3}
-              value={tenure}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                const validPoints = [3, 6, 9, 12, 24];
-                const closest = validPoints.reduce((prev, curr) =>
-                  Math.abs(curr - val) < Math.abs(prev - val) ? curr : prev
-                );
-                setTenure(closest);
-              }}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
-            />
+            {/* Slider with exact steps mapping 0 to 5 for TENURE_OPTIONS */}
+            <div className="relative pt-1 pb-1">
+              <input
+                id="ext-tenure-slider"
+                type="range"
+                min={0}
+                max={TENURE_OPTIONS.length - 1}
+                step={1}
+                value={sliderIndex}
+                onChange={(e) => setSliderIndex(Number(e.target.value))}
+                className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 focus:outline-none"
+              />
 
-            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
-              <span className={tenure === 3 ? 'text-emerald-700 font-bold' : ''}>3m</span>
-              <span className={tenure === 6 ? 'text-emerald-700 font-bold' : ''}>6m</span>
-              <span className={tenure === 9 ? 'text-emerald-700 font-bold' : ''}>9m</span>
-              <span className={tenure === 12 ? 'text-emerald-700 font-bold' : ''}>12m</span>
-              <span className={tenure === 24 ? 'text-emerald-700 font-bold' : ''}>24m</span>
+              {/* Exact 1-to-1 Column Aligned Step Labels */}
+              <div className="grid grid-cols-6 pt-2 text-center text-xs font-mono">
+                {TENURE_OPTIONS.map((opt, idx) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setSliderIndex(idx)}
+                    className={`py-1 px-1 rounded transition-colors ${
+                      sliderIndex === idx
+                        ? 'text-emerald-700 font-extrabold bg-emerald-50 ring-1 ring-emerald-300'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    {opt}m
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -240,21 +253,23 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
             )}
           </div>
 
-          {/* Action Button: Close & Proceed */}
+          {/* Action Buttons: Cancel (STAYS ON CURRENT PAGE) vs Proceed (GOES FORWARD) */}
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
             <button
-              onClick={onAbort || onProceedAndClose}
-              className="w-1/2 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors"
+              id="btn-cancel-stay"
+              onClick={onCancelStayOnPage}
+              className="w-1/2 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition-colors flex items-center justify-center gap-1.5 border border-slate-300 shadow-sm"
             >
-              Cancel & Modify Terms
+              <RotateCcw className="w-3.5 h-3.5 text-slate-600" />
+              <span>Cancel & Modify Terms</span>
             </button>
 
             <button
               id="btn-close-proceed"
-              onClick={onProceedAndClose}
+              onClick={onProceedAndContinue}
               className="w-1/2 py-3 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
             >
-              <span>Close & Proceed</span>
+              <span>I Understand, Proceed</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
