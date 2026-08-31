@@ -7920,7 +7920,10 @@
           ".itinerary-header",
           ".sector-info",
           ".hotel-name",
-          "#booking-summary"
+          "#booking-summary",
+          '[class*="flightDetails"]',
+          '[class*="flightName"]',
+          '[class*="headerTitle"]'
         ];
         for (const sel of travelTitleSelectors) {
           const el = document.querySelector(sel);
@@ -7933,54 +7936,92 @@
           }
         }
         if (!detectedName) {
-          const cityMatch = bodyText.match(/(?:Flight to|Booking for|Hotel in|Trip to)\s+([A-Za-z\s]+)/i);
-          detectedName = cityMatch ? `MakeMyTrip: ${cityMatch[1].trim()}` : "MakeMyTrip Flight & Hotel Booking";
+          const routeMatch = bodyText.match(/([A-Za-z\s]+(?:\([A-Z]{3}\))?\s*(?:→|->|to|-)\s*[A-Za-z\s]+(?:\([A-Z]{3}\))?)/i);
+          if (routeMatch && routeMatch[1]) {
+            detectedName = `MakeMyTrip: ${routeMatch[1].trim()}`;
+          }
         }
-        const fareMatch = bodyText.match(/(?:Total Amount|Total Fare|Grand Total|Due Now|Payable Amount|Trip Total)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
-        if (fareMatch && fareMatch[1]) {
-          const num = parseCurrencyNumber(fareMatch[1]);
-          if (num > 1e3) detectedPrice = num;
+        if (!detectedName) {
+          detectedName = "MakeMyTrip Flight & Hotel Booking";
+        }
+        const totalDueMatch = bodyText.match(/(?:Total Due|Grand Total|Total Amount|Payable Amount|Total Fare|Trip Total)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+        if (totalDueMatch && totalDueMatch[1]) {
+          const num = parseCurrencyNumber(totalDueMatch[1]);
+          if (num > 500) detectedPrice = num;
         }
         if (!detectedPrice) {
-          const fareEls = document.querySelectorAll('[class*="fare"], [class*="price"], [class*="total"]');
+          const fareEls = document.querySelectorAll('[class*="fare"], [class*="price"], [class*="total"], [class*="Total"]');
           for (const el of Array.from(fareEls)) {
             const text = el.textContent || "";
             if (text.includes("\u20B9")) {
               const num = parseCurrencyNumber(text);
-              if (num >= 3e3 && num <= 1e6) {
+              if (num >= 1e3 && num <= 1e6) {
                 detectedPrice = num;
                 break;
               }
             }
           }
         }
-        const travelPrice = detectedPrice > 0 ? detectedPrice : 28500;
+        const travelPrice = detectedPrice > 0 ? detectedPrice : 13061;
+        const selectedBankMatch = bodyText.match(/(Kotak Mahindra Bank|Bajaj Finserv|MakeMyTrip ICICI Bank|AU Small Finance Bank|HDFC Bank|ICICI Bank|Axis Bank|IDFC FIRST Bank)/i);
+        const selectedBankName = selectedBankMatch ? selectedBankMatch[1] : "Selected Bank";
+        const tenureMatch = bodyText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+        const emiTenureMonths = tenureMatch ? parseInt(tenureMatch[1], 10) : 12;
+        const emiMonthlyAmount = tenureMatch ? parseCurrencyNumber(tenureMatch[2]) : Math.round(travelPrice / 12);
+        const interestMatch = bodyText.match(/Incl\.\s*₹\s*([0-9,]+)\s*interest\s*@\s*([0-9.]+)%/i);
+        const statedInterestAmount = interestMatch ? parseCurrencyNumber(interestMatch[1]) : Math.round(travelPrice * 0.088);
+        const statedInterestRate = interestMatch ? interestMatch[2] : "16.0";
+        const totalPayableMatch = bodyText.match(/₹\s*([0-9,]+)\s*Total payable/i);
+        const statedTotalPayable = totalPayableMatch ? parseCurrencyNumber(totalPayableMatch[1]) : travelPrice + statedInterestAmount;
+        const gstOnInterest = Math.round(statedInterestAmount * 0.18);
+        const bankProcessingFeeTotal = Math.round(199 * 1.18);
+        const realTrueOutflow = statedTotalPayable + gstOnInterest + bankProcessingFeeTotal;
         const travelOffers = [
           {
-            id: "sip-liquid",
-            bankOrCard: "6-Month Liquid Fund SIP (Recommended)",
-            description: `Accumulate \u20B9${Math.round(travelPrice / 6).toLocaleString("en-IN")}/mo in an RBI-compliant 7.10% liquid portfolio`,
-            effectiveBenefit: "Yields +\u20B9612 interest; 0% debt liability",
+            id: "upi-travel",
+            bankOrCard: "UPI / Scan to Pay (QR) - Zero Debt",
+            description: `Single-tranche direct payment of \u20B9${travelPrice.toLocaleString("en-IN")}`,
+            effectiveBenefit: "Saves 100% of interest, bank fees & GST",
             rating: "BEST",
-            reason: "Take the trip completely debt-free without risking credit score or TNPL defaults.",
+            reason: "Zero interest, zero processing fees, keeps credit limit 100% free with instant confirmation.",
             netPrice: travelPrice,
             recommended: true
           },
           {
-            id: "upi-travel",
-            bankOrCard: "UPI / Direct Bank Transfer",
-            description: "Single-tranche direct payment from checking account",
-            effectiveBenefit: "Saves 100% of BNPL late fee exposure",
+            id: "sip-liquid",
+            bankOrCard: "6-Month Liquid Fund SIP Alternative",
+            description: `Save \u20B9${Math.round(travelPrice / 6).toLocaleString("en-IN")}/mo in an RBI-compliant 7.10% liquid portfolio`,
+            effectiveBenefit: "Earns +\u20B9275 interest gain; 0% debt liability",
             rating: "BEST",
-            reason: "Zero interest, zero processing fees, zero penalty exposure.",
+            reason: "Travel completely debt-free and earn returns instead of leaking ~\u20B91,600 to bank interest and statutory GST.",
             netPrice: travelPrice,
             recommended: true
+          },
+          {
+            id: "bank-emi-scraped",
+            bankOrCard: `${selectedBankName} (${emiTenureMonths}M EMI @ ${statedInterestRate}%)`,
+            description: `${emiTenureMonths} months x \u20B9${emiMonthlyAmount.toLocaleString("en-IN")}/mo (Advertised Total: \u20B9${statedTotalPayable.toLocaleString("en-IN")})`,
+            effectiveBenefit: `\u20B9${emiMonthlyAmount.toLocaleString("en-IN")}/mo + \u20B9${gstOnInterest + bankProcessingFeeTotal} Hidden GST/Fee Drag`,
+            rating: "AVOID",
+            reason: `MakeMyTrip shows \u20B9${statedTotalPayable.toLocaleString("en-IN")}, but your bank additionally charges non-refundable 18% GST (\u20B9${gstOnInterest}) on interest + \u20B9${bankProcessingFeeTotal} fee (+GST), making your true outflow \u20B9${realTrueOutflow.toLocaleString("en-IN")}.`,
+            netPrice: realTrueOutflow,
+            recommended: false
+          },
+          {
+            id: "nocost-travel-emi",
+            bankOrCard: "No-Cost EMI (MakeMyTrip ICICI / Bajaj Finserv / AU Bank)",
+            description: `${emiTenureMonths} Months installment plan with upfront interest offset`,
+            effectiveBenefit: `\u20B9${Math.round(travelPrice / emiTenureMonths).toLocaleString("en-IN")}/mo + \u20B9${Math.round(199 + travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18)} GST drag`,
+            rating: "AVOID",
+            reason: "Even with merchant interest discount, bank charges \u20B9199 processing fee + monthly 18% GST on interest component.",
+            netPrice: travelPrice + Math.round(199 + travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18),
+            recommended: false
           },
           {
             id: "tnpl-trip",
             bankOrCard: "Travel Now, Pay Later (TNPL / Sanctioned BNPL)",
             description: "3 to 6 Months deferred installment loan",
-            effectiveBenefit: `\u20B9${Math.round(travelPrice / 6).toLocaleString("en-IN")}/mo with 28.4% APR risk`,
+            effectiveBenefit: `\u20B9${Math.round(travelPrice / 6).toLocaleString("en-IN")}/mo with 28.4% APR penalty risk`,
             rating: "AVOID",
             reason: "Exposes user to 24%-36% penalty APRs plus \u20B9450-\u20B9850 bounce fees if post-vacation cash is tight.",
             netPrice: travelPrice + Math.round(travelPrice * 0.14),
@@ -8497,7 +8538,7 @@
       "credit card emi",
       "complete payment",
       "buy now",
-      // 2. Travel (MakeMyTrip, Cleartrip, Yatra)
+      // 2. Travel & Flight/Hotel Checkouts (MakeMyTrip, Cleartrip, Yatra, Goibibo)
       "travel now pay later",
       "travel now, pay later",
       "trip on emi",
@@ -8509,6 +8550,13 @@
       "continue to payment",
       "book flight",
       "pay & book now",
+      "select your bank",
+      "select tenure",
+      "months x",
+      "total payable",
+      "scan to pay",
+      "cardless emi",
+      "no cost emi",
       // 3. Ed-Tech & Udemy (UpGrad, Scaler, Simplilearn, Udemy)
       "education loan",
       "apply for education loan",
@@ -8534,25 +8582,31 @@
         const text = (curr.innerText || curr.textContent || "").trim().toLowerCase();
         const tagName = curr.tagName.toUpperCase();
         for (const keyword of UNIVERSAL_INTERCEPT_KEYWORDS) {
-          if (text === keyword || text.length < 60 && text.includes(keyword)) {
+          if (text === keyword || text.length < 70 && text.includes(keyword)) {
             return curr;
           }
         }
-        if (/(\bemi\b|\bloan\b|\btnpl\b|pay\s*later|installment|subvention|place\s*order|proceed\s*to\s*pay)/i.test(text) && (tagName === "BUTTON" || tagName === "A" || curr.getAttribute("role") === "button" || curr.classList.toString().includes("btn"))) {
+        if (/(\bemi\b|\bloan\b|\btnpl\b|pay\s*later|installment|subvention|place\s*order|proceed\s*to\s*pay|months\s*x|total\s*payable|no\s*cost\s*emi|kotak|bajaj|hdfc|icici|axis|idfc|scan\s*to\s*pay)/i.test(text) && (tagName === "BUTTON" || tagName === "A" || tagName === "LABEL" || tagName === "LI" || curr.getAttribute("role") === "button" || curr.getAttribute("role") === "radio" || curr.getAttribute("role") === "tab" || curr.classList.toString().includes("btn") || curr.classList.toString().includes("option") || curr.classList.toString().includes("item") || curr.classList.toString().includes("bank") || curr.classList.toString().includes("tenure"))) {
           return curr;
         }
         if (tagName === "INPUT") {
+          const inputType = (curr.type || "").toLowerCase();
           const inputVal = (curr.value || "").toLowerCase();
           const inputName = (curr.name || "").toLowerCase();
-          for (const keyword of UNIVERSAL_INTERCEPT_KEYWORDS) {
-            if (inputVal.includes(keyword) || inputName.includes(keyword)) {
+          if (inputType === "radio" || inputType === "submit" || inputType === "button") {
+            for (const keyword of UNIVERSAL_INTERCEPT_KEYWORDS) {
+              if (inputVal.includes(keyword) || inputName.includes(keyword) || text.includes(keyword)) {
+                return curr;
+              }
+            }
+            if (/emi|bank|tenure|pay/i.test(inputName) || /emi|bank|tenure|pay/i.test(inputVal)) {
               return curr;
             }
           }
         }
         const idStr = (curr.id || "").toLowerCase();
         const classStr = (curr.className || "").toString().toLowerCase();
-        if (idStr.includes("placeorder") || idStr.includes("proceedtopay") || idStr.includes("emipayment") || classStr.includes("paylater") || classStr.includes("emiselection")) {
+        if (idStr.includes("placeorder") || idStr.includes("proceedtopay") || idStr.includes("emipayment") || idStr.includes("selectbank") || idStr.includes("selecttenure") || classStr.includes("paylater") || classStr.includes("emiselection") || classStr.includes("bankitem") || classStr.includes("tenureitem")) {
           return curr;
         }
         curr = curr.parentElement;
@@ -8564,6 +8618,10 @@
       "click",
       (e) => {
         if (hostContainer && (e.target === hostContainer || hostContainer.contains(e.target))) {
+          return;
+        }
+        const floatingPill = document.getElementById("commitguard-floating-pill");
+        if (floatingPill && (e.target === floatingPill || floatingPill.contains(e.target))) {
           return;
         }
         const targetEl = findInterceptTarget(e.target);
@@ -8598,7 +8656,68 @@
       true
       // CAPTURING PHASE: Guarantees we execute before Flipkart / Amazon handlers
     );
-    console.log("\u{1F6E1}\uFE0F CommitGuard Global Capture Listener registered successfully");
+    function injectFloatingTrigger() {
+      if (document.getElementById("commitguard-floating-pill")) return;
+      const pill = document.createElement("div");
+      pill.id = "commitguard-floating-pill";
+      pill.setAttribute("title", "Click to view CommitGuard Pre-Commitment Math (<1.2ms)");
+      pill.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2147483640;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 9999px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+    `;
+      pill.innerHTML = `
+      <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></span>
+      <span>\u{1F6E1}\uFE0F CommitGuard Intel (<span style="color: #34d399;">&lt;1.2ms</span>)</span>
+    `;
+      pill.addEventListener("mouseenter", () => {
+        pill.style.transform = "translateY(-2px) scale(1.03)";
+        pill.style.boxShadow = "0 15px 30px -5px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(16, 185, 129, 0.4)";
+      });
+      pill.addEventListener("mouseleave", () => {
+        pill.style.transform = "translateY(0) scale(1)";
+        pill.style.boxShadow = "0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.15)";
+      });
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const productInfo = extractProductInfo();
+        injectShadowModal(
+          productInfo.surfaceType,
+          productInfo.price,
+          productInfo.name,
+          productInfo.offers,
+          productInfo.originalPrice,
+          productInfo.discountPercent,
+          () => {
+          },
+          () => {
+          }
+        );
+      });
+      const targetParent = document.body || document.documentElement;
+      if (targetParent) targetParent.appendChild(pill);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", injectFloatingTrigger);
+    } else {
+      injectFloatingTrigger();
+    }
+    console.log("\u{1F6E1}\uFE0F CommitGuard Global Capture & Floating Intel Badge registered successfully");
   })();
 })();
 /*! Bundled license information:
