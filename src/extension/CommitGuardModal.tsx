@@ -192,12 +192,31 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
   const processingFee = 199;
   const nominalRate = 15.0;
 
+  // Helper for bank-accurate APR and processing fees
+  function getBankRates(bankName: string, isDebit = false) {
+    if (/american express|amex/i.test(bankName)) return { apr: 14.0, fee: 235 };
+    if (/federal/i.test(bankName)) return { apr: isDebit ? 16.0 : 13.5, fee: 199 };
+    if (/onecard/i.test(bankName)) return { apr: 14.0, fee: 199 };
+    if (/kotak/i.test(bankName)) return { apr: isDebit ? 16.0 : 14.0, fee: 199 };
+    if (/sbi|state bank/i.test(bankName)) return { apr: 14.5, fee: 199 };
+    if (/hdfc/i.test(bankName)) return { apr: isDebit ? 16.0 : 15.0, fee: 235 };
+    if (/icici/i.test(bankName)) return { apr: isDebit ? 16.0 : 15.0, fee: 235 };
+    if (/axis/i.test(bankName)) return { apr: 15.0, fee: 235 };
+    if (/bobcard|bob/i.test(bankName)) return { apr: 16.0, fee: 199 };
+    if (/au small|au bank/i.test(bankName)) return { apr: 15.5, fee: 199 };
+    if (/idfc/i.test(bankName)) return { apr: 14.5, fee: 199 };
+    if (/indusind/i.test(bankName)) return { apr: 15.5, fee: 235 };
+    if (/bajaj/i.test(bankName)) return { apr: 0.0, fee: 199 };
+    if (/tvs/i.test(bankName)) return { apr: 18.0, fee: 199 };
+    return { apr: isDebit ? 16.0 : 15.0, fee: 199 };
+  }
+
   // Handler to apply simulated platform-specific payment method
   const handleApplyPlatformSimulation = (categoryId: string, bank: string, tenureMonths: number) => {
     // If user clicked a bank while in a non-bank category (like UPI or Pay Later), auto-switch to Bank EMI
     let effectiveCategory = categoryId;
     if (
-      (categoryId === 'UPI' || categoryId === 'FLIPKART_PAY_LATER' || categoryId === 'AXIS_CASHBACK' || categoryId === 'SCAN_TO_PAY' || categoryId === 'AMAZON_UPI' || categoryId === 'UPI_DIRECT' || categoryId === 'COOL_OFF_FUND') &&
+      (categoryId === 'UPI' || categoryId === 'FLIPKART_PAY_LATER' || categoryId === 'AXIS_CASHBACK' || categoryId === 'SCAN_TO_PAY' || categoryId === 'AMAZON_UPI' || categoryId === 'UPI_DIRECT' || categoryId === 'COOL_OFF_FUND' || categoryId === 'UPFRONT_CASH') &&
       bank !== customBank
     ) {
       if (surfaceType === 'FLIPKART') effectiveCategory = 'BANK_EMI';
@@ -265,18 +284,19 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         return;
       }
       if (effectiveCategory === 'BANK_EMI') {
-        const interest = Math.round(productPrice * 0.15 * (tenureMonths / 12));
+        const bankRate = getBankRates(bank, false);
+        const interest = Math.round(productPrice * (bankRate.apr / 100) * (tenureMonths / 12));
         const gst = Math.round(interest * 0.18);
-        const fee = 235;
+        const fee = bankRate.fee;
         const total = productPrice + interest + gst + fee;
         const monthly = Math.round((productPrice + interest) / tenureMonths);
         const offer: ScrapedOffer = {
           id: `sim-fk-bankemi-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M Credit Card EMI @ 15.0%)`,
+          bankOrCard: `${bank} (${tenureMonths}M Credit Card EMI @ ${bankRate.apr.toFixed(1)}%)`,
           description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised: ₹${(productPrice + interest).toLocaleString('en-IN')})`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gst + fee).toLocaleString('en-IN')} Hidden Drag`,
           rating: 'AVOID',
-          reason: `Long-tenure EMIs lock credit limit and incur compounding 15.0% APR + 18% non-refundable GST (₹${gst}) on interest + ₹${fee} fee.`,
+          reason: `Long-tenure EMIs lock credit limit and incur compounding ${bankRate.apr.toFixed(1)}% APR + 18% non-refundable GST (₹${gst}) on interest + ₹${fee} fee.`,
           netPrice: total,
           recommended: false,
           isSelected: true,
@@ -343,15 +363,16 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
       }
       if (effectiveCategory === 'CREDIT_EMI' || effectiveCategory === 'DEBIT_EMI') {
         const isDebit = effectiveCategory === 'DEBIT_EMI';
-        const apr = isDebit ? 16.0 : 14.0;
+        const bankRate = getBankRates(bank, isDebit);
+        const apr = bankRate.apr;
         const interest = Math.round(productPrice * (apr / 100) * (tenureMonths / 12));
         const gst = Math.round(interest * 0.18);
-        const fee = 235;
+        const fee = bankRate.fee;
         const total = productPrice + interest + gst + fee;
         const monthly = Math.round((productPrice + interest) / tenureMonths);
         const offer: ScrapedOffer = {
           id: `sim-tr-emi-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M ${isDebit ? 'Debit Card' : 'Credit Card'} EMI @ ${apr}%)`,
+          bankOrCard: `${bank} (${tenureMonths}M ${isDebit ? 'Debit Card' : 'Credit Card'} EMI @ ${apr.toFixed(1)}%)`,
           description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised Total: ₹${(productPrice + interest).toLocaleString('en-IN')})`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gst + fee).toLocaleString('en-IN')} Hidden Drag`,
           rating: 'AVOID',
@@ -365,16 +386,19 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         return;
       }
       if (effectiveCategory === 'CARDLESS_EMI') {
-        const estGst = Math.round(199 + (productPrice * 0.15 * (tenureMonths / 12) * 0.18));
-        const monthly = Math.round(productPrice / tenureMonths);
+        const isBajaj = /bajaj/i.test(bank);
+        const estInterest = isBajaj ? 0 : Math.round(productPrice * 0.18 * (tenureMonths / 12));
+        const estGst = Math.round(199 + (estInterest * 0.18));
+        const monthly = Math.round((productPrice + estInterest) / tenureMonths);
+        const total = productPrice + estInterest + estGst;
         const offer: ScrapedOffer = {
           id: `sim-tr-cardless-${bank}-${tenureMonths}`,
           bankOrCard: `${bank} (${tenureMonths}M Cardless EMI Network)`,
-          description: `${tenureMonths} Months installment plan`,
+          description: `${tenureMonths} Months installment plan (₹${monthly.toLocaleString('en-IN')}/mo)`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
           rating: 'AVOID',
           reason: `Requires active cardless line and bills ₹199 convenience fee + monthly 18% GST.`,
-          netPrice: productPrice + estGst,
+          netPrice: total,
           recommended: false,
           isSelected: true,
         };
@@ -456,11 +480,12 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
       }
       if (effectiveCategory === 'NO_COST') {
         const monthly = Math.round(productPrice / tenureMonths);
-        const estGst = Math.round(199 + (productPrice * 0.15 * (tenureMonths / 12) * 0.18));
+        const estInterest = Math.round(productPrice * 0.15 * (tenureMonths / 12));
+        const estGst = Math.round(199 + (estInterest * 0.18));
         const offer: ScrapedOffer = {
           id: `sim-amz-nocost-${bank}-${tenureMonths}`,
           bankOrCard: `${bank} (${tenureMonths}M No-Cost EMI)`,
-          description: `${tenureMonths} Months installment plan`,
+          description: `${tenureMonths} Months installment plan (₹${monthly.toLocaleString('en-IN')}/mo)`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
           rating: 'AVOID',
           reason: `Charges ₹199 bank fee + non-refundable 18% GST on monthly interest.`,
