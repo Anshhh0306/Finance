@@ -9,53 +9,49 @@ import ReactDOM from 'react-dom/client';
 import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
 (() => {
-  console.log('🛡️ CommitGuard Content Script Active: Initializing DOM Observers');
+  console.log('🛡️ CommitGuard Content Script Active on:', window.location.href);
 
   const COMMITGUARD_HOST_ID = 'commitguard-extension-root';
 
-  // Target selectors for Amazon & Flipkart checkout, EMI radio choices, and payment buttons
-  const CHECKOUT_SELECTORS = [
-    // Amazon selectors
-    'input[name="proceedToRetailCheckout"]',
-    '#placeYourOrder',
-    'input[name="placeYourOrder1"]',
-    '#submitOrderButtonId',
-    'input[value*="EMI"]',
-    'input[value*="emi"]',
-    '[data-action="select-emi-tenure"]',
-    // Flipkart selectors
-    'button._2KpZ6l._2ObVJD._3AWRqL',
-    'button:contains("Place Order")',
-    'button:contains("PLACE ORDER")',
-    'button:contains("PROCEED TO PAY")',
-    'label:has(input[type="radio"][name*="EMI"])',
-    'label:has(input[type="radio"][name*="emi"])',
-    // Generic payment intent triggers
-    'button[id*="place-order"]',
-    'button[id*="pay-now"]',
-  ];
-
-  // Helper to extract cart value from page DOM
+  // Helper to extract cart value from Flipkart / Amazon page DOM
   function extractCartAmount(): number {
+    // 1. Try finding specific total amount patterns
+    const bodyText = document.body ? document.body.innerText : '';
+    const match = bodyText.match(/(?:Total Amount|Total Payable|Payable Amount|Total Price|Order Total)[^\d₹]*[₹Rs.]*\s*([0-9,]+)/i);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1].replace(/,/g, ''), 10);
+      if (!isNaN(parsed) && parsed > 500) {
+        return parsed;
+      }
+    }
+
+    // 2. Try common price selectors
     const priceSelectors = [
-      '.a-price-whole',
-      '#subtotals-marketplace-table .a-text-bold',
       '._35kyal',
       '._1_hQ79',
+      '.a-price-whole',
+      '#subtotals-marketplace-table .a-text-bold',
       '[data-price]',
+      'div:contains("₹")',
     ];
 
     for (const selector of priceSelectors) {
-      const el = document.querySelector(selector);
-      if (el && el.textContent) {
-        const numeric = el.textContent.replace(/[^0-9]/g, '');
-        const val = parseInt(numeric, 10);
-        if (!isNaN(val) && val > 500) {
-          return val;
+      try {
+        const els = document.querySelectorAll(selector);
+        for (const el of Array.from(els)) {
+          const text = el.textContent || '';
+          const digits = text.replace(/[^0-9]/g, '');
+          const val = parseInt(digits, 10);
+          if (!isNaN(val) && val > 1000 && val < 5000000) {
+            return val;
+          }
         }
+      } catch {
+        // Continue
       }
     }
-    return 80000; // Default benchmark price (₹80,000)
+
+    return 70196; // Benchmark default if unparsed
   }
 
   // Active React Root and Host Container References
@@ -80,16 +76,14 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     hostContainer.style.height = '100%';
     hostContainer.style.pointerEvents = 'auto';
 
-    // 2. Attach Shadow Root (Open mode for DOM accessibility within extension)
+    // 2. Attach Shadow Root (Open mode for DOM accessibility)
     shadowRoot = hostContainer.attachShadow({ mode: 'open' });
 
     // 3. Inject Tailwind CSS Styles directly into the Shadow Root
-    // In production, chrome.runtime.getURL resolves the bundled CSS.
-    // In dev / fallback, we also inject the style sheet directly.
     const styleLink = document.createElement('link');
     styleLink.rel = 'stylesheet';
     try {
-      styleLink.href = chrome.runtime.getURL('src/extension/styles.css');
+      styleLink.href = chrome.runtime.getURL('styles.css');
     } catch {
       styleLink.href = '';
     }
@@ -101,10 +95,10 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       :host { all: initial; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
       .commitguard-backdrop {
         position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
-        padding: 1rem; background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        padding: 1rem; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       }
       .commitguard-card {
-        position: relative; width: 100%; max-width: 42rem; background-color: #ffffff; border-radius: 1rem;
+        position: relative; width: 100%; max-width: 44rem; background-color: #ffffff; border-radius: 1rem;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); border: 1px solid #e2e8f0; overflow: hidden;
       }
     `;
@@ -115,8 +109,9 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     mountPoint.id = 'commitguard-react-app';
     shadowRoot.appendChild(mountPoint);
 
-    // 5. Append host container to document body
-    document.body.appendChild(hostContainer);
+    // 5. Append host container to document body or documentElement
+    const parent = document.body || document.documentElement;
+    parent.appendChild(hostContainer);
 
     // 6. Mount React component inside Shadow Root
     reactRoot = ReactDOM.createRoot(mountPoint);
@@ -157,58 +152,96 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     }
   }
 
-  // Intercept checkout click event with event capture
-  function handleInterceptClick(e: MouseEvent, targetElement: HTMLElement) {
-    // If user already acknowledged, let it proceed
-    if (targetElement.getAttribute('data-commitguard-authorized') === 'true') {
-      return;
-    }
+  // Keywords that represent checkout commitment on Flipkart & Amazon
+  const INTERCEPT_KEYWORDS = [
+    'continue with emi',
+    'buy with emi',
+    'select plan and continue',
+    'place order',
+    'place your order',
+    'proceed to pay',
+    'proceed to retail checkout',
+    'credit card emi',
+    'complete payment',
+    'pay now',
+  ];
 
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    const price = extractCartAmount();
-    console.log(`🛡️ CommitGuard Intercepted Checkout Action: Cart = ₹${price}`);
-
-    injectShadowModal(price, () => {
-      // Mark element as authorized and replay the user's action
-      targetElement.setAttribute('data-commitguard-authorized', 'true');
-      targetElement.click();
-    });
-  }
-
-  // Attach event listeners to checkout elements
-  function scanAndAttachListeners() {
-    for (const selector of CHECKOUT_SELECTORS) {
-      try {
-        const elements = document.querySelectorAll<HTMLElement>(selector);
-        elements.forEach((el) => {
-          if (!el.getAttribute('data-commitguard-monitored')) {
-            el.setAttribute('data-commitguard-monitored', 'true');
-            el.addEventListener(
-              'click',
-              (e) => handleInterceptClick(e, el),
-              { capture: true }
-            );
-          }
-        });
-      } catch {
-        // Silently skip any invalid vendor selectors
+  // Helper to check if an element or its ancestors match target intent
+  function findInterceptTarget(element: HTMLElement | null): HTMLElement | null {
+    let curr = element;
+    let depth = 0;
+    while (curr && depth < 6 && curr !== document.body) {
+      // Check data attribute bypass
+      if (curr.getAttribute('data-commitguard-authorized') === 'true') {
+        return null;
       }
+
+      // Check text content of button, link, or clickable element
+      const text = (curr.innerText || curr.textContent || '').trim().toLowerCase();
+      const tagName = curr.tagName.toUpperCase();
+
+      for (const keyword of INTERCEPT_KEYWORDS) {
+        if (text === keyword || (text.length < 50 && text.includes(keyword))) {
+          return curr;
+        }
+      }
+
+      // Check input elements (e.g., input[type="submit"], input[name="placeYourOrder1"])
+      if (tagName === 'INPUT') {
+        const inputVal = ((curr as HTMLInputElement).value || '').toLowerCase();
+        const inputName = ((curr as HTMLInputElement).name || '').toLowerCase();
+        for (const keyword of INTERCEPT_KEYWORDS) {
+          if (inputVal.includes(keyword) || inputName.includes(keyword)) {
+            return curr;
+          }
+        }
+      }
+
+      // Check button classes or IDs
+      const idStr = (curr.id || '').toLowerCase();
+      if (idStr.includes('placeorder') || idStr.includes('place-order') || idStr.includes('proceedtopay')) {
+        return curr;
+      }
+
+      curr = curr.parentElement;
+      depth++;
     }
+    return null;
   }
 
-  // Observe ongoing DOM changes (SPAs, dynamic cart updates)
-  const observer = new MutationObserver(() => {
-    scanAndAttachListeners();
-  });
+  // GLOBAL CAPTURING CLICK LISTENER
+  // Intercepts clicks at the window level BEFORE host application event handlers run
+  window.addEventListener(
+    'click',
+    (e: MouseEvent) => {
+      // Ignore clicks inside our own Shadow Root
+      if (hostContainer && (e.target === hostContainer || hostContainer.contains(e.target as Node))) {
+        return;
+      }
 
-  observer.observe(document.documentElement || document.body, {
-    childList: true,
-    subtree: true,
-  });
+      const targetEl = findInterceptTarget(e.target as HTMLElement);
+      if (!targetEl) {
+        return;
+      }
 
-  // Initial scan on load
-  scanAndAttachListeners();
+      console.log('🛡️ CommitGuard Intercepted Payment Action on:', targetEl);
+
+      // Stop host site from immediately placing order or navigating
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const price = extractCartAmount();
+
+      injectShadowModal(price, () => {
+        // Mark as authorized so the next click goes through to host site
+        targetEl.setAttribute('data-commitguard-authorized', 'true');
+        console.log('🛡️ CommitGuard Authorized: Continuing original payment action');
+        targetEl.click();
+      });
+    },
+    true // CAPTURING PHASE: Guarantees we execute before Flipkart / Amazon handlers
+  );
+
+  console.log('🛡️ CommitGuard Global Capture Listener registered successfully');
 })();

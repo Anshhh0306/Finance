@@ -7563,47 +7563,40 @@
 
   // src/extension/content.tsx
   (() => {
-    console.log("\u{1F6E1}\uFE0F CommitGuard Content Script Active: Initializing DOM Observers");
+    console.log("\u{1F6E1}\uFE0F CommitGuard Content Script Active on:", window.location.href);
     const COMMITGUARD_HOST_ID = "commitguard-extension-root";
-    const CHECKOUT_SELECTORS = [
-      // Amazon selectors
-      'input[name="proceedToRetailCheckout"]',
-      "#placeYourOrder",
-      'input[name="placeYourOrder1"]',
-      "#submitOrderButtonId",
-      'input[value*="EMI"]',
-      'input[value*="emi"]',
-      '[data-action="select-emi-tenure"]',
-      // Flipkart selectors
-      "button._2KpZ6l._2ObVJD._3AWRqL",
-      'button:contains("Place Order")',
-      'button:contains("PLACE ORDER")',
-      'button:contains("PROCEED TO PAY")',
-      'label:has(input[type="radio"][name*="EMI"])',
-      'label:has(input[type="radio"][name*="emi"])',
-      // Generic payment intent triggers
-      'button[id*="place-order"]',
-      'button[id*="pay-now"]'
-    ];
     function extractCartAmount() {
-      const priceSelectors = [
-        ".a-price-whole",
-        "#subtotals-marketplace-table .a-text-bold",
-        "._35kyal",
-        "._1_hQ79",
-        "[data-price]"
-      ];
-      for (const selector of priceSelectors) {
-        const el = document.querySelector(selector);
-        if (el && el.textContent) {
-          const numeric = el.textContent.replace(/[^0-9]/g, "");
-          const val = parseInt(numeric, 10);
-          if (!isNaN(val) && val > 500) {
-            return val;
-          }
+      const bodyText = document.body ? document.body.innerText : "";
+      const match = bodyText.match(/(?:Total Amount|Total Payable|Payable Amount|Total Price|Order Total)[^\d₹]*[₹Rs.]*\s*([0-9,]+)/i);
+      if (match && match[1]) {
+        const parsed = parseInt(match[1].replace(/,/g, ""), 10);
+        if (!isNaN(parsed) && parsed > 500) {
+          return parsed;
         }
       }
-      return 8e4;
+      const priceSelectors = [
+        "._35kyal",
+        "._1_hQ79",
+        ".a-price-whole",
+        "#subtotals-marketplace-table .a-text-bold",
+        "[data-price]",
+        'div:contains("\u20B9")'
+      ];
+      for (const selector of priceSelectors) {
+        try {
+          const els = document.querySelectorAll(selector);
+          for (const el of Array.from(els)) {
+            const text = el.textContent || "";
+            const digits = text.replace(/[^0-9]/g, "");
+            const val = parseInt(digits, 10);
+            if (!isNaN(val) && val > 1e3 && val < 5e6) {
+              return val;
+            }
+          }
+        } catch {
+        }
+      }
+      return 70196;
     }
     let hostContainer = null;
     let shadowRoot = null;
@@ -7625,7 +7618,7 @@
       const styleLink = document.createElement("link");
       styleLink.rel = "stylesheet";
       try {
-        styleLink.href = chrome.runtime.getURL("src/extension/styles.css");
+        styleLink.href = chrome.runtime.getURL("styles.css");
       } catch {
         styleLink.href = "";
       }
@@ -7635,10 +7628,10 @@
       :host { all: initial; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
       .commitguard-backdrop {
         position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
-        padding: 1rem; background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        padding: 1rem; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       }
       .commitguard-card {
-        position: relative; width: 100%; max-width: 42rem; background-color: #ffffff; border-radius: 1rem;
+        position: relative; width: 100%; max-width: 44rem; background-color: #ffffff; border-radius: 1rem;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); border: 1px solid #e2e8f0; overflow: hidden;
       }
     `;
@@ -7646,7 +7639,8 @@
       const mountPoint = document.createElement("div");
       mountPoint.id = "commitguard-react-app";
       shadowRoot.appendChild(mountPoint);
-      document.body.appendChild(hostContainer);
+      const parent = document.body || document.documentElement;
+      parent.appendChild(hostContainer);
       reactRoot = import_client.default.createRoot(mountPoint);
       const handleDismiss = () => {
         if (reactRoot) {
@@ -7682,46 +7676,75 @@
       } catch {
       }
     }
-    function handleInterceptClick(e, targetElement) {
-      if (targetElement.getAttribute("data-commitguard-authorized") === "true") {
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      const price = extractCartAmount();
-      console.log(`\u{1F6E1}\uFE0F CommitGuard Intercepted Checkout Action: Cart = \u20B9${price}`);
-      injectShadowModal(price, () => {
-        targetElement.setAttribute("data-commitguard-authorized", "true");
-        targetElement.click();
-      });
-    }
-    function scanAndAttachListeners() {
-      for (const selector of CHECKOUT_SELECTORS) {
-        try {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach((el) => {
-            if (!el.getAttribute("data-commitguard-monitored")) {
-              el.setAttribute("data-commitguard-monitored", "true");
-              el.addEventListener(
-                "click",
-                (e) => handleInterceptClick(e, el),
-                { capture: true }
-              );
-            }
-          });
-        } catch {
+    const INTERCEPT_KEYWORDS = [
+      "continue with emi",
+      "buy with emi",
+      "select plan and continue",
+      "place order",
+      "place your order",
+      "proceed to pay",
+      "proceed to retail checkout",
+      "credit card emi",
+      "complete payment",
+      "pay now"
+    ];
+    function findInterceptTarget(element) {
+      let curr = element;
+      let depth = 0;
+      while (curr && depth < 6 && curr !== document.body) {
+        if (curr.getAttribute("data-commitguard-authorized") === "true") {
+          return null;
         }
+        const text = (curr.innerText || curr.textContent || "").trim().toLowerCase();
+        const tagName = curr.tagName.toUpperCase();
+        for (const keyword of INTERCEPT_KEYWORDS) {
+          if (text === keyword || text.length < 50 && text.includes(keyword)) {
+            return curr;
+          }
+        }
+        if (tagName === "INPUT") {
+          const inputVal = (curr.value || "").toLowerCase();
+          const inputName = (curr.name || "").toLowerCase();
+          for (const keyword of INTERCEPT_KEYWORDS) {
+            if (inputVal.includes(keyword) || inputName.includes(keyword)) {
+              return curr;
+            }
+          }
+        }
+        const idStr = (curr.id || "").toLowerCase();
+        if (idStr.includes("placeorder") || idStr.includes("place-order") || idStr.includes("proceedtopay")) {
+          return curr;
+        }
+        curr = curr.parentElement;
+        depth++;
       }
+      return null;
     }
-    const observer = new MutationObserver(() => {
-      scanAndAttachListeners();
-    });
-    observer.observe(document.documentElement || document.body, {
-      childList: true,
-      subtree: true
-    });
-    scanAndAttachListeners();
+    window.addEventListener(
+      "click",
+      (e) => {
+        if (hostContainer && (e.target === hostContainer || hostContainer.contains(e.target))) {
+          return;
+        }
+        const targetEl = findInterceptTarget(e.target);
+        if (!targetEl) {
+          return;
+        }
+        console.log("\u{1F6E1}\uFE0F CommitGuard Intercepted Payment Action on:", targetEl);
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const price = extractCartAmount();
+        injectShadowModal(price, () => {
+          targetEl.setAttribute("data-commitguard-authorized", "true");
+          console.log("\u{1F6E1}\uFE0F CommitGuard Authorized: Continuing original payment action");
+          targetEl.click();
+        });
+      },
+      true
+      // CAPTURING PHASE: Guarantees we execute before Flipkart / Amazon handlers
+    );
+    console.log("\u{1F6E1}\uFE0F CommitGuard Global Capture Listener registered successfully");
   })();
 })();
 /*! Bundled license information:
