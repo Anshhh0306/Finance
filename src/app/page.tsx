@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { CommitGuardWidget } from '@/components/CommitGuardWidget';
 import { NeutralDirectory } from '@/components/NeutralDirectory';
 import { MobileBankingPage } from '@/components/MobileBankingPage';
+import { EcommerceCheckoutPage } from '@/components/EcommerceCheckoutPage';
 import {
   ShieldCheck,
   ShoppingBag,
@@ -14,11 +15,11 @@ import {
   RotateCcw,
 } from 'lucide-react';
 
-type ActiveScenario = 'BANK_APP' | 'EMI' | 'FD' | 'DEBT_MF' | 'DIRECTORY';
+type ActiveScenario = 'EMI' | 'BANK_APP' | 'FD' | 'DEBT_MF' | 'DIRECTORY';
 
 export default function DemoStudioPage() {
-  const [activeScenario, setActiveScenario] = useState<ActiveScenario>('BANK_APP');
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [activeScenario, setActiveScenario] = useState<ActiveScenario>('EMI');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [proceedTriggered, setProceedTriggered] = useState(false);
 
   // Scenario default payloads
@@ -175,7 +176,22 @@ export default function DemoStudioPage() {
       </div>
 
       {/* Main Interactive Display Area */}
-      {activeScenario === 'BANK_APP' ? (
+      {activeScenario === 'EMI' ? (
+        <EcommerceCheckoutPage
+          isInterceptorOpen={isModalOpen}
+          onTriggerInterceptor={() => setIsModalOpen(true)}
+          onProceed={() => {
+            setIsModalOpen(false);
+            setProceedTriggered(true);
+          }}
+          onAbort={() => setIsModalOpen(false)}
+          proceedTriggered={proceedTriggered}
+          onReset={() => {
+            setIsModalOpen(false);
+            setProceedTriggered(false);
+          }}
+        />
+      ) : activeScenario === 'BANK_APP' ? (
         <MobileBankingPage />
       ) : activeScenario === 'DIRECTORY' ? (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -206,20 +222,8 @@ export default function DemoStudioPage() {
             </div>
           ) : isModalOpen ? (
             <CommitGuardWidget
-              commitmentType={
-                activeScenario === 'EMI'
-                  ? 'NO_COST_EMI'
-                  : activeScenario === 'FD'
-                  ? 'FD_LOCKIN'
-                  : 'DEBT_MF'
-              }
-              initialPayload={
-                activeScenario === 'EMI'
-                  ? emiPayload
-                  : activeScenario === 'FD'
-                  ? fdPayload
-                  : debtMfPayload
-              }
+              commitmentType={activeScenario === 'FD' ? 'FD_LOCKIN' : 'DEBT_MF'}
+              initialPayload={activeScenario === 'FD' ? fdPayload : debtMfPayload}
               onProceed={() => setProceedTriggered(true)}
               onAbort={() => setIsModalOpen(false)}
             />
