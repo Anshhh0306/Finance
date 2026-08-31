@@ -194,13 +194,25 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
   // Handler to apply simulated platform-specific payment method
   const handleApplyPlatformSimulation = (categoryId: string, bank: string, tenureMonths: number) => {
-    setCustomCategoryId(categoryId);
+    // If user clicked a bank while in a non-bank category (like UPI or Pay Later), auto-switch to Bank EMI
+    let effectiveCategory = categoryId;
+    if (
+      (categoryId === 'UPI' || categoryId === 'FLIPKART_PAY_LATER' || categoryId === 'AXIS_CASHBACK' || categoryId === 'SCAN_TO_PAY' || categoryId === 'AMAZON_UPI' || categoryId === 'UPI_DIRECT' || categoryId === 'COOL_OFF_FUND') &&
+      bank !== customBank
+    ) {
+      if (surfaceType === 'FLIPKART') effectiveCategory = 'BANK_EMI';
+      else if (surfaceType === 'TRAVEL') effectiveCategory = 'CREDIT_EMI';
+      else if (surfaceType === 'AMAZON') effectiveCategory = 'NO_COST';
+      else if (surfaceType === 'EDTECH') effectiveCategory = 'ZERO_SUBVENTION';
+    }
+
+    setCustomCategoryId(effectiveCategory);
     setCustomBank(bank);
     setCustomTenure(tenureMonths);
 
     // 1. FLIPKART
     if (surfaceType === 'FLIPKART') {
-      if (categoryId === 'UPI') {
+      if (effectiveCategory === 'UPI') {
         const offer: ScrapedOffer = {
           id: 'sim-fk-upi',
           bankOrCard: 'UPI / Direct Debit (Zero Debt)',
@@ -216,7 +228,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'AXIS_CASHBACK') {
+      if (effectiveCategory === 'AXIS_CASHBACK') {
         const cb = Math.round(productPrice * 0.05);
         const offer: ScrapedOffer = {
           id: 'sim-fk-axis',
@@ -233,16 +245,17 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'NO_COST') {
+      if (effectiveCategory === 'NO_COST') {
         const monthly = Math.round(productPrice / tenureMonths);
-        const estGst = Math.round(199 + (productPrice * 0.15 * (tenureMonths / 12) * 0.18));
+        const estInterest = Math.round(productPrice * 0.15 * (tenureMonths / 12));
+        const estGst = Math.round(199 + (estInterest * 0.18));
         const offer: ScrapedOffer = {
           id: `sim-fk-nocost-${bank}-${tenureMonths}`,
           bankOrCard: `${bank} (${tenureMonths}M No-Cost EMI)`,
-          description: `${tenureMonths} Months installment plan with upfront interest offset`,
+          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised Total: ₹${productPrice.toLocaleString('en-IN')})`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
           rating: 'AVOID',
-          reason: `Flipkart offers interest discount, but ${bank} charges ₹199 processing fee + non-refundable 18% GST (₹${Math.round(productPrice * 0.15 * (tenureMonths / 12) * 0.18)}) on monthly interest.`,
+          reason: `Flipkart discounts the interest, but ${bank} charges ₹199 processing fee + non-refundable 18% GST (₹${Math.round(estInterest * 0.18)}) on monthly interest.`,
           netPrice: productPrice + estGst,
           recommended: false,
           isSelected: true,
@@ -251,7 +264,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'BANK_EMI') {
+      if (effectiveCategory === 'BANK_EMI') {
         const interest = Math.round(productPrice * 0.15 * (tenureMonths / 12));
         const gst = Math.round(interest * 0.18);
         const fee = 235;
@@ -260,10 +273,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         const offer: ScrapedOffer = {
           id: `sim-fk-bankemi-${bank}-${tenureMonths}`,
           bankOrCard: `${bank} (${tenureMonths}M Credit Card EMI @ 15.0%)`,
-          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo`,
+          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Advertised: ₹${(productPrice + interest).toLocaleString('en-IN')})`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${(gst + fee).toLocaleString('en-IN')} Hidden Drag`,
           rating: 'AVOID',
-          reason: `Long-tenure EMIs lock credit limit and incur compounding 15.0% APR + 18% non-refundable GST on interest.`,
+          reason: `Long-tenure EMIs lock credit limit and incur compounding 15.0% APR + 18% non-refundable GST (₹${gst}) on interest + ₹${fee} fee.`,
           netPrice: total,
           recommended: false,
           isSelected: true,
@@ -272,16 +285,19 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'FLIPKART_PAY_LATER') {
-        const fee = Math.round(productPrice * 0.18);
+      if (effectiveCategory === 'FLIPKART_PAY_LATER') {
+        const apr = 0.24;
+        const interest = Math.round(productPrice * apr * (tenureMonths / 12));
+        const monthly = Math.round((productPrice + interest) / tenureMonths);
+        const total = productPrice + interest;
         const offer: ScrapedOffer = {
-          id: 'sim-fk-paylater',
-          bankOrCard: 'Flipkart Pay Later / Monthly EMI',
-          description: 'Instant credit line up to ₹1,00,000 with 24% penalty APR risk',
-          effectiveBenefit: 'Deferred payment with credit bureau inquiry',
+          id: `sim-fk-paylater-${tenureMonths}`,
+          bankOrCard: `Flipkart Pay Later (${tenureMonths}M Monthly EMI @ 24% APR)`,
+          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Total: ₹${total.toLocaleString('en-IN')})`,
+          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${interest.toLocaleString('en-IN')} 24% APR Drag`,
           rating: 'AVOID',
-          reason: 'Late payment fees of ₹350–₹750 + 24% APR penalty drag if cash flow is missed.',
-          netPrice: productPrice + fee,
+          reason: `Carries 24% reducing APR plus credit bureau inquiry and ₹350–₹750 late payment penalty risk.`,
+          netPrice: total,
           recommended: false,
           isSelected: true,
         };
@@ -293,7 +309,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
     // 2. TRAVEL (MakeMyTrip / Cleartrip)
     if (surfaceType === 'TRAVEL') {
-      if (categoryId === 'SCAN_TO_PAY') {
+      if (effectiveCategory === 'SCAN_TO_PAY') {
         const offer: ScrapedOffer = {
           id: 'sim-tr-qr',
           bankOrCard: 'Scan to Pay / QR (UPI - Zero Debt)',
@@ -309,7 +325,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'LIQUID_SIP') {
+      if (effectiveCategory === 'LIQUID_SIP') {
         const offer: ScrapedOffer = {
           id: 'sim-tr-sip',
           bankOrCard: '6-Month Liquid Fund SIP Alternative',
@@ -325,8 +341,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'CREDIT_EMI' || categoryId === 'DEBIT_EMI') {
-        const isDebit = categoryId === 'DEBIT_EMI';
+      if (effectiveCategory === 'CREDIT_EMI' || effectiveCategory === 'DEBIT_EMI') {
+        const isDebit = effectiveCategory === 'DEBIT_EMI';
         const apr = isDebit ? 16.0 : 14.0;
         const interest = Math.round(productPrice * (apr / 100) * (tenureMonths / 12));
         const gst = Math.round(interest * 0.18);
@@ -348,12 +364,12 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'CARDLESS_EMI') {
+      if (effectiveCategory === 'CARDLESS_EMI') {
         const estGst = Math.round(199 + (productPrice * 0.15 * (tenureMonths / 12) * 0.18));
         const monthly = Math.round(productPrice / tenureMonths);
         const offer: ScrapedOffer = {
-          id: `sim-tr-cardless-${bank}`,
-          bankOrCard: `${bank} (Cardless EMI Network)`,
+          id: `sim-tr-cardless-${bank}-${tenureMonths}`,
+          bankOrCard: `${bank} (${tenureMonths}M Cardless EMI Network)`,
           description: `${tenureMonths} Months installment plan`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${estGst.toLocaleString('en-IN')} GST Drag`,
           rating: 'AVOID',
@@ -366,12 +382,13 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'TNPL') {
+      if (effectiveCategory === 'TNPL') {
         const penalty = Math.round(productPrice * 0.14);
+        const monthly = Math.round(productPrice / 3);
         const offer: ScrapedOffer = {
-          id: 'sim-tr-tnpl',
+          id: `sim-tr-tnpl-${tenureMonths}`,
           bankOrCard: 'TripMoney / Travel Now, Pay Later (TNPL)',
-          description: '3 to 6 Months deferred installment loan with 28.4% APR penalty risk',
+          description: `3 to 6 Months deferred installment loan (₹${monthly.toLocaleString('en-IN')}/mo) with 28.4% APR penalty risk`,
           effectiveBenefit: 'High penalty APR if post-trip cash flow is tight',
           rating: 'AVOID',
           reason: 'Exposes user to 24%-36% penalty APRs plus ₹450-₹850 bounce fees if post-vacation cash is tight.',
@@ -387,7 +404,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
     // 3. AMAZON
     if (surfaceType === 'AMAZON') {
-      if (categoryId === 'AMAZON_UPI') {
+      if (effectiveCategory === 'AMAZON_UPI') {
         const offer: ScrapedOffer = {
           id: 'sim-amz-upi',
           bankOrCard: 'Amazon Pay UPI / Direct Debit (Zero Debt)',
@@ -403,7 +420,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'AMAZON_ICICI') {
+      if (effectiveCategory === 'AMAZON_ICICI') {
         const cb = Math.round(productPrice * 0.05);
         const offer: ScrapedOffer = {
           id: 'sim-amz-icici',
@@ -420,10 +437,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'BANK_DISCOUNT') {
+      if (effectiveCategory === 'BANK_DISCOUNT') {
         const disc = Math.min(Math.round(productPrice * 0.1), 1500);
         const offer: ScrapedOffer = {
-          id: 'sim-amz-bankdisc',
+          id: `sim-amz-bankdisc-${bank}`,
           bankOrCard: `Bank Offer (${bank} Credit Cards)`,
           description: `Instant discount up to ₹${disc.toLocaleString('en-IN')} on select credit cards`,
           effectiveBenefit: `Save ₹${disc.toLocaleString('en-IN')} upfront`,
@@ -437,7 +454,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'NO_COST') {
+      if (effectiveCategory === 'NO_COST') {
         const monthly = Math.round(productPrice / tenureMonths);
         const estGst = Math.round(199 + (productPrice * 0.15 * (tenureMonths / 12) * 0.18));
         const offer: ScrapedOffer = {
@@ -455,13 +472,14 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'AMAZON_PAY_LATER') {
+      if (effectiveCategory === 'AMAZON_PAY_LATER') {
         const fee = Math.round(productPrice * 0.16);
+        const monthly = Math.round((productPrice + fee) / tenureMonths);
         const offer: ScrapedOffer = {
-          id: 'sim-amz-paylater',
-          bankOrCard: 'Amazon Pay Later (Axio / Karur Vysya)',
-          description: '3 to 12 Months split installment line',
-          effectiveBenefit: 'Convenient split with credit limit hold',
+          id: `sim-amz-paylater-${tenureMonths}`,
+          bankOrCard: `Amazon Pay Later (${tenureMonths}M EMI via Axio)`,
+          description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo (Total: ₹${(productPrice + fee).toLocaleString('en-IN')})`,
+          effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo with credit limit hold`,
           rating: 'AVOID',
           reason: 'Carries 18%–24% reducing APR + credit bureau inquiry.',
           netPrice: productPrice + fee,
@@ -472,7 +490,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'GST_INVOICE') {
+      if (effectiveCategory === 'GST_INVOICE') {
         const itc = Math.round(productPrice * 0.18);
         const offer: ScrapedOffer = {
           id: 'sim-amz-gst',
@@ -493,7 +511,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
     // 4. UDEMY (Low-ticket courses, zero 24-month loans)
     if (surfaceType === 'UDEMY') {
-      if (categoryId === 'UPI_DIRECT') {
+      if (effectiveCategory === 'UPI_DIRECT') {
         const offer: ScrapedOffer = {
           id: 'sim-ud-upi',
           bankOrCard: 'UPI / Debit Card (Immediate Full Pay)',
@@ -509,7 +527,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'COOL_OFF_FUND') {
+      if (effectiveCategory === 'COOL_OFF_FUND') {
         const offer: ScrapedOffer = {
           id: 'sim-ud-cooloff',
           bankOrCard: 'Sovereign Liquid Fund / 30-Day Cool-Off',
@@ -525,10 +543,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'MICRO_BNPL') {
+      if (effectiveCategory === 'MICRO_BNPL') {
         const latePenalty = 250;
         const offer: ScrapedOffer = {
-          id: 'sim-ud-bnpl',
+          id: `sim-ud-bnpl-${bank}`,
           bankOrCard: `${bank} (Micro-BNPL / 15-Day Split)`,
           description: '3-Part split payment or 15-day deferred bill',
           effectiveBenefit: `₹${Math.round(productPrice / 3).toLocaleString('en-IN')}/mo with credit file risk`,
@@ -546,7 +564,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
     // 5. EDTECH (UpGrad / Scaler)
     if (surfaceType === 'EDTECH') {
-      if (categoryId === 'UPFRONT_CASH') {
+      if (effectiveCategory === 'UPFRONT_CASH') {
         const rebate = Math.round(productPrice * 0.05);
         const offer: ScrapedOffer = {
           id: 'sim-ed-upfront',
@@ -563,12 +581,12 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'ZERO_SUBVENTION') {
+      if (effectiveCategory === 'ZERO_SUBVENTION') {
         const subventionFee = Math.round(productPrice * 0.045) + 1500;
         const monthly = Math.round(productPrice / tenureMonths);
         const offer: ScrapedOffer = {
-          id: `sim-ed-subv-${bank}`,
-          bankOrCard: `${bank} ("0% Interest" Subvention Loan)`,
+          id: `sim-ed-subv-${bank}-${tenureMonths}`,
+          bankOrCard: `${bank} (${tenureMonths}M "0% Interest" Subvention Loan)`,
           description: `${tenureMonths} Months installment package with embedded surcharge`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo + ₹${subventionFee.toLocaleString('en-IN')} Subvention Drag`,
           rating: 'AVOID',
@@ -581,13 +599,13 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'LONG_LOAN') {
+      if (effectiveCategory === 'LONG_LOAN') {
         const interest = Math.round(productPrice * 0.14 * (tenureMonths / 12));
         const fee = 2500;
         const total = productPrice + interest + fee;
         const monthly = Math.round((productPrice + interest) / tenureMonths);
         const offer: ScrapedOffer = {
-          id: `sim-ed-loan-${bank}`,
+          id: `sim-ed-loan-${bank}-${tenureMonths}`,
           bankOrCard: `${bank} (${tenureMonths}M Education Loan @ 14.0%)`,
           description: `${tenureMonths} months x ₹${monthly.toLocaleString('en-IN')}/mo`,
           effectiveBenefit: `₹${monthly.toLocaleString('en-IN')}/mo with ₹${interest.toLocaleString('en-IN')} interest drag`,
@@ -601,7 +619,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         setSelectedOfferId(offer.id);
         return;
       }
-      if (categoryId === 'CORP_SPONSOR') {
+      if (effectiveCategory === 'CORP_SPONSOR') {
         const taxBenefit = Math.round(productPrice * 0.30);
         const offer: ScrapedOffer = {
           id: 'sim-ed-corp',
