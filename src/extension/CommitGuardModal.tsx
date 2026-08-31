@@ -70,6 +70,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
   // Active view tab: 'CARD_OFFERS' vs 'EMI_FRICTION' vs 'RECOVERY_COMPOUNDING'
   const [activeTab, setActiveTab] = useState<'CARD_OFFERS' | 'EMI_FRICTION' | 'RECOVERY_COMPOUNDING'>('CARD_OFFERS');
   const [showAllMethods, setShowAllMethods] = useState<boolean>(false);
+  const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const [compoundingHorizon, setCompoundingHorizon] = useState<'1Y' | '3Y' | '5Y'>('5Y');
   const [isProofOpen, setIsProofOpen] = useState(false);
   const processingFee = 199;
   const nominalRate = 15.0;
@@ -215,8 +217,12 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
   // Find user's selected offer or fallback to first
   const selectedOffer = useMemo(() => {
+    if (selectedOfferId) {
+      const found = displayOffers.find((o) => o.id === selectedOfferId);
+      if (found) return found;
+    }
     return displayOffers.find((o) => o.isSelected) || displayOffers[0];
-  }, [displayOffers]);
+  }, [displayOffers, selectedOfferId]);
 
   // Other available offers
   const otherOffers = useMemo(() => {
@@ -472,6 +478,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   {/* Expanded list of alternative offers */}
                   {showAllMethods && (
                     <div className="space-y-2.5 mt-3 animate-in fade-in duration-200">
+                      <div className="text-[11px] font-semibold text-slate-500 flex items-center justify-between px-1">
+                        <span>Click any method to inspect its Reality Check:</span>
+                        <span className="text-[10px] text-emerald-700 font-mono font-bold">👆 Click to Switch</span>
+                      </div>
                       {otherOffers.map((offer) => {
                         const isBest = offer.rating === 'BEST';
                         const isAvoid = offer.rating === 'AVOID';
@@ -480,18 +490,22 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                         return (
                           <div
                             key={offer.id}
-                            className={`p-3.5 rounded-xl border transition-all ${
+                            onClick={() => setSelectedOfferId(offer.id)}
+                            role="button"
+                            tabIndex={0}
+                            className={`p-3.5 rounded-xl border transition-all cursor-pointer hover:shadow-md hover:scale-[1.01] active:scale-[0.99] group ${
                               isBest
-                                ? 'bg-emerald-50/70 border-emerald-300 ring-1 ring-emerald-200'
+                                ? 'bg-emerald-50/70 hover:bg-emerald-100/80 border-emerald-300 ring-1 ring-emerald-200'
                                 : isAvoid
-                                ? 'bg-red-50/60 border-red-200'
-                                : 'bg-white border-slate-200'
+                                ? 'bg-red-50/60 hover:bg-red-100/80 border-red-200'
+                                : 'bg-white hover:bg-slate-50 border-slate-200'
                             }`}
+                            title="Click to select this payment method and inspect its reality check"
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="space-y-1">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="font-bold text-sm text-slate-900">
+                                  <span className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors">
                                     {offer.bankOrCard}
                                   </span>
 
@@ -539,6 +553,9 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                                   isBest ? 'text-emerald-600' : isAvoid ? 'text-red-700' : 'text-slate-600'
                                 }`}>
                                   {offer.effectiveBenefit}
+                                </div>
+                                <div className="text-[9px] text-slate-400 mt-1 font-semibold group-hover:text-emerald-600">
+                                  Select ➔
                                 </div>
                               </div>
                             </div>
@@ -752,35 +769,65 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
 
                 {/* Compounding Comparison Columns */}
                 <div className="grid grid-cols-3 gap-2 pt-1">
-                  <div className="p-2.5 rounded-lg bg-white border border-emerald-100 shadow-2xs text-center">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase">1 Year T-Bill</div>
-                    <div className="text-sm sm:text-base font-black text-slate-900 mt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCompoundingHorizon('1Y')}
+                    className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                      compoundingHorizon === '1Y'
+                        ? 'bg-emerald-900 text-white border-emerald-800 ring-2 ring-emerald-400 shadow-sm scale-[1.02]'
+                        : 'bg-white hover:bg-emerald-50/50 border-emerald-200 text-slate-900 shadow-2xs'
+                    }`}
+                  >
+                    <div className={`text-[10px] font-bold uppercase ${compoundingHorizon === '1Y' ? 'text-emerald-200' : 'text-slate-500'}`}>
+                      1 Year T-Bill
+                    </div>
+                    <div className={`text-sm sm:text-base font-black mt-0.5 ${compoundingHorizon === '1Y' ? 'text-white' : 'text-slate-900'}`}>
                       ₹{recoveryCompounding.fv1Year.toLocaleString('en-IN')}
                     </div>
-                    <div className="text-[9px] text-emerald-700 font-semibold mt-0.5">
+                    <div className={`text-[9px] font-semibold mt-0.5 ${compoundingHorizon === '1Y' ? 'text-emerald-300' : 'text-emerald-700'}`}>
                       Preserves ₹{recoveryCompounding.savedFriction.toLocaleString('en-IN')}
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="p-2.5 rounded-lg bg-white border border-emerald-100 shadow-2xs text-center">
-                    <div className="text-[10px] font-bold text-slate-500 uppercase">3 Year Compound</div>
-                    <div className="text-sm sm:text-base font-black text-emerald-700 mt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCompoundingHorizon('3Y')}
+                    className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                      compoundingHorizon === '3Y'
+                        ? 'bg-emerald-900 text-white border-emerald-800 ring-2 ring-emerald-400 shadow-sm scale-[1.02]'
+                        : 'bg-white hover:bg-emerald-50/50 border-emerald-200 text-slate-900 shadow-2xs'
+                    }`}
+                  >
+                    <div className={`text-[10px] font-bold uppercase ${compoundingHorizon === '3Y' ? 'text-emerald-200' : 'text-slate-500'}`}>
+                      3 Year Compound
+                    </div>
+                    <div className={`text-sm sm:text-base font-black mt-0.5 ${compoundingHorizon === '3Y' ? 'text-white' : 'text-emerald-700'}`}>
                       ₹{recoveryCompounding.fv3Year.toLocaleString('en-IN')}
                     </div>
-                    <div className="text-[9px] text-emerald-600 font-semibold mt-0.5">
+                    <div className={`text-[9px] font-semibold mt-0.5 ${compoundingHorizon === '3Y' ? 'text-emerald-300' : 'text-emerald-600'}`}>
                       +₹{(recoveryCompounding.fv3Year - recoveryCompounding.savedFriction).toLocaleString('en-IN')} yield
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="p-2.5 rounded-lg bg-emerald-900 text-white shadow-2xs text-center">
-                    <div className="text-[10px] font-bold text-emerald-300 uppercase">5 Year Wealth</div>
-                    <div className="text-sm sm:text-base font-black text-white mt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setCompoundingHorizon('5Y')}
+                    className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                      compoundingHorizon === '5Y'
+                        ? 'bg-emerald-900 text-white border-emerald-800 ring-2 ring-emerald-400 shadow-sm scale-[1.02]'
+                        : 'bg-white hover:bg-emerald-50/50 border-emerald-200 text-slate-900 shadow-2xs'
+                    }`}
+                  >
+                    <div className={`text-[10px] font-bold uppercase ${compoundingHorizon === '5Y' ? 'text-emerald-300' : 'text-slate-500'}`}>
+                      5 Year Wealth
+                    </div>
+                    <div className={`text-sm sm:text-base font-black mt-0.5 ${compoundingHorizon === '5Y' ? 'text-white' : 'text-slate-900'}`}>
                       ₹{recoveryCompounding.fv5Year.toLocaleString('en-IN')}
                     </div>
-                    <div className="text-[9px] text-emerald-200 font-semibold mt-0.5">
+                    <div className={`text-[9px] font-semibold mt-0.5 ${compoundingHorizon === '5Y' ? 'text-emerald-200' : 'text-emerald-700'}`}>
                       +₹{recoveryCompounding.compoundedGain5Y.toLocaleString('en-IN')} pure gain
                     </div>
-                  </div>
+                  </button>
                 </div>
 
                 {/* Pre-Commitment Liquid SIP Comparison */}
