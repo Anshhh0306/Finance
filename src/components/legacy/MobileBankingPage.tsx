@@ -22,7 +22,7 @@ import {
   OneTrackSymbol,
   QrScanSymbol,
 } from '@/components/symbols/BankingSymbols';
-import { CommitGuardWidget } from '@/components/CommitGuardWidget';
+import { CommitGuardWidget } from './CommitGuardWidget';
 
 export const MobileBankingPage: React.FC = () => {
   const [showBalance, setShowBalance] = useState(false);
