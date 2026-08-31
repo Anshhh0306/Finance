@@ -46,19 +46,15 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
   onProceed,
   onAbort,
 }) => {
-  // Scenario state
-  const [emiInput, setEmiInput] = useState<EmiCommitmentInput>(initialPayload);
-  const [lockInInput, setLockInInput] = useState<LockInCommitmentInput>(initialPayload);
-  const [debtMfInput, setDebtMfInput] = useState<DebtMfCommitmentInput>(initialPayload);
-
-  // Computed results
-  const [emiResult, setEmiResult] = useState(() =>
-    commitmentType === 'NO_COST_EMI' ? calculateNoCostEmiDrag(initialPayload) : null
-  );
-  const [lockInResult, setLockInResult] = useState(() =>
-    commitmentType === 'FD_LOCKIN' ? calculateLockInVsLiquidity(initialPayload) : null
-  );
+  // Scenario state synchronized with initialPayload
   const [exitMonth, setExitMonth] = useState(initialPayload.completedMonthsBeforeExit || 6);
+
+  // Synchronize when initialPayload changes (tab switch)
+  useEffect(() => {
+    if (initialPayload.completedMonthsBeforeExit) {
+      setExitMonth(initialPayload.completedMonthsBeforeExit);
+    }
+  }, [initialPayload]);
 
   // Policy & Goals
   const [policyAlerts, setPolicyAlerts] = useState<PolicyAlert[]>([]);
@@ -73,45 +69,44 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
     const goals = getSandboxedGoals();
 
     if (commitmentType === 'NO_COST_EMI') {
-      const res = calculateNoCostEmiDrag(emiInput);
+      const res = calculateNoCostEmiDrag(initialPayload);
       setEmiResult(res);
 
       const alerts = evaluatePolicyAlerts({
         commitmentType: 'NO_COST_EMI',
-        tenureMonths: emiInput.tenureMonths,
-        processingFee: emiInput.bankProcessingFee,
+        tenureMonths: initialPayload.tenureMonths,
+        processingFee: initialPayload.bankProcessingFee,
       });
       setPolicyAlerts(alerts);
 
-      const conflict = evaluateGoalConflict(emiInput.tenureMonths, emiInput.productPrice, false, goals);
+      const conflict = evaluateGoalConflict(initialPayload.tenureMonths, initialPayload.productPrice, false, goals);
       setGoalConflict(conflict);
 
-      // Trigger AI translation or instant fallback
       fetchAiNarrative({
         commitmentType: 'NO_COST_EMI',
-        productOrInstrumentName: emiInput.productName,
-        principalOrPrice: emiInput.productPrice,
-        tenureMonths: emiInput.tenureMonths,
+        productOrInstrumentName: initialPayload.productName,
+        principalOrPrice: initialPayload.productPrice,
+        tenureMonths: initialPayload.tenureMonths,
         computedMetrics: res,
         policyAlerts: alerts,
         goalConflict: conflict,
       });
     } else if (commitmentType === 'FD_LOCKIN') {
-      const currentInput = { ...lockInInput, completedMonthsBeforeExit: exitMonth };
+      const currentInput = { ...initialPayload, completedMonthsBeforeExit: exitMonth };
       const res = calculateLockInVsLiquidity(currentInput);
       setLockInResult(res);
 
       const alerts = evaluatePolicyAlerts({
         commitmentType: 'FD_LOCKIN',
-        interestEarnedOrYield: res.fdPrematurePayout - lockInInput.principalAmount,
-        advertisedRate: lockInInput.contractedRate,
-        tenureMonths: lockInInput.contractedTenureMonths,
+        interestEarnedOrYield: res.fdPrematurePayout - initialPayload.principalAmount,
+        advertisedRate: initialPayload.contractedRate,
+        tenureMonths: initialPayload.contractedTenureMonths,
       });
       setPolicyAlerts(alerts);
 
       const conflict = evaluateGoalConflict(
-        lockInInput.contractedTenureMonths,
-        lockInInput.principalAmount,
+        initialPayload.contractedTenureMonths,
+        initialPayload.principalAmount,
         true,
         goals
       );
@@ -119,9 +114,9 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
 
       fetchAiNarrative({
         commitmentType: 'FD_LOCKIN',
-        productOrInstrumentName: lockInInput.institutionName,
-        principalOrPrice: lockInInput.principalAmount,
-        tenureMonths: lockInInput.contractedTenureMonths,
+        productOrInstrumentName: initialPayload.institutionName,
+        principalOrPrice: initialPayload.principalAmount,
+        tenureMonths: initialPayload.contractedTenureMonths,
         computedMetrics: res,
         policyAlerts: alerts,
         goalConflict: conflict,
@@ -129,26 +124,26 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
     } else {
       // DEBT_MF
       const realYield = calculatePostTaxRealYield(
-        debtMfInput.expectedGrossYield,
-        debtMfInput.investorTaxSlabPercent,
-        debtMfInput.expectedInflationPercent
+        initialPayload.expectedGrossYield,
+        initialPayload.investorTaxSlabPercent,
+        initialPayload.expectedInflationPercent
       );
       const opportunity = calculateOpportunityCost(
-        debtMfInput.expectedGrossYield,
-        debtMfInput.investmentAmount,
-        debtMfInput.horizonMonths
+        initialPayload.expectedGrossYield,
+        initialPayload.investmentAmount,
+        initialPayload.horizonMonths
       );
 
       const alerts = evaluatePolicyAlerts({
         commitmentType: 'DEBT_MF',
-        equityAllocationPercent: debtMfInput.equityAllocationPercent,
-        tenureMonths: debtMfInput.horizonMonths,
+        equityAllocationPercent: initialPayload.equityAllocationPercent,
+        tenureMonths: initialPayload.horizonMonths,
       });
       setPolicyAlerts(alerts);
 
       const conflict = evaluateGoalConflict(
-        debtMfInput.horizonMonths,
-        debtMfInput.investmentAmount,
+        initialPayload.horizonMonths,
+        initialPayload.investmentAmount,
         false,
         goals
       );
@@ -156,15 +151,15 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
 
       fetchAiNarrative({
         commitmentType: 'DEBT_MF',
-        productOrInstrumentName: debtMfInput.fundName,
-        principalOrPrice: debtMfInput.investmentAmount,
-        tenureMonths: debtMfInput.horizonMonths,
+        productOrInstrumentName: initialPayload.fundName,
+        principalOrPrice: initialPayload.investmentAmount,
+        tenureMonths: initialPayload.horizonMonths,
         computedMetrics: { ...realYield, ...opportunity },
         policyAlerts: alerts,
         goalConflict: conflict,
       });
     }
-  }, [commitmentType, emiInput, lockInInput, debtMfInput, exitMonth]);
+  }, [commitmentType, initialPayload, exitMonth]);
 
   const fetchAiNarrative = async (payload: any) => {
     setIsLoadingAi(true);
