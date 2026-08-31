@@ -191,73 +191,105 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
   };
 
   return (
-    <div className="glass-panel-glow rounded-2xl p-5 sm:p-7 space-y-6 text-white max-w-3xl mx-auto border border-brand-500/30">
-      {/* Header Banner */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-brand-500/20 text-brand-500 border border-brand-500/30">
-            <ShieldAlert className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold tracking-tight">CommitGuard Pre-Commitment Interceptor</h2>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-accent-emerald border border-emerald-500/30 font-mono">
-                &lt;5ms Math Engine
-              </span>
-            </div>
-            <p className="text-xs text-slate-400">
-              Deterministic Trade-Off Clarity before transaction authorization
-            </p>
-          </div>
+    <div className="rounded-3xl p-6 sm:p-8 space-y-5 text-slate-900 bg-white border border-slate-200 shadow-2xl max-w-xl mx-auto dark:bg-slate-900 dark:text-slate-100 dark:border-slate-800 transition-all">
+      {/* Top Handle bar (Mobile Sheet Style) */}
+      <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto -mt-2 mb-2" />
+
+      {/* Clean Pill Header */}
+      <div className="flex items-center justify-between">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+          <span>CommitGuard • Decision Clarity</span>
         </div>
 
-        <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 font-mono bg-surface-100 px-3 py-1.5 rounded-lg border border-white/5">
-          <Zap className="w-3.5 h-3.5 text-accent-amber" />
-          <span>Point-of-Sale Hook Active</span>
+        <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+          <span>&lt;5ms Math Engine</span>
         </div>
+      </div>
+
+      {/* Title */}
+      <div className="space-y-1">
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          True Cost Breakdown: {initialPayload.productName || initialPayload.institutionName || initialPayload.fundName || 'Transaction'}
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Pre-commitment verification for ₹{(initialPayload.productPrice || initialPayload.principalAmount || initialPayload.investmentAmount || 0).toLocaleString('en-IN')}
+        </p>
+      </div>
+
+      {/* Pill Metric Badges (Directly Matching User Reference Image) */}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {commitmentType === 'NO_COST_EMI' && emiResult && (
+          <>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Effective APR: <strong className="ml-1.5 text-emerald-600 dark:text-emerald-400">{emiResult.effectiveAnnualPercentageRate}%</strong> (not 0%)
+            </span>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Processing Fee: <strong className="ml-1.5 text-slate-900 dark:text-white">₹{initialPayload.bankProcessingFee || 199} + 18% GST</strong>
+            </span>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Total GST Drag: <strong className="ml-1.5 text-rose-600 dark:text-rose-400">₹{emiResult.totalGstOnInterest.toLocaleString('en-IN')}</strong>
+            </span>
+          </>
+        )}
+
+        {commitmentType === 'FD_LOCKIN' && lockInResult && (
+          <>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Contracted Rate: <strong className="ml-1.5 text-emerald-600 dark:text-emerald-400">{initialPayload.contractedRate}%</strong>
+            </span>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Premature Penalty: <strong className="ml-1.5 text-rose-600 dark:text-rose-400">{initialPayload.prematurePenaltyRate}% Exit Drag</strong>
+            </span>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Net Drag vs Liquid: <strong className="ml-1.5 text-amber-600 dark:text-amber-400">₹{lockInResult.netLossVsLiquid.toLocaleString('en-IN')}</strong>
+            </span>
+          </>
+        )}
+
+        {commitmentType === 'DEBT_MF' && (
+          <>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Tax Regime: <strong className="ml-1.5 text-rose-600 dark:text-rose-400">Section 50AA (No Indexation)</strong>
+            </span>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+              Marginal Slab: <strong className="ml-1.5 text-slate-900 dark:text-white">{initialPayload.investorTaxSlabPercent}% Bracket</strong>
+            </span>
+          </>
+        )}
       </div>
 
       {/* Sandboxed Goal Volatility Conflict Banner */}
       <GoalVolatilityAlert evaluation={goalConflict} />
 
-      {/* 3-Bullet Plain-English AI Trade-off Narrator */}
-      <div className="p-4 sm:p-5 rounded-xl bg-surface-100/90 border border-white/10 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-100">
-            <Sparkles className="w-4 h-4 text-brand-500 animate-pulse" />
-            <span>3-Second Plain-English Decision Clarity</span>
-          </div>
-          <span className="text-[10px] text-slate-400 font-mono">
-            {narrative?.status === 'GUARDRAIL_VERIFIED' ? '🛡️ Guardrail Verified' : '⚡ Deterministic Fallback'}
-          </span>
-        </div>
-
+      {/* 3-Bullet Plain-English Risk Trade-off List (Directly Styled like Reference Image) */}
+      <div className="pt-3 pb-3 border-t border-b border-slate-200 dark:border-slate-800">
         {isLoadingAi && !narrative ? (
-          <div className="space-y-2 animate-pulse py-2">
-            <div className="h-4 bg-surface-300 rounded w-3/4"></div>
-            <div className="h-4 bg-surface-300 rounded w-5/6"></div>
-            <div className="h-4 bg-surface-300 rounded w-2/3"></div>
+          <div className="space-y-2.5 animate-pulse py-2">
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-5/6"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
           </div>
         ) : (
-          <ul className="space-y-2.5 text-xs text-slate-200 leading-relaxed">
+          <ul className="space-y-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
             <li className="flex items-start gap-2.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-amber mt-1.5 shrink-0" />
+              <span className="text-slate-900 dark:text-white font-bold text-base leading-none">•</span>
               <span>
-                <strong className="text-white">Hidden Friction: </strong>
+                <strong className="text-slate-900 dark:text-white font-bold">Friction: </strong>
                 {narrative?.bullet_1_hidden_friction}
               </span>
             </li>
             <li className="flex items-start gap-2.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-500 mt-1.5 shrink-0" />
+              <span className="text-slate-900 dark:text-white font-bold text-base leading-none">•</span>
               <span>
-                <strong className="text-white">Liquidity Horizon: </strong>
+                <strong className="text-slate-900 dark:text-white font-bold">Liquidity: </strong>
                 {narrative?.bullet_2_liquidity_horizon}
               </span>
             </li>
             <li className="flex items-start gap-2.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-emerald mt-1.5 shrink-0" />
+              <span className="text-slate-900 dark:text-white font-bold text-base leading-none">•</span>
               <span>
-                <strong className="text-white">Neutral Baseline: </strong>
+                <strong className="text-slate-900 dark:text-white font-bold">Baseline: </strong>
                 {narrative?.bullet_3_neutral_baseline}
               </span>
             </li>
@@ -273,23 +305,17 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
               key={alert.policyId}
               className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs ${
                 alert.severity === 'CRITICAL'
-                  ? 'bg-accent-rose/10 border-accent-rose/30 text-rose-200'
+                  ? 'bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-200'
                   : alert.severity === 'WARNING'
-                  ? 'bg-accent-amber/10 border-accent-amber/30 text-amber-200'
-                  : 'bg-surface-100 border-white/10 text-slate-300'
+                  ? 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200'
+                  : 'bg-slate-50 border-slate-200 text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200'
               }`}
             >
-              {alert.severity === 'CRITICAL' ? (
-                <AlertTriangle className="w-4 h-4 text-accent-rose shrink-0 mt-0.5" />
-              ) : alert.severity === 'WARNING' ? (
-                <AlertTriangle className="w-4 h-4 text-accent-amber shrink-0 mt-0.5" />
-              ) : (
-                <Info className="w-4 h-4 text-brand-500 shrink-0 mt-0.5" />
-              )}
+              <Info className="w-4 h-4 mt-0.5 shrink-0" />
               <div className="space-y-0.5">
                 <div className="font-semibold flex items-center gap-2">
                   <span>{alert.clauseTitle}</span>
-                  <span className="text-[10px] font-mono opacity-70">({alert.statuteReference})</span>
+                  <span className="text-[10px] font-mono opacity-75">({alert.statuteReference})</span>
                 </div>
                 <p className="text-[11px] opacity-90 leading-normal">{alert.detailedNotice}</p>
               </div>
@@ -299,9 +325,9 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
       )}
 
       {/* Mathematical Breakdown Drawer */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
-          <FileCheck2 className="w-4 h-4 text-accent-cyan" />
+      <div className="space-y-3 pt-1">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <FileCheck2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span>Verifiable Mathematical Proof</span>
         </div>
 
@@ -318,22 +344,20 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
         )}
       </div>
 
-      {/* User Agency Action Controls */}
-      <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* User Agency Action Controls (Matching User Reference: Outline Button + Solid Black Button) */}
+      <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
         <button
           onClick={onAbort}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-surface-100 hover:bg-surface-200 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-1/2 px-5 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs sm:text-sm font-semibold dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2 shadow-sm"
         >
-          <XCircle className="w-4 h-4 text-slate-400" />
-          Modify Terms / Exit Interceptor
+          Change Terms
         </button>
 
         <button
           onClick={onProceed}
-          className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold shadow-glow transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-1/2 px-6 py-3 rounded-xl bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold dark:bg-emerald-600 dark:hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
         >
-          <CheckCircle className="w-4 h-4 text-accent-emerald" />
-          I Understand the Trade-Offs, Proceed
+          I Understand, Proceed
         </button>
       </div>
     </div>
