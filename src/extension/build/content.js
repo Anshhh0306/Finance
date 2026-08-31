@@ -7415,8 +7415,16 @@
   ];
   var ShieldCheck = createLucideIcon("ShieldCheck", __iconNode10);
 
-  // node_modules/lucide-react/dist/esm/icons/sliders-vertical.js
+  // node_modules/lucide-react/dist/esm/icons/shopping-bag.js
   var __iconNode11 = [
+    ["path", { d: "M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z", key: "hou9p0" }],
+    ["path", { d: "M3 6h18", key: "d0wm0j" }],
+    ["path", { d: "M16 10a4 4 0 0 1-8 0", key: "1ltviw" }]
+  ];
+  var ShoppingBag = createLucideIcon("ShoppingBag", __iconNode11);
+
+  // node_modules/lucide-react/dist/esm/icons/sliders-vertical.js
+  var __iconNode12 = [
     ["line", { x1: "4", x2: "4", y1: "21", y2: "14", key: "1p332r" }],
     ["line", { x1: "4", x2: "4", y1: "10", y2: "3", key: "gb41h5" }],
     ["line", { x1: "12", x2: "12", y1: "21", y2: "12", key: "hf2csr" }],
@@ -7427,10 +7435,10 @@
     ["line", { x1: "10", x2: "14", y1: "8", y2: "8", key: "1yglbp" }],
     ["line", { x1: "18", x2: "22", y1: "16", y2: "16", key: "1jxqpz" }]
   ];
-  var SlidersVertical = createLucideIcon("SlidersVertical", __iconNode11);
+  var SlidersVertical = createLucideIcon("SlidersVertical", __iconNode12);
 
   // node_modules/lucide-react/dist/esm/icons/sparkles.js
-  var __iconNode12 = [
+  var __iconNode13 = [
     [
       "path",
       {
@@ -7443,10 +7451,10 @@
     ["path", { d: "M4 17v2", key: "vumght" }],
     ["path", { d: "M5 18H3", key: "zchphs" }]
   ];
-  var Sparkles = createLucideIcon("Sparkles", __iconNode12);
+  var Sparkles = createLucideIcon("Sparkles", __iconNode13);
 
   // node_modules/lucide-react/dist/esm/icons/thumbs-down.js
-  var __iconNode13 = [
+  var __iconNode14 = [
     ["path", { d: "M17 14V2", key: "8ymqnk" }],
     [
       "path",
@@ -7456,10 +7464,10 @@
       }
     ]
   ];
-  var ThumbsDown = createLucideIcon("ThumbsDown", __iconNode13);
+  var ThumbsDown = createLucideIcon("ThumbsDown", __iconNode14);
 
   // node_modules/lucide-react/dist/esm/icons/thumbs-up.js
-  var __iconNode14 = [
+  var __iconNode15 = [
     ["path", { d: "M7 10v12", key: "1qc93n" }],
     [
       "path",
@@ -7469,17 +7477,17 @@
       }
     ]
   ];
-  var ThumbsUp = createLucideIcon("ThumbsUp", __iconNode14);
+  var ThumbsUp = createLucideIcon("ThumbsUp", __iconNode15);
 
   // node_modules/lucide-react/dist/esm/icons/trending-up.js
-  var __iconNode15 = [
+  var __iconNode16 = [
     ["polyline", { points: "22 7 13.5 15.5 8.5 10.5 2 17", key: "126l90" }],
     ["polyline", { points: "16 7 22 7 22 13", key: "kwv8wd" }]
   ];
-  var TrendingUp = createLucideIcon("TrendingUp", __iconNode15);
+  var TrendingUp = createLucideIcon("TrendingUp", __iconNode16);
 
   // node_modules/lucide-react/dist/esm/icons/triangle-alert.js
-  var __iconNode16 = [
+  var __iconNode17 = [
     [
       "path",
       {
@@ -7490,14 +7498,14 @@
     ["path", { d: "M12 9v4", key: "juzpu7" }],
     ["path", { d: "M12 17h.01", key: "p32p05" }]
   ];
-  var TriangleAlert = createLucideIcon("TriangleAlert", __iconNode16);
+  var TriangleAlert = createLucideIcon("TriangleAlert", __iconNode17);
 
   // node_modules/lucide-react/dist/esm/icons/x.js
-  var __iconNode17 = [
+  var __iconNode18 = [
     ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ];
-  var X = createLucideIcon("X", __iconNode17);
+  var X = createLucideIcon("X", __iconNode18);
 
   // src/lib/financial-engine.ts
   var GST_RATE = 0.18;
@@ -7593,9 +7601,9 @@
 
   // src/extension/CommitGuardModal.tsx
   var ExtensionCommitGuardModal = ({
-    surfaceType = "ECOMMERCE",
+    surfaceType = "AMAZON",
     productPrice = 5399,
-    productName = "Identified Flipkart Item",
+    productName = "Identified Checkout Item",
     originalPrice,
     discountPercent,
     scrapedOffers = [],
@@ -7643,6 +7651,52 @@
     }, [mathResult, tenure]);
     const displayOffers = (0, import_react3.useMemo)(() => {
       if (scrapedOffers && scrapedOffers.length > 0) return scrapedOffers;
+      if (surfaceType === "AMAZON") {
+        const amazonCashback = Math.round(productPrice * 0.05);
+        const bankDiscount = Math.min(Math.round(productPrice * 0.1), 1250);
+        return [
+          {
+            id: "amazon-icici-card",
+            bankOrCard: "Amazon Pay ICICI Bank Credit Card",
+            description: "5% Unlimited Cashback credited to Amazon Pay Balance",
+            effectiveBenefit: `Save \u20B9${amazonCashback.toLocaleString("en-IN")} cashback`,
+            rating: "BEST",
+            reason: "Zero lock-in tenure. Instant Amazon Pay cashback without interest or processing fees.",
+            netPrice: productPrice - amazonCashback,
+            recommended: true
+          },
+          {
+            id: "upi-instant",
+            bankOrCard: "Amazon Pay UPI / Direct Debit (Zero Debt)",
+            description: "Single-tranche direct payment from bank account",
+            effectiveBenefit: "Saves 100% of GST & bank processing fees",
+            rating: "BEST",
+            reason: "Zero interest, zero processing fee, keeps credit limit 100% free.",
+            netPrice: productPrice,
+            recommended: true
+          },
+          {
+            id: "amazon-bank-offer",
+            bankOrCard: "Bank Offer: HDFC / SBI Credit Cards",
+            description: "Instant 10% discount on credit card transactions",
+            effectiveBenefit: `Save \u20B9${bankDiscount.toLocaleString("en-IN")} upfront`,
+            rating: "GOOD",
+            reason: "Direct instant price reduction at checkout if paid in full.",
+            netPrice: productPrice - bankDiscount,
+            recommended: false
+          },
+          {
+            id: "no-cost-emi",
+            bankOrCard: "Amazon No-Cost EMI (All Banks)",
+            description: `${tenure} Months installment plan`,
+            effectiveBenefit: `\u20B9${mathResult.monthlyBaseEmi.toLocaleString("en-IN")}/mo + \u20B9${mathResult.totalHiddenFriction.toLocaleString("en-IN")} GST Drag`,
+            rating: "AVOID",
+            reason: `Charges ${mathResult.effectiveAnnualPercentageRate}% Effective APR via statutory 18% GST on interest + \u20B9${processingFee} bank fee.`,
+            netPrice: productPrice + mathResult.totalHiddenFriction,
+            recommended: false
+          }
+        ];
+      }
       const axisCashback = Math.round(productPrice * 0.05);
       return [
         {
@@ -7686,7 +7740,7 @@
           recommended: false
         }
       ];
-    }, [scrapedOffers, productPrice, tenure, mathResult, processingFee]);
+    }, [scrapedOffers, surfaceType, productPrice, tenure, mathResult, processingFee]);
     return /* @__PURE__ */ import_react3.default.createElement(
       "div",
       {
@@ -7695,7 +7749,7 @@
           if (e.target === e.currentTarget) onCancelStayOnPage();
         }
       },
-      /* @__PURE__ */ import_react3.default.createElement("div", { className: "commitguard-card" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: `p-1.5 rounded-lg text-white shadow-sm ${surfaceType === "TRAVEL" ? "bg-sky-600" : surfaceType === "EDTECH" ? "bg-indigo-600" : surfaceType === "UDEMY" ? "bg-purple-600" : "bg-emerald-600"}` }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(Plane, { className: "w-5 h-5" }) : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(GraduationCap, { className: "w-5 h-5" }) : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(BookOpen, { className: "w-5 h-5" }) : /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-5 h-5" })), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-slate-900" }, surfaceType === "TRAVEL" ? "CommitGuard Travel: TNPL & EMI Reality Check" : surfaceType === "EDTECH" ? "CommitGuard EdTech: Education Loan Subvention Truth" : surfaceType === "UDEMY" ? "CommitGuard Udemy: Impulse Buy & BNPL Interceptor" : "CommitGuard Smart Checkout Intel"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-normal" }, surfaceType === "TRAVEL" ? "MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP" : surfaceType === "EDTECH" ? "UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI" : surfaceType === "UDEMY" ? "Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay" : "Live Card & EMI Optimization for Flipkart & Amazon"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-mono font-medium" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "<1.2ms Real-Time Scraper")), /* @__PURE__ */ import_react3.default.createElement(
+      /* @__PURE__ */ import_react3.default.createElement("div", { className: "commitguard-card" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: `p-1.5 rounded-lg text-white shadow-sm ${surfaceType === "TRAVEL" ? "bg-sky-600" : surfaceType === "EDTECH" ? "bg-indigo-600" : surfaceType === "UDEMY" ? "bg-purple-600" : surfaceType === "AMAZON" ? "bg-amber-600" : "bg-emerald-600"}` }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(Plane, { className: "w-5 h-5" }) : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(GraduationCap, { className: "w-5 h-5" }) : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(BookOpen, { className: "w-5 h-5" }) : surfaceType === "AMAZON" ? /* @__PURE__ */ import_react3.default.createElement(ShoppingBag, { className: "w-5 h-5" }) : /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-5 h-5" })), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-slate-900" }, surfaceType === "TRAVEL" ? "CommitGuard Travel: TNPL & EMI Reality Check" : surfaceType === "EDTECH" ? "CommitGuard EdTech: Education Loan Subvention Truth" : surfaceType === "UDEMY" ? "CommitGuard Udemy: Impulse Buy & BNPL Interceptor" : surfaceType === "AMAZON" ? "CommitGuard Amazon: Live Card & EMI Optimization" : surfaceType === "FLIPKART" ? "CommitGuard Flipkart: Live Card & EMI Optimization" : "CommitGuard Smart Checkout Intel"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-normal" }, surfaceType === "TRAVEL" ? "MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP" : surfaceType === "EDTECH" ? "UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI" : surfaceType === "UDEMY" ? "Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay" : surfaceType === "AMAZON" ? "Amazon.in: Live Amazon Pay ICICI 5% Cashback vs Hidden EMI GST" : surfaceType === "FLIPKART" ? "Flipkart.com: Live Flipkart Axis 5% Cashback vs Hidden EMI GST" : "Live Card & EMI Optimization for E-Commerce"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-mono font-medium" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "<1.2ms Real-Time Scraper")), /* @__PURE__ */ import_react3.default.createElement(
         "button",
         {
           onClick: onCancelStayOnPage,
@@ -7735,7 +7789,7 @@
           },
           /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-start justify-between gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 flex-wrap" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "font-bold text-sm text-slate-900" }, offer.bankOrCard), isBest && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white shadow-xs" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsUp, { className: "w-2.5 h-2.5" }), "RECOMMENDED: BEST VALUE"), isGood && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200" }, "GOOD OFFER"), isAvoid && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsDown, { className: "w-2.5 h-2.5 text-red-600" }), "AVOID: HIDDEN CHARGES")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-600" }, offer.description), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-700 font-medium flex items-center gap-1.5 pt-0.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-slate-400" }), /* @__PURE__ */ import_react3.default.createElement("span", null, offer.reason))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-right shrink-0" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-xs text-slate-500 font-medium" }, "Effective Price"), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-base font-black ${isBest ? "text-emerald-700" : isAvoid ? "text-red-600" : "text-slate-900"}` }, "\u20B9", offer.netPrice.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-[10px] font-bold ${isBest ? "text-emerald-600" : isAvoid ? "text-red-700" : "text-slate-600"}` }, offer.effectiveBenefit)))
         );
-      })), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "TRAVEL" ? "CommitGuard Travel Advisory (TNPL Warning):" : surfaceType === "EDTECH" ? "CommitGuard EdTech Advisory (Subvention Reality):" : surfaceType === "UDEMY" ? "CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):" : "CommitGuard Recommendation:")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-slate-600 text-[11px] leading-relaxed" }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Travel Now, Pay Later (TNPL)"), " advertises low monthly tranches but triggers ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "24% to 36% penalty APRs"), " and compounding bounce fees if any installment is missed post-trip. ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Recommended Alternative:"), " Start a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "6-month Liquid Fund SIP"), " at 7.10% yield to book your trip 100% debt-free.") : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, 'Education Loan "0% Subvention"'), " packages frequently embed an upfront ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "3% to 5% institutional subvention surcharge"), " into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.") : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Udemy Countdown Timers:"), ' The "Sale ends in 5 hours" timer resets automatically on next browser session. Over ', /* @__PURE__ */ import_react3.default.createElement("strong", null, "87% of purchased self-paced courses are never completed"), ". If paying, use direct UPI without EMI lock-ins, or invest in a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Liquid Fund"), " until you have scheduled hours to study.") : /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Flipkart Axis Bank Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% statement cashback"), ". If you use ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST and processing fees.")))), activeTab === "EMI_FRICTION" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-red-50 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-red-800 uppercase tracking-wide" }, "Effective APR"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-red-600 mt-1" }, mathResult.effectiveAnnualPercentageRate, "%"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-red-700/80 mt-0.5" }, "vs Advertised ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "0% APR"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-amber-50 border border-amber-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-amber-800 uppercase tracking-wide" }, "Total GST + Fee Drag"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-amber-700 mt-1" }, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-amber-800/80 mt-0.5" }, "\u20B9", processingFee, " fee + \u20B9", mathResult.totalGstOnInterest.toFixed(2), " GST")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-slate-700 uppercase tracking-wide" }, "Monthly Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-slate-900 mt-1" }, "\u20B9", mathResult.monthlyBaseEmi.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-slate-500 mt-0.5" }, "Locked for ", tenure, " installments"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "3-Bullet Plain-English Translation")), /* @__PURE__ */ import_react3.default.createElement("ul", { className: "space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed" }, /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-red-700 font-bold" }, "19.93% Effective APR Reality: "), "Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into ", /* @__PURE__ */ import_react3.default.createElement("strong", null, mathResult.effectiveAnnualPercentageRate, "% Effective APR"), ".")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-slate-900 font-bold" }, "Unrecoverable Monthly Drag: "), "Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), " in pure administrative leak.")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-emerald-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-800 font-bold" }, "Zero-Friction Baseline: "), "Paying upfront via direct UPI or debit card eliminates the \u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " drag completely while keeping your monthly credit limit untouched.")))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "ext-tenure-slider", className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Adjust EMI Tenure: ", /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-700 text-sm" }, tenure, " Months"))), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] text-slate-500 font-mono" }, "Click any tenure step")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "relative pt-1 pb-1" }, /* @__PURE__ */ import_react3.default.createElement(
+      })), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "TRAVEL" ? "CommitGuard Travel Advisory (TNPL Warning):" : surfaceType === "EDTECH" ? "CommitGuard EdTech Advisory (Subvention Reality):" : surfaceType === "UDEMY" ? "CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):" : surfaceType === "AMAZON" ? "CommitGuard Amazon Advisory (Cashback vs EMI Drag):" : "CommitGuard Flipkart Advisory (Cashback vs EMI Drag):")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-slate-600 text-[11px] leading-relaxed" }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Travel Now, Pay Later (TNPL)"), " advertises low monthly tranches but triggers ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "24% to 36% penalty APRs"), " and compounding bounce fees if any installment is missed post-trip. ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Recommended Alternative:"), " Start a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "6-month Liquid Fund SIP"), " at 7.10% yield to book your trip 100% debt-free.") : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, 'Education Loan "0% Subvention"'), " packages frequently embed an upfront ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "3% to 5% institutional subvention surcharge"), " into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.") : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Udemy Countdown Timers:"), ' The "Sale ends in 5 hours" timer resets automatically on next browser session. Over ', /* @__PURE__ */ import_react3.default.createElement("strong", null, "87% of purchased self-paced courses are never completed"), ". If paying, use direct UPI without EMI lock-ins, or invest in a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Liquid Fund"), " until you have scheduled hours to study.") : surfaceType === "AMAZON" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold an ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Amazon Pay ICICI Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% Amazon Pay balance cashback"), ". If you choose ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST on interest and bank processing fees.") : /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Flipkart Axis Bank Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% statement cashback"), ". If you use ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST and processing fees.")))), activeTab === "EMI_FRICTION" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-red-50 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-red-800 uppercase tracking-wide" }, "Effective APR"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-red-600 mt-1" }, mathResult.effectiveAnnualPercentageRate, "%"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-red-700/80 mt-0.5" }, "vs Advertised ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "0% APR"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-amber-50 border border-amber-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-amber-800 uppercase tracking-wide" }, "Total GST + Fee Drag"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-amber-700 mt-1" }, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-amber-800/80 mt-0.5" }, "\u20B9", processingFee, " fee + \u20B9", mathResult.totalGstOnInterest.toFixed(2), " GST")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-slate-700 uppercase tracking-wide" }, "Monthly Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-slate-900 mt-1" }, "\u20B9", mathResult.monthlyBaseEmi.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-slate-500 mt-0.5" }, "Locked for ", tenure, " installments"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "3-Bullet Plain-English Translation")), /* @__PURE__ */ import_react3.default.createElement("ul", { className: "space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed" }, /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-red-700 font-bold" }, "19.93% Effective APR Reality: "), "Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into ", /* @__PURE__ */ import_react3.default.createElement("strong", null, mathResult.effectiveAnnualPercentageRate, "% Effective APR"), ".")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-slate-900 font-bold" }, "Unrecoverable Monthly Drag: "), "Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), " in pure administrative leak.")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-emerald-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-800 font-bold" }, "Zero-Friction Baseline: "), "Paying upfront via direct UPI or debit card eliminates the \u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " drag completely while keeping your monthly credit limit untouched.")))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "ext-tenure-slider", className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Adjust EMI Tenure: ", /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-700 text-sm" }, tenure, " Months"))), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] text-slate-500 font-mono" }, "Click any tenure step")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "relative pt-1 pb-1" }, /* @__PURE__ */ import_react3.default.createElement(
         "input",
         {
           id: "ext-tenure-slider",
@@ -7817,6 +7871,12 @@
     const COMMITGUARD_HOST_ID = "commitguard-extension-root";
     function detectSurfaceType() {
       const host = window.location.hostname.toLowerCase();
+      if (host.includes("amazon")) {
+        return "AMAZON";
+      }
+      if (host.includes("flipkart")) {
+        return "FLIPKART";
+      }
       if (host.includes("udemy")) {
         return "UDEMY";
       }
@@ -7826,7 +7886,7 @@
       if (host.includes("upgrad") || host.includes("scaler") || host.includes("simplilearn") || host.includes("coursera")) {
         return "EDTECH";
       }
-      return "ECOMMERCE";
+      return "FLIPKART";
     }
     const CURRENT_SURFACE = detectSurfaceType();
     console.log(`\u{1F6E1}\uFE0F CommitGuard Surface Detected: [${CURRENT_SURFACE}] on ${window.location.hostname}`);
@@ -8025,51 +8085,6 @@
           }
           if (detectedPrice > 0) break;
         }
-        if (!detectedPrice) {
-          const individualMatch = bodyText.match(/Buy individual course[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
-          if (individualMatch && individualMatch[1]) {
-            detectedPrice = parseCurrencyNumber(individualMatch[1]);
-          }
-        }
-        if (!detectedPrice) {
-          const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
-          if (priceMatch && priceMatch[1]) {
-            detectedPrice = parseCurrencyNumber(priceMatch[1]);
-          }
-        }
-        const origPriceSelectors = [
-          '[data-purpose="original-price-container"] span',
-          's[data-purpose="original-price"]',
-          '[data-purpose="course-old-price-text"]',
-          "span.ud-sr-only + span[data-purpose]",
-          "s span",
-          "s"
-        ];
-        for (const sel of origPriceSelectors) {
-          const els = purchaseContainer.querySelectorAll(sel);
-          for (const el of Array.from(els)) {
-            const text = el.textContent || "";
-            if (text.includes("\u20B9")) {
-              const num = parseCurrencyNumber(text);
-              if (num > detectedPrice && num <= 5e4) {
-                detectedOriginalPrice = num;
-                break;
-              }
-            }
-          }
-          if (detectedOriginalPrice > 0) break;
-        }
-        if (!detectedOriginalPrice) {
-          const origMatch = bodyText.match(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:[0-9]+%\s*off)/i);
-          if (origMatch && origMatch[1]) {
-            const num = parseCurrencyNumber(origMatch[1]);
-            if (num > detectedPrice) detectedOriginalPrice = num;
-          }
-        }
-        const discountMatch2 = bodyText.match(/(\d+)%\s*off/i);
-        if (discountMatch2 && discountMatch2[1]) {
-          detectedDiscount = parseInt(discountMatch2[1], 10);
-        }
         const udemyPrice = detectedPrice > 0 ? detectedPrice : 539;
         const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3439;
         const discountPct = detectedDiscount > 0 ? detectedDiscount : Math.round((udemyOrigPrice - udemyPrice) / udemyOrigPrice * 100);
@@ -8114,56 +8129,188 @@
           offers: udemyOffers
         };
       }
-      const titleSelectors = [
+      if (CURRENT_SURFACE === "AMAZON") {
+        const amazonTitleSelectors = [
+          "#productTitle",
+          "#title",
+          "h1#title",
+          "span#productTitle",
+          "h1"
+        ];
+        for (const sel of amazonTitleSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent) {
+            const t = el.textContent.trim();
+            if (t.length > 5) {
+              detectedName = t.slice(0, 65);
+              break;
+            }
+          }
+        }
+        if (!detectedName) detectedName = "Identified Amazon Product";
+        const amazonPriceSelectors = [
+          ".a-price .a-offscreen",
+          "#corePriceDisplay_desktop_feature_div .a-price-whole",
+          "#corePrice_feature_div .a-price-whole",
+          "#priceblock_ourprice",
+          "#priceblock_dealprice",
+          "#priceblock_saleprice",
+          "span.apexPriceToPay span.a-offscreen",
+          "span.a-price-whole",
+          "#subtotals-marketplace-table .a-text-bold"
+        ];
+        for (const sel of amazonPriceSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent) {
+            const num = parseCurrencyNumber(el.textContent);
+            if (num > 100 && num < 1e7) {
+              detectedPrice = num;
+              break;
+            }
+          }
+        }
+        const amazonMrpSelectors = [
+          "span.a-price.a-text-price span.a-offscreen",
+          ".basisPrice .a-offscreen",
+          "span.a-text-price"
+        ];
+        for (const sel of amazonMrpSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent) {
+            const num = parseCurrencyNumber(el.textContent);
+            if (num > detectedPrice) {
+              detectedOriginalPrice = num;
+              break;
+            }
+          }
+        }
+        const amazonSavingsEl = document.querySelector("span.savingsPercentage, .reinventPriceSavingsPercentageMargin");
+        if (amazonSavingsEl && amazonSavingsEl.textContent) {
+          const dMatch = amazonSavingsEl.textContent.match(/(\d+)%/);
+          if (dMatch && dMatch[1]) detectedDiscount = parseInt(dMatch[1], 10);
+        }
+        const amazonFinalPrice = detectedPrice > 0 ? detectedPrice : 32295;
+        const amazonOffers = [];
+        amazonOffers.push({
+          id: "amazon-upi-instant",
+          bankOrCard: "UPI / Direct Debit (Zero Debt)",
+          description: "Immediate payment without loan or credit line lock-in",
+          effectiveBenefit: "Saves 100% of GST & bank processing fees",
+          rating: "BEST",
+          reason: "Zero interest, zero processing fee, keeps credit limit 100% free.",
+          netPrice: amazonFinalPrice,
+          recommended: true
+        });
+        const cashbackMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*cashback\s*as\s*Amazon\s*Pay/i);
+        let iciciCashback = Math.round(amazonFinalPrice * 0.05);
+        if (cashbackMatch && cashbackMatch[1]) {
+          const parsedCb = parseCurrencyNumber(cashbackMatch[1]);
+          if (parsedCb > 0 && parsedCb < amazonFinalPrice) iciciCashback = parsedCb;
+        }
+        amazonOffers.push({
+          id: "amazon-pay-icici",
+          bankOrCard: "Amazon Pay ICICI Bank Credit Card",
+          description: "5% Unlimited Cashback credited directly to Amazon Pay Balance",
+          effectiveBenefit: `Save \u20B9${iciciCashback.toLocaleString("en-IN")} cashback`,
+          rating: "BEST",
+          reason: `Earns \u20B9${iciciCashback.toLocaleString("en-IN")} unconditional Amazon Pay balance without any tenure lock-in.`,
+          netPrice: amazonFinalPrice - iciciCashback,
+          recommended: true
+        });
+        const bankOfferMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*discount\s*on\s*Credit\s*Cards/i);
+        let bankDiscount = Math.min(Math.round(amazonFinalPrice * 0.1), 1e3);
+        if (bankOfferMatch && bankOfferMatch[1]) {
+          const parsedBd = parseCurrencyNumber(bankOfferMatch[1]);
+          if (parsedBd > 0 && parsedBd < amazonFinalPrice) bankDiscount = parsedBd;
+        }
+        amazonOffers.push({
+          id: "amazon-bank-discount",
+          bankOrCard: "Bank Offer (HDFC / SBI / ICICI Credit Cards)",
+          description: `Instant discount up to \u20B9${bankDiscount.toLocaleString("en-IN")} on select credit cards`,
+          effectiveBenefit: `Save \u20B9${bankDiscount.toLocaleString("en-IN")} upfront`,
+          rating: "GOOD",
+          reason: "Direct instant price reduction at checkout if paid in full single tranche.",
+          netPrice: amazonFinalPrice - bankDiscount,
+          recommended: false
+        });
+        const emiMonths2 = 12;
+        const estimatedGstFee2 = Math.round(199 + amazonFinalPrice * 0.15 * (emiMonths2 / 12) * 0.18);
+        const emiSavingsMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*EMI\s*interest\s*savings/i);
+        const interestSavingsStr = emiSavingsMatch && emiSavingsMatch[1] ? ` (Advertised \u20B9${emiSavingsMatch[1]} savings)` : "";
+        amazonOffers.push({
+          id: "amazon-nocost-emi",
+          bankOrCard: "No-Cost EMI (All Banks)",
+          description: `${emiMonths2} Months installment plan${interestSavingsStr}`,
+          effectiveBenefit: `\u20B9${Math.round(amazonFinalPrice / emiMonths2).toLocaleString("en-IN")}/mo + \u20B9${estimatedGstFee2} GST drag`,
+          rating: "AVOID",
+          reason: `Hidden administrative leak: charges \u20B9199 bank fee + \u20B9${estimatedGstFee2} non-refundable GST on monthly interest.`,
+          netPrice: amazonFinalPrice + estimatedGstFee2,
+          recommended: false
+        });
+        if (/GST\s*invoice|business\s*purchase/i.test(bodyText)) {
+          const gstInputCredit = Math.round(amazonFinalPrice * 0.18);
+          amazonOffers.push({
+            id: "amazon-gst-itc",
+            bankOrCard: "Partner Offer: Amazon Business GST Invoice",
+            description: "Claim Input Tax Credit (ITC) for business purchases",
+            effectiveBenefit: `Save up to \u20B9${gstInputCredit.toLocaleString("en-IN")} (18% GST ITC)`,
+            rating: "GOOD",
+            reason: "Valid for registered GSTIN businesses to offset output tax liability.",
+            netPrice: amazonFinalPrice - gstInputCredit,
+            recommended: false
+          });
+        }
+        return {
+          surfaceType: "AMAZON",
+          price: amazonFinalPrice,
+          originalPrice: detectedOriginalPrice > 0 ? detectedOriginalPrice : void 0,
+          discountPercent: detectedDiscount > 0 ? detectedDiscount : void 0,
+          name: detectedName,
+          offers: amazonOffers
+        };
+      }
+      const flipkartTitleSelectors = [
         "h1",
         "span.B_NuCI",
         "span._35KyD6",
-        "#productTitle",
-        ".VU-ZEz"
+        ".VU-ZEz",
+        "span.VU-ZEz"
       ];
-      for (const sel of titleSelectors) {
+      for (const sel of flipkartTitleSelectors) {
         const el = document.querySelector(sel);
         if (el && el.textContent) {
           const titleText = el.textContent.trim();
           if (titleText.length > 5) {
-            detectedName = titleText.slice(0, 60);
+            detectedName = titleText.slice(0, 65);
             break;
           }
         }
       }
-      const priceSelectors = [
+      if (!detectedName) detectedName = "Identified Flipkart Item";
+      const flipkartPriceSelectors = [
         "div.Nx9bqj.CxhGGd",
         "div.Nx9bqj",
         "div._30jeq3._16Jk6d",
         "div._30jeq3",
-        ".a-price-whole",
-        "#subtotals-marketplace-table .a-text-bold"
+        ".Nx9bqj",
+        ".CxhGGd"
       ];
-      for (const sel of priceSelectors) {
+      for (const sel of flipkartPriceSelectors) {
         const el = document.querySelector(sel);
         if (el && el.textContent) {
-          const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
-          if (!isNaN(num) && num > 500 && num < 1e7) {
+          const num = parseCurrencyNumber(el.textContent);
+          if (num > 100 && num < 1e7) {
             detectedPrice = num;
             break;
           }
         }
       }
-      if (!detectedPrice) {
-        const buyAtMatch = bodyText.match(/(?:Buy at|Buy now at|Total Amount|Payable Amount|Total Price)[^\d₹]*₹\s*([0-9,]+)/i);
-        if (buyAtMatch && buyAtMatch[1]) {
-          const p = parseInt(buyAtMatch[1].replace(/,/g, ""), 10);
-          if (!isNaN(p) && p > 500 && p < 1e7) {
-            detectedPrice = p;
-          }
-        }
-      }
-      const mrpSelectors = ["div.yRaY8j.A68rqU", "div._3I9_wc._2p6lqe", "span.a-price.a-text-price"];
-      for (const sel of mrpSelectors) {
+      const flipkartMrpSelectors = ["div.yRaY8j.A68rqU", "div._3I9_wc._2p6lqe", ".yRaY8j"];
+      for (const sel of flipkartMrpSelectors) {
         const el = document.querySelector(sel);
         if (el && el.textContent) {
-          const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
-          if (!isNaN(num) && num > detectedPrice) {
+          const num = parseCurrencyNumber(el.textContent);
+          if (num > detectedPrice) {
             detectedOriginalPrice = num;
             break;
           }
@@ -8173,83 +8320,76 @@
       if (discountMatch && discountMatch[1]) {
         detectedDiscount = parseInt(discountMatch[1], 10);
       }
-      const emiMonthlyMatch = bodyText.match(/(?:From|Pay|EMI)\s*₹\s*([0-9,]+)\s*(?:\/\s*m|per month|monthly)/i);
-      if (emiMonthlyMatch && emiMonthlyMatch[1]) {
-        detectedEmi = parseInt(emiMonthlyMatch[1].replace(/,/g, ""), 10);
-      }
-      const finalPrice = detectedPrice > 0 ? detectedPrice : 5399;
-      const offers = [];
-      const hasAxisCard = /Flipkart Axis Bank|Axis Bank Credit Card|Axis/i.test(bodyText);
+      const flipkartPrice = detectedPrice > 0 ? detectedPrice : 5399;
+      const flipkartOffers = [];
       const hasAuBank = /AU Small Finance|AU Bank|AU Credit Card/i.test(bodyText);
       const hasSuperCoins = /SuperCoins/i.test(bodyText);
-      offers.push({
+      flipkartOffers.push({
         id: "upi-instant",
         bankOrCard: "UPI / Direct Debit (Zero Debt)",
         description: "Immediate payment without loan or credit line lock-in",
         effectiveBenefit: "Saves 100% of GST & bank processing fees",
         rating: "BEST",
         reason: "Zero interest, zero processing fee, keeps credit limit 100% free.",
-        netPrice: finalPrice,
+        netPrice: flipkartPrice,
         recommended: true
       });
-      if (hasAxisCard || true) {
-        const cashback = Math.round(finalPrice * 0.05);
-        offers.push({
-          id: "axis-card",
-          bankOrCard: "Flipkart Axis Bank Credit Card",
-          description: "5% Unlimited Cashback credited directly to statement",
-          effectiveBenefit: `Save \u20B9${cashback.toLocaleString("en-IN")} upfront`,
-          rating: "BEST",
-          reason: `Gives \u20B9${cashback.toLocaleString("en-IN")} instant statement cashback without any tenure lock-in.`,
-          netPrice: finalPrice - cashback,
-          recommended: true
-        });
-      }
+      const axisCashback = Math.round(flipkartPrice * 0.05);
+      flipkartOffers.push({
+        id: "axis-card",
+        bankOrCard: "Flipkart Axis Bank Credit Card",
+        description: "5% Unlimited Cashback credited directly to statement",
+        effectiveBenefit: `Save \u20B9${axisCashback.toLocaleString("en-IN")} upfront`,
+        rating: "BEST",
+        reason: `Gives \u20B9${axisCashback.toLocaleString("en-IN")} instant statement cashback without any tenure lock-in.`,
+        netPrice: flipkartPrice - axisCashback,
+        recommended: true
+      });
       if (hasAuBank || bodyText.includes("AU")) {
-        const auDiscount = Math.min(Math.round(finalPrice * 0.1), 1500);
-        offers.push({
+        const auDiscount = Math.min(Math.round(flipkartPrice * 0.1), 1500);
+        flipkartOffers.push({
           id: "au-bank",
           bankOrCard: "AU Small Finance Bank Credit Card",
           description: "Instant 10% discount on credit card transactions",
           effectiveBenefit: `Save \u20B9${auDiscount.toLocaleString("en-IN")}`,
           rating: "GOOD",
           reason: "Direct instant price reduction at checkout if you pay in single tranche.",
-          netPrice: finalPrice - auDiscount,
+          netPrice: flipkartPrice - auDiscount,
           recommended: false
         });
       }
       const emiMonths = 12;
-      const estimatedGstFee = Math.round(199 + finalPrice * 0.15 * (emiMonths / 12) * 0.18);
-      offers.push({
+      const estimatedGstFee = Math.round(199 + flipkartPrice * 0.15 * (emiMonths / 12) * 0.18);
+      flipkartOffers.push({
         id: "no-cost-emi",
         bankOrCard: "No-Cost EMI (All Banks)",
         description: `${emiMonths} Months installment plan`,
-        effectiveBenefit: `\u20B9${Math.round(finalPrice / emiMonths).toLocaleString("en-IN")}/mo + \u20B9${estimatedGstFee} GST drag`,
+        effectiveBenefit: `\u20B9${Math.round(flipkartPrice / emiMonths).toLocaleString("en-IN")}/mo + \u20B9${estimatedGstFee} GST drag`,
         rating: "AVOID",
         reason: `Hidden administrative leak: charges \u20B9199 fee + \u20B9${estimatedGstFee} non-refundable GST on interest.`,
-        netPrice: finalPrice + estimatedGstFee,
+        netPrice: flipkartPrice + estimatedGstFee,
         recommended: false
       });
       if (hasSuperCoins) {
-        offers.push({
+        flipkartOffers.push({
           id: "supercoins",
           bankOrCard: "Flipkart SuperCoins Plus",
           description: "Earn SuperCoins cashback rewards",
           effectiveBenefit: "Extra 15 SuperCoins on purchase",
           rating: "GOOD",
           reason: "Bonus rewards stacking on top of any payment card.",
-          netPrice: finalPrice,
+          netPrice: flipkartPrice,
           recommended: false
         });
       }
       return {
-        surfaceType: "ECOMMERCE",
-        price: finalPrice,
+        surfaceType: "FLIPKART",
+        price: flipkartPrice,
         originalPrice: detectedOriginalPrice > 0 ? detectedOriginalPrice : void 0,
         discountPercent: detectedDiscount > 0 ? detectedDiscount : void 0,
-        name: detectedName || "Identified Flipkart Item",
+        name: detectedName,
         advertisedMonthlyEmi: detectedEmi,
-        offers
+        offers: flipkartOffers
       };
     }
     let hostContainer = null;
@@ -8510,6 +8650,7 @@ lucide-react/dist/esm/icons/piggy-bank.js:
 lucide-react/dist/esm/icons/plane.js:
 lucide-react/dist/esm/icons/rotate-ccw.js:
 lucide-react/dist/esm/icons/shield-check.js:
+lucide-react/dist/esm/icons/shopping-bag.js:
 lucide-react/dist/esm/icons/sliders-vertical.js:
 lucide-react/dist/esm/icons/sparkles.js:
 lucide-react/dist/esm/icons/thumbs-down.js:

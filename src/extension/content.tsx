@@ -13,10 +13,16 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
   const COMMITGUARD_HOST_ID = 'commitguard-extension-root';
 
-  type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH' | 'UDEMY';
+  type InterceptorSurface = 'AMAZON' | 'FLIPKART' | 'TRAVEL' | 'EDTECH' | 'UDEMY';
 
   function detectSurfaceType(): InterceptorSurface {
     const host = window.location.hostname.toLowerCase();
+    if (host.includes('amazon')) {
+      return 'AMAZON';
+    }
+    if (host.includes('flipkart')) {
+      return 'FLIPKART';
+    }
     if (host.includes('udemy')) {
       return 'UDEMY';
     }
@@ -26,7 +32,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     if (host.includes('upgrad') || host.includes('scaler') || host.includes('simplilearn') || host.includes('coursera')) {
       return 'EDTECH';
     }
-    return 'ECOMMERCE';
+    return 'FLIPKART';
   }
 
   const CURRENT_SURFACE = detectSurfaceType();
@@ -60,7 +66,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     return isNaN(fallbackVal) ? 0 : Math.round(fallbackVal);
   }
 
-  // Universal Live Scraper adapting to variations in wording across Flipkart, Amazon, MakeMyTrip, Cleartrip, UpGrad, and Udemy
+  // Universal Live Scraper adapting dynamically to Amazon, Flipkart, MakeMyTrip, Cleartrip, UpGrad, and Udemy
   function extractProductInfo(clickedEl?: HTMLElement | null): {
     surfaceType: InterceptorSurface;
     price: number;
@@ -230,7 +236,6 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     // 3. SURFACE: UDEMY (Online Course Interceptor)
     // ==========================================
     if (CURRENT_SURFACE === 'UDEMY') {
-      // 1. Course Title Selectors on Udemy
       const udemyTitleSelectors = [
         'h1[data-purpose="lead-title"]',
         'h1.clp-lead__title',
@@ -250,8 +255,6 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       }
       if (!detectedName) detectedName = 'Fundamentals of Backend Engineering';
 
-      // 2. Scrape selling price directly from "Buy individual course" container or page
-      // Look first near the clicked button or inside the purchase section
       const purchaseContainer =
         (clickedEl && clickedEl.closest('[class*="buy-box"], [class*="sidebar"], [class*="purchase-section"], [class*="clp-lead"]')) ||
         document.querySelector('[data-purpose="sidebar-container"]') ||
@@ -259,7 +262,6 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         document.querySelector('[class*="buy-box"]') ||
         document.body;
 
-      // Scan for exact selling price (e.g. ₹539.00, ₹479.00, ₹449.00)
       const udemyPriceSelectors = [
         '[data-purpose="course-price-text"] span:not(.sr-only)',
         '[data-purpose="course-price-text"]',
@@ -275,7 +277,6 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           const text = el.textContent || '';
           if (text.includes('₹')) {
             const num = parseCurrencyNumber(text);
-            // Valid single course price on Udemy is between ₹200 and ₹20,000 (NOT 47,900)
             if (num >= 200 && num <= 20000) {
               detectedPrice = num;
               break;
@@ -283,61 +284,6 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           }
         }
         if (detectedPrice > 0) break;
-      }
-
-      // Regex targeted to "Buy individual course \n ₹539.00"
-      if (!detectedPrice) {
-        const individualMatch = bodyText.match(/Buy individual course[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
-        if (individualMatch && individualMatch[1]) {
-          detectedPrice = parseCurrencyNumber(individualMatch[1]);
-        }
-      }
-
-      // Regex fallback if selectors changed (e.g. ₹539.00 or ₹479.00)
-      if (!detectedPrice) {
-        const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
-        if (priceMatch && priceMatch[1]) {
-          detectedPrice = parseCurrencyNumber(priceMatch[1]);
-        }
-      }
-
-      // 3. Scrape struck-through original price (e.g. ₹3,439.00)
-      const origPriceSelectors = [
-        '[data-purpose="original-price-container"] span',
-        's[data-purpose="original-price"]',
-        '[data-purpose="course-old-price-text"]',
-        'span.ud-sr-only + span[data-purpose]',
-        's span',
-        's',
-      ];
-      for (const sel of origPriceSelectors) {
-        const els = purchaseContainer.querySelectorAll(sel);
-        for (const el of Array.from(els)) {
-          const text = el.textContent || '';
-          if (text.includes('₹')) {
-            const num = parseCurrencyNumber(text);
-            if (num > detectedPrice && num <= 50000) {
-              detectedOriginalPrice = num;
-              break;
-            }
-          }
-        }
-        if (detectedOriginalPrice > 0) break;
-      }
-
-      // Regex fallback for original price near discount % (e.g. ₹3,439.00 84% off)
-      if (!detectedOriginalPrice) {
-        const origMatch = bodyText.match(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*(?:[0-9]+%\s*off)/i);
-        if (origMatch && origMatch[1]) {
-          const num = parseCurrencyNumber(origMatch[1]);
-          if (num > detectedPrice) detectedOriginalPrice = num;
-        }
-      }
-
-      // Check discount % (e.g. 84% off)
-      const discountMatch = bodyText.match(/(\d+)%\s*off/i);
-      if (discountMatch && discountMatch[1]) {
-        detectedDiscount = parseInt(discountMatch[1], 10);
       }
 
       const udemyPrice = detectedPrice > 0 ? detectedPrice : 539;
@@ -388,168 +334,306 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     }
 
     // ==========================================
-    // 4. SURFACE: E-COMMERCE (Flipkart / Amazon)
+    // 4. SURFACE: AMAZON INDIA (amazon.in / amazon.com)
     // ==========================================
-    const titleSelectors = [
+    if (CURRENT_SURFACE === 'AMAZON') {
+      const amazonTitleSelectors = [
+        '#productTitle',
+        '#title',
+        'h1#title',
+        'span#productTitle',
+        'h1',
+      ];
+      for (const sel of amazonTitleSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const t = el.textContent.trim();
+          if (t.length > 5) {
+            detectedName = t.slice(0, 65);
+            break;
+          }
+        }
+      }
+      if (!detectedName) detectedName = 'Identified Amazon Product';
+
+      // Scrape Amazon selling price
+      const amazonPriceSelectors = [
+        '.a-price .a-offscreen',
+        '#corePriceDisplay_desktop_feature_div .a-price-whole',
+        '#corePrice_feature_div .a-price-whole',
+        '#priceblock_ourprice',
+        '#priceblock_dealprice',
+        '#priceblock_saleprice',
+        'span.apexPriceToPay span.a-offscreen',
+        'span.a-price-whole',
+        '#subtotals-marketplace-table .a-text-bold',
+      ];
+      for (const sel of amazonPriceSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const num = parseCurrencyNumber(el.textContent);
+          if (num > 100 && num < 10000000) {
+            detectedPrice = num;
+            break;
+          }
+        }
+      }
+
+      // Scrape Amazon MRP (struck-through)
+      const amazonMrpSelectors = [
+        'span.a-price.a-text-price span.a-offscreen',
+        '.basisPrice .a-offscreen',
+        'span.a-text-price',
+      ];
+      for (const sel of amazonMrpSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const num = parseCurrencyNumber(el.textContent);
+          if (num > detectedPrice) {
+            detectedOriginalPrice = num;
+            break;
+          }
+        }
+      }
+
+      // Check discount % on Amazon
+      const amazonSavingsEl = document.querySelector('span.savingsPercentage, .reinventPriceSavingsPercentageMargin');
+      if (amazonSavingsEl && amazonSavingsEl.textContent) {
+        const dMatch = amazonSavingsEl.textContent.match(/(\d+)%/);
+        if (dMatch && dMatch[1]) detectedDiscount = parseInt(dMatch[1], 10);
+      }
+
+      const amazonFinalPrice = detectedPrice > 0 ? detectedPrice : 32295;
+      const amazonOffers: ScrapedOffer[] = [];
+
+      // 1. Direct UPI / Amazon Pay Balance (Zero Debt)
+      amazonOffers.push({
+        id: 'amazon-upi-instant',
+        bankOrCard: 'UPI / Direct Debit (Zero Debt)',
+        description: 'Immediate payment without loan or credit line lock-in',
+        effectiveBenefit: 'Saves 100% of GST & bank processing fees',
+        rating: 'BEST',
+        reason: 'Zero interest, zero processing fee, keeps credit limit 100% free.',
+        netPrice: amazonFinalPrice,
+        recommended: true,
+      });
+
+      // 2. Amazon Pay ICICI Bank Credit Card (5% Cashback)
+      const cashbackMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*cashback\s*as\s*Amazon\s*Pay/i);
+      let iciciCashback = Math.round(amazonFinalPrice * 0.05);
+      if (cashbackMatch && cashbackMatch[1]) {
+        const parsedCb = parseCurrencyNumber(cashbackMatch[1]);
+        if (parsedCb > 0 && parsedCb < amazonFinalPrice) iciciCashback = parsedCb;
+      }
+
+      amazonOffers.push({
+        id: 'amazon-pay-icici',
+        bankOrCard: 'Amazon Pay ICICI Bank Credit Card',
+        description: '5% Unlimited Cashback credited directly to Amazon Pay Balance',
+        effectiveBenefit: `Save ₹${iciciCashback.toLocaleString('en-IN')} cashback`,
+        rating: 'BEST',
+        reason: `Earns ₹${iciciCashback.toLocaleString('en-IN')} unconditional Amazon Pay balance without any tenure lock-in.`,
+        netPrice: amazonFinalPrice - iciciCashback,
+        recommended: true,
+      });
+
+      // 3. Amazon Bank Offers (e.g. HDFC / SBI / ICICI Instant Credit Card Discounts)
+      const bankOfferMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*discount\s*on\s*Credit\s*Cards/i);
+      let bankDiscount = Math.min(Math.round(amazonFinalPrice * 0.1), 1000);
+      if (bankOfferMatch && bankOfferMatch[1]) {
+        const parsedBd = parseCurrencyNumber(bankOfferMatch[1]);
+        if (parsedBd > 0 && parsedBd < amazonFinalPrice) bankDiscount = parsedBd;
+      }
+
+      amazonOffers.push({
+        id: 'amazon-bank-discount',
+        bankOrCard: 'Bank Offer (HDFC / SBI / ICICI Credit Cards)',
+        description: `Instant discount up to ₹${bankDiscount.toLocaleString('en-IN')} on select credit cards`,
+        effectiveBenefit: `Save ₹${bankDiscount.toLocaleString('en-IN')} upfront`,
+        rating: 'GOOD',
+        reason: 'Direct instant price reduction at checkout if paid in full single tranche.',
+        netPrice: amazonFinalPrice - bankDiscount,
+        recommended: false,
+      });
+
+      // 4. Amazon No-Cost EMI (With Hidden GST + Fee Alert)
+      const emiMonths = 12;
+      const estimatedGstFee = Math.round(199 + (amazonFinalPrice * 0.15 * (emiMonths / 12) * 0.18));
+      
+      const emiSavingsMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*EMI\s*interest\s*savings/i);
+      const interestSavingsStr = emiSavingsMatch && emiSavingsMatch[1] ? ` (Advertised ₹${emiSavingsMatch[1]} savings)` : '';
+
+      amazonOffers.push({
+        id: 'amazon-nocost-emi',
+        bankOrCard: 'No-Cost EMI (All Banks)',
+        description: `${emiMonths} Months installment plan${interestSavingsStr}`,
+        effectiveBenefit: `₹${Math.round(amazonFinalPrice / emiMonths).toLocaleString('en-IN')}/mo + ₹${estimatedGstFee} GST drag`,
+        rating: 'AVOID',
+        reason: `Hidden administrative leak: charges ₹199 bank fee + ₹${estimatedGstFee} non-refundable GST on monthly interest.`,
+        netPrice: amazonFinalPrice + estimatedGstFee,
+        recommended: false,
+      });
+
+      // 5. Amazon Business GST Invoice (If detected on page)
+      if (/GST\s*invoice|business\s*purchase/i.test(bodyText)) {
+        const gstInputCredit = Math.round(amazonFinalPrice * 0.18);
+        amazonOffers.push({
+          id: 'amazon-gst-itc',
+          bankOrCard: 'Partner Offer: Amazon Business GST Invoice',
+          description: 'Claim Input Tax Credit (ITC) for business purchases',
+          effectiveBenefit: `Save up to ₹${gstInputCredit.toLocaleString('en-IN')} (18% GST ITC)`,
+          rating: 'GOOD',
+          reason: 'Valid for registered GSTIN businesses to offset output tax liability.',
+          netPrice: amazonFinalPrice - gstInputCredit,
+          recommended: false,
+        });
+      }
+
+      return {
+        surfaceType: 'AMAZON',
+        price: amazonFinalPrice,
+        originalPrice: detectedOriginalPrice > 0 ? detectedOriginalPrice : undefined,
+        discountPercent: detectedDiscount > 0 ? detectedDiscount : undefined,
+        name: detectedName,
+        offers: amazonOffers,
+      };
+    }
+
+    // ==========================================
+    // 5. SURFACE: FLIPKART (flipkart.com)
+    // ==========================================
+    const flipkartTitleSelectors = [
       'h1',
       'span.B_NuCI',
       'span._35KyD6',
-      '#productTitle',
       '.VU-ZEz',
+      'span.VU-ZEz',
     ];
-    for (const sel of titleSelectors) {
+    for (const sel of flipkartTitleSelectors) {
       const el = document.querySelector(sel);
       if (el && el.textContent) {
         const titleText = el.textContent.trim();
         if (titleText.length > 5) {
-          detectedName = titleText.slice(0, 60);
+          detectedName = titleText.slice(0, 65);
           break;
         }
       }
     }
+    if (!detectedName) detectedName = 'Identified Flipkart Item';
 
-    // Extract primary selling price from main Flipkart price elements
-    const priceSelectors = [
+    const flipkartPriceSelectors = [
       'div.Nx9bqj.CxhGGd',
       'div.Nx9bqj',
       'div._30jeq3._16Jk6d',
       'div._30jeq3',
-      '.a-price-whole',
-      '#subtotals-marketplace-table .a-text-bold',
+      '.Nx9bqj',
+      '.CxhGGd',
     ];
-    for (const sel of priceSelectors) {
+    for (const sel of flipkartPriceSelectors) {
       const el = document.querySelector(sel);
       if (el && el.textContent) {
-        const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
-        if (!isNaN(num) && num > 500 && num < 10000000) {
+        const num = parseCurrencyNumber(el.textContent);
+        if (num > 100 && num < 10000000) {
           detectedPrice = num;
           break;
         }
       }
     }
 
-    // Scan for "Buy at ₹4,524" or "Buy now at ₹..." in buttons/headings
-    if (!detectedPrice) {
-      const buyAtMatch = bodyText.match(/(?:Buy at|Buy now at|Total Amount|Payable Amount|Total Price)[^\d₹]*₹\s*([0-9,]+)/i);
-      if (buyAtMatch && buyAtMatch[1]) {
-        const p = parseInt(buyAtMatch[1].replace(/,/g, ''), 10);
-        if (!isNaN(p) && p > 500 && p < 10000000) {
-          detectedPrice = p;
-        }
-      }
-    }
-
-    // Scan original struck-through MRP (e.g. ₹19,999 or 73% off)
-    const mrpSelectors = ['div.yRaY8j.A68rqU', 'div._3I9_wc._2p6lqe', 'span.a-price.a-text-price'];
-    for (const sel of mrpSelectors) {
+    const flipkartMrpSelectors = ['div.yRaY8j.A68rqU', 'div._3I9_wc._2p6lqe', '.yRaY8j'];
+    for (const sel of flipkartMrpSelectors) {
       const el = document.querySelector(sel);
       if (el && el.textContent) {
-        const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
-        if (!isNaN(num) && num > detectedPrice) {
+        const num = parseCurrencyNumber(el.textContent);
+        if (num > detectedPrice) {
           detectedOriginalPrice = num;
           break;
         }
       }
     }
 
-    // Check discount percentage
     const discountMatch = bodyText.match(/(\d+)%\s*off/i);
     if (discountMatch && discountMatch[1]) {
       detectedDiscount = parseInt(discountMatch[1], 10);
     }
 
-    // Check for "Buy with EMI From ₹5,166/m"
-    const emiMonthlyMatch = bodyText.match(/(?:From|Pay|EMI)\s*₹\s*([0-9,]+)\s*(?:\/\s*m|per month|monthly)/i);
-    if (emiMonthlyMatch && emiMonthlyMatch[1]) {
-      detectedEmi = parseInt(emiMonthlyMatch[1].replace(/,/g, ''), 10);
-    }
+    const flipkartPrice = detectedPrice > 0 ? detectedPrice : 5399;
 
-    const finalPrice = detectedPrice > 0 ? detectedPrice : 5399;
-
-    // Detect active bank/card offers on page
-    const offers: ScrapedOffer[] = [];
-    const hasAxisCard = /Flipkart Axis Bank|Axis Bank Credit Card|Axis/i.test(bodyText);
+    const flipkartOffers: ScrapedOffer[] = [];
     const hasAuBank = /AU Small Finance|AU Bank|AU Credit Card/i.test(bodyText);
     const hasSuperCoins = /SuperCoins/i.test(bodyText);
 
-    // 1. Direct UPI / Debit Card Baseline (Zero Drag)
-    offers.push({
+    flipkartOffers.push({
       id: 'upi-instant',
       bankOrCard: 'UPI / Direct Debit (Zero Debt)',
       description: 'Immediate payment without loan or credit line lock-in',
       effectiveBenefit: 'Saves 100% of GST & bank processing fees',
       rating: 'BEST',
       reason: 'Zero interest, zero processing fee, keeps credit limit 100% free.',
-      netPrice: finalPrice,
+      netPrice: flipkartPrice,
       recommended: true,
     });
 
-    // 2. Flipkart Axis Bank Credit Card
-    if (hasAxisCard || true) {
-      const cashback = Math.round(finalPrice * 0.05);
-      offers.push({
-        id: 'axis-card',
-        bankOrCard: 'Flipkart Axis Bank Credit Card',
-        description: '5% Unlimited Cashback credited directly to statement',
-        effectiveBenefit: `Save ₹${cashback.toLocaleString('en-IN')} upfront`,
-        rating: 'BEST',
-        reason: `Gives ₹${cashback.toLocaleString('en-IN')} instant statement cashback without any tenure lock-in.`,
-        netPrice: finalPrice - cashback,
-        recommended: true,
-      });
-    }
+    const axisCashback = Math.round(flipkartPrice * 0.05);
+    flipkartOffers.push({
+      id: 'axis-card',
+      bankOrCard: 'Flipkart Axis Bank Credit Card',
+      description: '5% Unlimited Cashback credited directly to statement',
+      effectiveBenefit: `Save ₹${axisCashback.toLocaleString('en-IN')} upfront`,
+      rating: 'BEST',
+      reason: `Gives ₹${axisCashback.toLocaleString('en-IN')} instant statement cashback without any tenure lock-in.`,
+      netPrice: flipkartPrice - axisCashback,
+      recommended: true,
+    });
 
-    // 3. AU Bank / Partner Bank Discount Offer
     if (hasAuBank || bodyText.includes('AU')) {
-      const auDiscount = Math.min(Math.round(finalPrice * 0.1), 1500);
-      offers.push({
+      const auDiscount = Math.min(Math.round(flipkartPrice * 0.1), 1500);
+      flipkartOffers.push({
         id: 'au-bank',
         bankOrCard: 'AU Small Finance Bank Credit Card',
         description: 'Instant 10% discount on credit card transactions',
         effectiveBenefit: `Save ₹${auDiscount.toLocaleString('en-IN')}`,
         rating: 'GOOD',
         reason: 'Direct instant price reduction at checkout if you pay in single tranche.',
-        netPrice: finalPrice - auDiscount,
+        netPrice: flipkartPrice - auDiscount,
         recommended: false,
       });
     }
 
-    // 4. No-Cost EMI (With Hidden GST Alert)
     const emiMonths = 12;
-    const estimatedGstFee = Math.round(199 + (finalPrice * 0.15 * (emiMonths / 12) * 0.18));
-    offers.push({
+    const estimatedGstFee = Math.round(199 + (flipkartPrice * 0.15 * (emiMonths / 12) * 0.18));
+    flipkartOffers.push({
       id: 'no-cost-emi',
       bankOrCard: 'No-Cost EMI (All Banks)',
       description: `${emiMonths} Months installment plan`,
-      effectiveBenefit: `₹${Math.round(finalPrice / emiMonths).toLocaleString('en-IN')}/mo + ₹${estimatedGstFee} GST drag`,
+      effectiveBenefit: `₹${Math.round(flipkartPrice / emiMonths).toLocaleString('en-IN')}/mo + ₹${estimatedGstFee} GST drag`,
       rating: 'AVOID',
       reason: `Hidden administrative leak: charges ₹199 fee + ₹${estimatedGstFee} non-refundable GST on interest.`,
-      netPrice: finalPrice + estimatedGstFee,
+      netPrice: flipkartPrice + estimatedGstFee,
       recommended: false,
     });
 
-    // 5. SuperCoins / Rewards
     if (hasSuperCoins) {
-      offers.push({
+      flipkartOffers.push({
         id: 'supercoins',
         bankOrCard: 'Flipkart SuperCoins Plus',
         description: 'Earn SuperCoins cashback rewards',
         effectiveBenefit: 'Extra 15 SuperCoins on purchase',
         rating: 'GOOD',
         reason: 'Bonus rewards stacking on top of any payment card.',
-        netPrice: finalPrice,
+        netPrice: flipkartPrice,
         recommended: false,
       });
     }
 
     return {
-      surfaceType: 'ECOMMERCE',
-      price: finalPrice,
+      surfaceType: 'FLIPKART',
+      price: flipkartPrice,
       originalPrice: detectedOriginalPrice > 0 ? detectedOriginalPrice : undefined,
       discountPercent: detectedDiscount > 0 ? detectedDiscount : undefined,
-      name: detectedName || 'Identified Flipkart Item',
+      name: detectedName,
       advertisedMonthlyEmi: detectedEmi,
-      offers,
+      offers: flipkartOffers,
     };
   }
 

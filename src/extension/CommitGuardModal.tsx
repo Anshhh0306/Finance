@@ -22,10 +22,11 @@ import {
   GraduationCap,
   Scale,
   BookOpen,
+  ShoppingBag,
 } from 'lucide-react';
 import { calculateNoCostEmiDrag } from '../lib/financial-engine';
 
-export type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH' | 'UDEMY';
+export type InterceptorSurface = 'AMAZON' | 'FLIPKART' | 'ECOMMERCE' | 'TRAVEL' | 'EDTECH' | 'UDEMY';
 
 export interface ScrapedOffer {
   id: string;
@@ -50,9 +51,9 @@ export interface ExtensionModalProps {
 }
 
 export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
-  surfaceType = 'ECOMMERCE',
+  surfaceType = 'AMAZON',
   productPrice = 5399,
-  productName = 'Identified Flipkart Item',
+  productName = 'Identified Checkout Item',
   originalPrice,
   discountPercent,
   scrapedOffers = [],
@@ -114,9 +115,57 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
     };
   }, [mathResult, tenure]);
 
-  // Fallback offers if none scraped
+  // Dynamic fallback offers customized per surface if none scraped
   const displayOffers: ScrapedOffer[] = useMemo(() => {
     if (scrapedOffers && scrapedOffers.length > 0) return scrapedOffers;
+
+    if (surfaceType === 'AMAZON') {
+      const amazonCashback = Math.round(productPrice * 0.05);
+      const bankDiscount = Math.min(Math.round(productPrice * 0.1), 1250);
+      return [
+        {
+          id: 'amazon-icici-card',
+          bankOrCard: 'Amazon Pay ICICI Bank Credit Card',
+          description: '5% Unlimited Cashback credited to Amazon Pay Balance',
+          effectiveBenefit: `Save ₹${amazonCashback.toLocaleString('en-IN')} cashback`,
+          rating: 'BEST',
+          reason: 'Zero lock-in tenure. Instant Amazon Pay cashback without interest or processing fees.',
+          netPrice: productPrice - amazonCashback,
+          recommended: true,
+        },
+        {
+          id: 'upi-instant',
+          bankOrCard: 'Amazon Pay UPI / Direct Debit (Zero Debt)',
+          description: 'Single-tranche direct payment from bank account',
+          effectiveBenefit: 'Saves 100% of GST & bank processing fees',
+          rating: 'BEST',
+          reason: 'Zero interest, zero processing fee, keeps credit limit 100% free.',
+          netPrice: productPrice,
+          recommended: true,
+        },
+        {
+          id: 'amazon-bank-offer',
+          bankOrCard: 'Bank Offer: HDFC / SBI Credit Cards',
+          description: 'Instant 10% discount on credit card transactions',
+          effectiveBenefit: `Save ₹${bankDiscount.toLocaleString('en-IN')} upfront`,
+          rating: 'GOOD',
+          reason: 'Direct instant price reduction at checkout if paid in full.',
+          netPrice: productPrice - bankDiscount,
+          recommended: false,
+        },
+        {
+          id: 'no-cost-emi',
+          bankOrCard: 'Amazon No-Cost EMI (All Banks)',
+          description: `${tenure} Months installment plan`,
+          effectiveBenefit: `₹${mathResult.monthlyBaseEmi.toLocaleString('en-IN')}/mo + ₹${mathResult.totalHiddenFriction.toLocaleString('en-IN')} GST Drag`,
+          rating: 'AVOID',
+          reason: `Charges ${mathResult.effectiveAnnualPercentageRate}% Effective APR via statutory 18% GST on interest + ₹${processingFee} bank fee.`,
+          netPrice: productPrice + mathResult.totalHiddenFriction,
+          recommended: false,
+        },
+      ];
+    }
+
     const axisCashback = Math.round(productPrice * 0.05);
     return [
       {
@@ -160,7 +209,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         recommended: false,
       },
     ];
-  }, [scrapedOffers, productPrice, tenure, mathResult, processingFee]);
+  }, [scrapedOffers, surfaceType, productPrice, tenure, mathResult, processingFee]);
 
   return (
     <div
@@ -182,6 +231,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                 ? 'bg-indigo-600'
                 : surfaceType === 'UDEMY'
                 ? 'bg-purple-600'
+                : surfaceType === 'AMAZON'
+                ? 'bg-amber-600'
                 : 'bg-emerald-600'
             }`}>
               {surfaceType === 'TRAVEL' ? (
@@ -190,6 +241,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                 <GraduationCap className="w-5 h-5" />
               ) : surfaceType === 'UDEMY' ? (
                 <BookOpen className="w-5 h-5" />
+              ) : surfaceType === 'AMAZON' ? (
+                <ShoppingBag className="w-5 h-5" />
               ) : (
                 <Sparkles className="w-5 h-5" />
               )}
@@ -202,6 +255,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   ? 'CommitGuard EdTech: Education Loan Subvention Truth'
                   : surfaceType === 'UDEMY'
                   ? 'CommitGuard Udemy: Impulse Buy & BNPL Interceptor'
+                  : surfaceType === 'AMAZON'
+                  ? 'CommitGuard Amazon: Live Card & EMI Optimization'
+                  : surfaceType === 'FLIPKART'
+                  ? 'CommitGuard Flipkart: Live Card & EMI Optimization'
                   : 'CommitGuard Smart Checkout Intel'}
               </span>
               <div className="text-[11px] text-slate-500 font-normal">
@@ -211,7 +268,11 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   ? 'UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI'
                   : surfaceType === 'UDEMY'
                   ? 'Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay'
-                  : 'Live Card & EMI Optimization for Flipkart & Amazon'}
+                  : surfaceType === 'AMAZON'
+                  ? 'Amazon.in: Live Amazon Pay ICICI 5% Cashback vs Hidden EMI GST'
+                  : surfaceType === 'FLIPKART'
+                  ? 'Flipkart.com: Live Flipkart Axis 5% Cashback vs Hidden EMI GST'
+                  : 'Live Card & EMI Optimization for E-Commerce'}
               </div>
             </div>
           </div>
@@ -257,6 +318,7 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
             )}
           </div>
         </div>
+
 
         {/* Tab Navigation: Card Offers (Good vs Bad) vs EMI Friction Breakdown */}
         <div className="flex border-b border-slate-200 bg-slate-100/70 p-1.5 gap-1.5">
@@ -407,7 +469,9 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                       ? 'CommitGuard EdTech Advisory (Subvention Reality):'
                       : surfaceType === 'UDEMY'
                       ? 'CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):'
-                      : 'CommitGuard Recommendation:'}
+                      : surfaceType === 'AMAZON'
+                      ? 'CommitGuard Amazon Advisory (Cashback vs EMI Drag):'
+                      : 'CommitGuard Flipkart Advisory (Cashback vs EMI Drag):'}
                   </span>
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed">
@@ -422,6 +486,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   ) : surfaceType === 'UDEMY' ? (
                     <>
                       <strong>Udemy Countdown Timers:</strong> The "Sale ends in 5 hours" timer resets automatically on next browser session. Over <strong>87% of purchased self-paced courses are never completed</strong>. If paying, use direct UPI without EMI lock-ins, or invest in a <strong>Liquid Fund</strong> until you have scheduled hours to study.
+                    </>
+                  ) : surfaceType === 'AMAZON' ? (
+                    <>
+                      If you hold an <strong>Amazon Pay ICICI Card</strong>, pay in full to lock an unconditional <strong>5% Amazon Pay balance cashback</strong>. If you choose <strong>No-Cost EMI</strong>, you will lose ~₹{mathResult.totalHiddenFriction.toLocaleString('en-IN')} to non-refundable 18% GST on interest and bank processing fees.
                     </>
                   ) : (
                     <>
