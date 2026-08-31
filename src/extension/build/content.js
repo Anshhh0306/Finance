@@ -7327,23 +7327,36 @@
   ];
   var ArrowRight = createLucideIcon("ArrowRight", __iconNode);
 
+  // node_modules/lucide-react/dist/esm/icons/book-open.js
+  var __iconNode2 = [
+    ["path", { d: "M12 7v14", key: "1akyts" }],
+    [
+      "path",
+      {
+        d: "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z",
+        key: "ruj8y"
+      }
+    ]
+  ];
+  var BookOpen = createLucideIcon("BookOpen", __iconNode2);
+
   // node_modules/lucide-react/dist/esm/icons/chevron-down.js
-  var __iconNode2 = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-  var ChevronDown = createLucideIcon("ChevronDown", __iconNode2);
+  var __iconNode3 = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+  var ChevronDown = createLucideIcon("ChevronDown", __iconNode3);
 
   // node_modules/lucide-react/dist/esm/icons/chevron-up.js
-  var __iconNode3 = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-  var ChevronUp = createLucideIcon("ChevronUp", __iconNode3);
+  var __iconNode4 = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+  var ChevronUp = createLucideIcon("ChevronUp", __iconNode4);
 
   // node_modules/lucide-react/dist/esm/icons/credit-card.js
-  var __iconNode4 = [
+  var __iconNode5 = [
     ["rect", { width: "20", height: "14", x: "2", y: "5", rx: "2", key: "ynyp8z" }],
     ["line", { x1: "2", x2: "22", y1: "10", y2: "10", key: "1b3vmo" }]
   ];
-  var CreditCard = createLucideIcon("CreditCard", __iconNode4);
+  var CreditCard = createLucideIcon("CreditCard", __iconNode5);
 
   // node_modules/lucide-react/dist/esm/icons/graduation-cap.js
-  var __iconNode5 = [
+  var __iconNode6 = [
     [
       "path",
       {
@@ -7354,10 +7367,10 @@
     ["path", { d: "M22 10v6", key: "1lu8f3" }],
     ["path", { d: "M6 12.5V16a6 3 0 0 0 12 0v-3.5", key: "1r8lef" }]
   ];
-  var GraduationCap = createLucideIcon("GraduationCap", __iconNode5);
+  var GraduationCap = createLucideIcon("GraduationCap", __iconNode6);
 
   // node_modules/lucide-react/dist/esm/icons/piggy-bank.js
-  var __iconNode6 = [
+  var __iconNode7 = [
     [
       "path",
       {
@@ -7368,10 +7381,10 @@
     ["path", { d: "M2 9v1c0 1.1.9 2 2 2h1", key: "nm575m" }],
     ["path", { d: "M16 11h.01", key: "xkw8gn" }]
   ];
-  var PiggyBank = createLucideIcon("PiggyBank", __iconNode6);
+  var PiggyBank = createLucideIcon("PiggyBank", __iconNode7);
 
   // node_modules/lucide-react/dist/esm/icons/plane.js
-  var __iconNode7 = [
+  var __iconNode8 = [
     [
       "path",
       {
@@ -7380,17 +7393,17 @@
       }
     ]
   ];
-  var Plane = createLucideIcon("Plane", __iconNode7);
+  var Plane = createLucideIcon("Plane", __iconNode8);
 
   // node_modules/lucide-react/dist/esm/icons/rotate-ccw.js
-  var __iconNode8 = [
+  var __iconNode9 = [
     ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ];
-  var RotateCcw = createLucideIcon("RotateCcw", __iconNode8);
+  var RotateCcw = createLucideIcon("RotateCcw", __iconNode9);
 
   // node_modules/lucide-react/dist/esm/icons/shield-check.js
-  var __iconNode9 = [
+  var __iconNode10 = [
     [
       "path",
       {
@@ -7400,10 +7413,10 @@
     ],
     ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
   ];
-  var ShieldCheck = createLucideIcon("ShieldCheck", __iconNode9);
+  var ShieldCheck = createLucideIcon("ShieldCheck", __iconNode10);
 
   // node_modules/lucide-react/dist/esm/icons/sliders-vertical.js
-  var __iconNode10 = [
+  var __iconNode11 = [
     ["line", { x1: "4", x2: "4", y1: "21", y2: "14", key: "1p332r" }],
     ["line", { x1: "4", x2: "4", y1: "10", y2: "3", key: "gb41h5" }],
     ["line", { x1: "12", x2: "12", y1: "21", y2: "12", key: "hf2csr" }],
@@ -7414,10 +7427,10 @@
     ["line", { x1: "10", x2: "14", y1: "8", y2: "8", key: "1yglbp" }],
     ["line", { x1: "18", x2: "22", y1: "16", y2: "16", key: "1jxqpz" }]
   ];
-  var SlidersVertical = createLucideIcon("SlidersVertical", __iconNode10);
+  var SlidersVertical = createLucideIcon("SlidersVertical", __iconNode11);
 
   // node_modules/lucide-react/dist/esm/icons/sparkles.js
-  var __iconNode11 = [
+  var __iconNode12 = [
     [
       "path",
       {
@@ -7430,10 +7443,10 @@
     ["path", { d: "M4 17v2", key: "vumght" }],
     ["path", { d: "M5 18H3", key: "zchphs" }]
   ];
-  var Sparkles = createLucideIcon("Sparkles", __iconNode11);
+  var Sparkles = createLucideIcon("Sparkles", __iconNode12);
 
   // node_modules/lucide-react/dist/esm/icons/thumbs-down.js
-  var __iconNode12 = [
+  var __iconNode13 = [
     ["path", { d: "M17 14V2", key: "8ymqnk" }],
     [
       "path",
@@ -7443,10 +7456,10 @@
       }
     ]
   ];
-  var ThumbsDown = createLucideIcon("ThumbsDown", __iconNode12);
+  var ThumbsDown = createLucideIcon("ThumbsDown", __iconNode13);
 
   // node_modules/lucide-react/dist/esm/icons/thumbs-up.js
-  var __iconNode13 = [
+  var __iconNode14 = [
     ["path", { d: "M7 10v12", key: "1qc93n" }],
     [
       "path",
@@ -7456,17 +7469,17 @@
       }
     ]
   ];
-  var ThumbsUp = createLucideIcon("ThumbsUp", __iconNode13);
+  var ThumbsUp = createLucideIcon("ThumbsUp", __iconNode14);
 
   // node_modules/lucide-react/dist/esm/icons/trending-up.js
-  var __iconNode14 = [
+  var __iconNode15 = [
     ["polyline", { points: "22 7 13.5 15.5 8.5 10.5 2 17", key: "126l90" }],
     ["polyline", { points: "16 7 22 7 22 13", key: "kwv8wd" }]
   ];
-  var TrendingUp = createLucideIcon("TrendingUp", __iconNode14);
+  var TrendingUp = createLucideIcon("TrendingUp", __iconNode15);
 
   // node_modules/lucide-react/dist/esm/icons/triangle-alert.js
-  var __iconNode15 = [
+  var __iconNode16 = [
     [
       "path",
       {
@@ -7477,14 +7490,14 @@
     ["path", { d: "M12 9v4", key: "juzpu7" }],
     ["path", { d: "M12 17h.01", key: "p32p05" }]
   ];
-  var TriangleAlert = createLucideIcon("TriangleAlert", __iconNode15);
+  var TriangleAlert = createLucideIcon("TriangleAlert", __iconNode16);
 
   // node_modules/lucide-react/dist/esm/icons/x.js
-  var __iconNode16 = [
+  var __iconNode17 = [
     ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ];
-  var X = createLucideIcon("X", __iconNode16);
+  var X = createLucideIcon("X", __iconNode17);
 
   // src/lib/financial-engine.ts
   var GST_RATE = 0.18;
@@ -7682,7 +7695,7 @@
           if (e.target === e.currentTarget) onCancelStayOnPage();
         }
       },
-      /* @__PURE__ */ import_react3.default.createElement("div", { className: "commitguard-card" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: `p-1.5 rounded-lg text-white shadow-sm ${surfaceType === "TRAVEL" ? "bg-sky-600" : surfaceType === "EDTECH" ? "bg-indigo-600" : "bg-emerald-600"}` }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(Plane, { className: "w-5 h-5" }) : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(GraduationCap, { className: "w-5 h-5" }) : /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-5 h-5" })), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-slate-900" }, surfaceType === "TRAVEL" ? "CommitGuard Travel: TNPL & EMI Reality Check" : surfaceType === "EDTECH" ? "CommitGuard EdTech: Education Loan Subvention Truth" : "CommitGuard Smart Checkout Intel"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-normal" }, surfaceType === "TRAVEL" ? "MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP" : surfaceType === "EDTECH" ? "UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI" : "Live Card & EMI Optimization for Flipkart & Amazon"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-mono font-medium" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "<1.2ms Real-Time Scraper")), /* @__PURE__ */ import_react3.default.createElement(
+      /* @__PURE__ */ import_react3.default.createElement("div", { className: "commitguard-card" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: `p-1.5 rounded-lg text-white shadow-sm ${surfaceType === "TRAVEL" ? "bg-sky-600" : surfaceType === "EDTECH" ? "bg-indigo-600" : surfaceType === "UDEMY" ? "bg-purple-600" : "bg-emerald-600"}` }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(Plane, { className: "w-5 h-5" }) : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(GraduationCap, { className: "w-5 h-5" }) : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(BookOpen, { className: "w-5 h-5" }) : /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-5 h-5" })), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-slate-900" }, surfaceType === "TRAVEL" ? "CommitGuard Travel: TNPL & EMI Reality Check" : surfaceType === "EDTECH" ? "CommitGuard EdTech: Education Loan Subvention Truth" : surfaceType === "UDEMY" ? "CommitGuard Udemy: Impulse Buy & BNPL Interceptor" : "CommitGuard Smart Checkout Intel"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-normal" }, surfaceType === "TRAVEL" ? "MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP" : surfaceType === "EDTECH" ? "UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI" : surfaceType === "UDEMY" ? "Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay" : "Live Card & EMI Optimization for Flipkart & Amazon"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-mono font-medium" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "<1.2ms Real-Time Scraper")), /* @__PURE__ */ import_react3.default.createElement(
         "button",
         {
           onClick: onCancelStayOnPage,
@@ -7722,7 +7735,7 @@
           },
           /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-start justify-between gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 flex-wrap" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "font-bold text-sm text-slate-900" }, offer.bankOrCard), isBest && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white shadow-xs" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsUp, { className: "w-2.5 h-2.5" }), "RECOMMENDED: BEST VALUE"), isGood && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200" }, "GOOD OFFER"), isAvoid && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsDown, { className: "w-2.5 h-2.5 text-red-600" }), "AVOID: HIDDEN CHARGES")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-600" }, offer.description), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-700 font-medium flex items-center gap-1.5 pt-0.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-slate-400" }), /* @__PURE__ */ import_react3.default.createElement("span", null, offer.reason))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-right shrink-0" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-xs text-slate-500 font-medium" }, "Effective Price"), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-base font-black ${isBest ? "text-emerald-700" : isAvoid ? "text-red-600" : "text-slate-900"}` }, "\u20B9", offer.netPrice.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-[10px] font-bold ${isBest ? "text-emerald-600" : isAvoid ? "text-red-700" : "text-slate-600"}` }, offer.effectiveBenefit)))
         );
-      })), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "TRAVEL" ? "CommitGuard Travel Advisory (TNPL Warning):" : surfaceType === "EDTECH" ? "CommitGuard EdTech Advisory (Subvention Reality):" : "CommitGuard Recommendation:")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-slate-600 text-[11px] leading-relaxed" }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Travel Now, Pay Later (TNPL)"), " advertises low monthly tranches but triggers ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "24% to 36% penalty APRs"), " and compounding bounce fees if any installment is missed post-trip. ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Recommended Alternative:"), " Start a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "6-month Liquid Fund SIP"), " at 7.10% yield to book your trip 100% debt-free.") : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, 'Education Loan "0% Subvention"'), " packages frequently embed an upfront ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "3% to 5% institutional subvention surcharge"), " into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.") : /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Flipkart Axis Bank Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% statement cashback"), ". If you use ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST and processing fees.")))), activeTab === "EMI_FRICTION" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-red-50 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-red-800 uppercase tracking-wide" }, "Effective APR"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-red-600 mt-1" }, mathResult.effectiveAnnualPercentageRate, "%"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-red-700/80 mt-0.5" }, "vs Advertised ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "0% APR"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-amber-50 border border-amber-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-amber-800 uppercase tracking-wide" }, "Total GST + Fee Drag"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-amber-700 mt-1" }, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-amber-800/80 mt-0.5" }, "\u20B9", processingFee, " fee + \u20B9", mathResult.totalGstOnInterest.toFixed(2), " GST")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-slate-700 uppercase tracking-wide" }, "Monthly Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-slate-900 mt-1" }, "\u20B9", mathResult.monthlyBaseEmi.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-slate-500 mt-0.5" }, "Locked for ", tenure, " installments"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "3-Bullet Plain-English Translation")), /* @__PURE__ */ import_react3.default.createElement("ul", { className: "space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed" }, /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-red-700 font-bold" }, "19.93% Effective APR Reality: "), "Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into ", /* @__PURE__ */ import_react3.default.createElement("strong", null, mathResult.effectiveAnnualPercentageRate, "% Effective APR"), ".")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-slate-900 font-bold" }, "Unrecoverable Monthly Drag: "), "Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), " in pure administrative leak.")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-emerald-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-800 font-bold" }, "Zero-Friction Baseline: "), "Paying upfront via direct UPI or debit card eliminates the \u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " drag completely while keeping your monthly credit limit untouched.")))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "ext-tenure-slider", className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Adjust EMI Tenure: ", /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-700 text-sm" }, tenure, " Months"))), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] text-slate-500 font-mono" }, "Click any tenure step")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "relative pt-1 pb-1" }, /* @__PURE__ */ import_react3.default.createElement(
+      })), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "TRAVEL" ? "CommitGuard Travel Advisory (TNPL Warning):" : surfaceType === "EDTECH" ? "CommitGuard EdTech Advisory (Subvention Reality):" : surfaceType === "UDEMY" ? "CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):" : "CommitGuard Recommendation:")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-slate-600 text-[11px] leading-relaxed" }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Travel Now, Pay Later (TNPL)"), " advertises low monthly tranches but triggers ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "24% to 36% penalty APRs"), " and compounding bounce fees if any installment is missed post-trip. ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Recommended Alternative:"), " Start a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "6-month Liquid Fund SIP"), " at 7.10% yield to book your trip 100% debt-free.") : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, 'Education Loan "0% Subvention"'), " packages frequently embed an upfront ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "3% to 5% institutional subvention surcharge"), " into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.") : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Udemy Countdown Timers:"), ' The "Sale ends in 5 hours" timer resets automatically on next browser session. Over ', /* @__PURE__ */ import_react3.default.createElement("strong", null, "87% of purchased self-paced courses are never completed"), ". If paying, use direct UPI without EMI lock-ins, or invest in a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Liquid Fund"), " until you have scheduled hours to study.") : /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Flipkart Axis Bank Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% statement cashback"), ". If you use ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST and processing fees.")))), activeTab === "EMI_FRICTION" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-red-50 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-red-800 uppercase tracking-wide" }, "Effective APR"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-red-600 mt-1" }, mathResult.effectiveAnnualPercentageRate, "%"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-red-700/80 mt-0.5" }, "vs Advertised ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "0% APR"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-amber-50 border border-amber-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-amber-800 uppercase tracking-wide" }, "Total GST + Fee Drag"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-amber-700 mt-1" }, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-amber-800/80 mt-0.5" }, "\u20B9", processingFee, " fee + \u20B9", mathResult.totalGstOnInterest.toFixed(2), " GST")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-slate-700 uppercase tracking-wide" }, "Monthly Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-slate-900 mt-1" }, "\u20B9", mathResult.monthlyBaseEmi.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-slate-500 mt-0.5" }, "Locked for ", tenure, " installments"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "3-Bullet Plain-English Translation")), /* @__PURE__ */ import_react3.default.createElement("ul", { className: "space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed" }, /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-red-700 font-bold" }, "19.93% Effective APR Reality: "), "Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into ", /* @__PURE__ */ import_react3.default.createElement("strong", null, mathResult.effectiveAnnualPercentageRate, "% Effective APR"), ".")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-slate-900 font-bold" }, "Unrecoverable Monthly Drag: "), "Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), " in pure administrative leak.")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-emerald-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-800 font-bold" }, "Zero-Friction Baseline: "), "Paying upfront via direct UPI or debit card eliminates the \u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " drag completely while keeping your monthly credit limit untouched.")))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "ext-tenure-slider", className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Adjust EMI Tenure: ", /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-700 text-sm" }, tenure, " Months"))), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] text-slate-500 font-mono" }, "Click any tenure step")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "relative pt-1 pb-1" }, /* @__PURE__ */ import_react3.default.createElement(
         "input",
         {
           id: "ext-tenure-slider",
@@ -7804,6 +7817,9 @@
     const COMMITGUARD_HOST_ID = "commitguard-extension-root";
     function detectSurfaceType() {
       const host = window.location.hostname.toLowerCase();
+      if (host.includes("udemy")) {
+        return "UDEMY";
+      }
       if (host.includes("makemytrip") || host.includes("cleartrip") || host.includes("yatra") || host.includes("goibibo")) {
         return "TRAVEL";
       }
@@ -7951,6 +7967,109 @@
           price: edTechPrice,
           name: detectedName,
           offers: edTechOffers
+        };
+      }
+      if (CURRENT_SURFACE === "UDEMY") {
+        const udemyTitleSelectors = [
+          'h1[data-purpose="lead-title"]',
+          "h1.clp-lead__title",
+          "h1",
+          '[data-purpose="course-header-title"]',
+          ".course-title"
+        ];
+        for (const sel of udemyTitleSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent) {
+            const t = el.textContent.trim();
+            if (t.length > 3) {
+              detectedName = t.slice(0, 60);
+              break;
+            }
+          }
+        }
+        if (!detectedName) detectedName = "Udemy Course Purchase";
+        const udemyPriceSelectors = [
+          '[data-purpose="course-price-text"] span:not(.sr-only)',
+          ".price-text--price-part--Tu6MH",
+          'div[data-purpose="course-price-text"]',
+          ".base-price-text",
+          ".clp-lead__price"
+        ];
+        for (const sel of udemyPriceSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent && el.textContent.includes("\u20B9")) {
+            const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
+            if (!isNaN(num) && num > 100 && num < 1e5) {
+              detectedPrice = num;
+              break;
+            }
+          }
+        }
+        if (!detectedPrice) {
+          const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+)/i);
+          if (priceMatch && priceMatch[1]) {
+            const p = parseInt(priceMatch[1].replace(/,/g, ""), 10);
+            if (!isNaN(p) && p > 100) detectedPrice = p;
+          }
+        }
+        const origPriceSelectors = [
+          '[data-purpose="original-price-container"] span',
+          's[data-purpose="original-price"]',
+          "span.ud-sr-only + span[data-purpose]",
+          "s span"
+        ];
+        for (const sel of origPriceSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent && el.textContent.includes("\u20B9")) {
+            const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
+            if (!isNaN(num) && num > detectedPrice) {
+              detectedOriginalPrice = num;
+              break;
+            }
+          }
+        }
+        const udemyPrice = detectedPrice > 0 ? detectedPrice : 499;
+        const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3499;
+        const discountPct = Math.round((udemyOrigPrice - udemyPrice) / udemyOrigPrice * 100);
+        const udemyOffers = [
+          {
+            id: "upi-udemy",
+            bankOrCard: "UPI / Debit Card (Immediate Full Pay)",
+            description: "Single payment without BNPL or EMI installment debt",
+            effectiveBenefit: "Zero interest, zero processing friction",
+            rating: "BEST",
+            reason: "Never finance small educational purchases under \u20B92,000 with consumer credit.",
+            netPrice: udemyPrice,
+            recommended: true
+          },
+          {
+            id: "t-bill-delay",
+            bankOrCard: "Sovereign Liquid Fund / 30-Day Cool-Off",
+            description: "Park course fee for 30 days to test real learning commitment",
+            effectiveBenefit: "Saves 100% of price on uncompleted impulse buys",
+            rating: "BEST",
+            reason: "Over 87% of impulse-bought self-paced courses are abandoned after Lecture 2.",
+            netPrice: udemyPrice,
+            recommended: true
+          },
+          {
+            id: "bnpl-micro",
+            bankOrCard: "LazyPay / Simpl / BNPL Micro-EMI",
+            description: "3-Part split payment or 15-day deferred bill",
+            effectiveBenefit: `\u20B9${Math.round(udemyPrice / 3).toLocaleString("en-IN")}/mo with credit file risk`,
+            rating: "AVOID",
+            reason: "Late payment fees of \u20B9250+ on a \u20B9499 course represent a 50%+ penalty drag on your credit score.",
+            netPrice: udemyPrice + 250,
+            recommended: false
+          }
+        ];
+        return {
+          surfaceType: "UDEMY",
+          price: udemyPrice,
+          originalPrice: udemyOrigPrice,
+          discountPercent: discountPct,
+          name: detectedName,
+          offers: udemyOffers
         };
       }
       const titleSelectors = [
@@ -8208,7 +8327,7 @@
       "continue to payment",
       "book flight",
       "pay & book now",
-      // 3. Ed-Tech (UpGrad, Scaler, Simplilearn)
+      // 3. Ed-Tech & Udemy (UpGrad, Scaler, Simplilearn, Udemy)
       "education loan",
       "apply for education loan",
       "pay with loan",
@@ -8217,7 +8336,11 @@
       "no cost emi options",
       "enroll with emi",
       "apply for loan",
-      "finance options"
+      "finance options",
+      "complete checkout",
+      "enroll now",
+      "buy this course",
+      "go to cart"
     ];
     function findInterceptTarget(element) {
       let curr = element;
@@ -8336,6 +8459,7 @@ lucide-react/dist/esm/defaultAttributes.js:
 lucide-react/dist/esm/Icon.js:
 lucide-react/dist/esm/createLucideIcon.js:
 lucide-react/dist/esm/icons/arrow-right.js:
+lucide-react/dist/esm/icons/book-open.js:
 lucide-react/dist/esm/icons/chevron-down.js:
 lucide-react/dist/esm/icons/chevron-up.js:
 lucide-react/dist/esm/icons/credit-card.js:

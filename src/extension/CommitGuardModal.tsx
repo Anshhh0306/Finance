@@ -21,10 +21,11 @@ import {
   Plane,
   GraduationCap,
   Scale,
+  BookOpen,
 } from 'lucide-react';
 import { calculateNoCostEmiDrag } from '../lib/financial-engine';
 
-export type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH';
+export type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH' | 'UDEMY';
 
 export interface ScrapedOffer {
   id: string;
@@ -175,12 +176,20 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white">
           <div className="flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg">
             <div className={`p-1.5 rounded-lg text-white shadow-sm ${
-              surfaceType === 'TRAVEL' ? 'bg-sky-600' : surfaceType === 'EDTECH' ? 'bg-indigo-600' : 'bg-emerald-600'
+              surfaceType === 'TRAVEL'
+                ? 'bg-sky-600'
+                : surfaceType === 'EDTECH'
+                ? 'bg-indigo-600'
+                : surfaceType === 'UDEMY'
+                ? 'bg-purple-600'
+                : 'bg-emerald-600'
             }`}>
               {surfaceType === 'TRAVEL' ? (
                 <Plane className="w-5 h-5" />
               ) : surfaceType === 'EDTECH' ? (
                 <GraduationCap className="w-5 h-5" />
+              ) : surfaceType === 'UDEMY' ? (
+                <BookOpen className="w-5 h-5" />
               ) : (
                 <Sparkles className="w-5 h-5" />
               )}
@@ -191,6 +200,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   ? 'CommitGuard Travel: TNPL & EMI Reality Check'
                   : surfaceType === 'EDTECH'
                   ? 'CommitGuard EdTech: Education Loan Subvention Truth'
+                  : surfaceType === 'UDEMY'
+                  ? 'CommitGuard Udemy: Impulse Buy & BNPL Interceptor'
                   : 'CommitGuard Smart Checkout Intel'}
               </span>
               <div className="text-[11px] text-slate-500 font-normal">
@@ -198,6 +209,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   ? 'MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP'
                   : surfaceType === 'EDTECH'
                   ? 'UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI'
+                  : surfaceType === 'UDEMY'
+                  ? 'Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay'
                   : 'Live Card & EMI Optimization for Flipkart & Amazon'}
               </div>
             </div>
@@ -388,6 +401,8 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                       ? 'CommitGuard Travel Advisory (TNPL Warning):'
                       : surfaceType === 'EDTECH'
                       ? 'CommitGuard EdTech Advisory (Subvention Reality):'
+                      : surfaceType === 'UDEMY'
+                      ? 'CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):'
                       : 'CommitGuard Recommendation:'}
                   </span>
                 </div>
@@ -399,6 +414,10 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                   ) : surfaceType === 'EDTECH' ? (
                     <>
                       <strong>Education Loan "0% Subvention"</strong> packages frequently embed an upfront <strong>3% to 5% institutional subvention surcharge</strong> into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.
+                    </>
+                  ) : surfaceType === 'UDEMY' ? (
+                    <>
+                      <strong>Udemy Countdown Timers:</strong> The "Sale ends in 5 hours" timer resets automatically on next browser session. Over <strong>87% of purchased self-paced courses are never completed</strong>. If paying, use direct UPI without EMI lock-ins, or invest in a <strong>Liquid Fund</strong> until you have scheduled hours to study.
                     </>
                   ) : (
                     <>

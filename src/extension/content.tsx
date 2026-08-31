@@ -13,10 +13,13 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
   const COMMITGUARD_HOST_ID = 'commitguard-extension-root';
 
-  type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH';
+  type InterceptorSurface = 'ECOMMERCE' | 'TRAVEL' | 'EDTECH' | 'UDEMY';
 
   function detectSurfaceType(): InterceptorSurface {
     const host = window.location.hostname.toLowerCase();
+    if (host.includes('udemy')) {
+      return 'UDEMY';
+    }
     if (host.includes('makemytrip') || host.includes('cleartrip') || host.includes('yatra') || host.includes('goibibo')) {
       return 'TRAVEL';
     }
@@ -209,7 +212,124 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     }
 
     // ==========================================
-    // 3. SURFACE: E-COMMERCE (Flipkart / Amazon)
+    // 3. SURFACE: UDEMY (Online Course Interceptor)
+    // ==========================================
+    if (CURRENT_SURFACE === 'UDEMY') {
+      // 1. Course Title Selectors on Udemy
+      const udemyTitleSelectors = [
+        'h1[data-purpose="lead-title"]',
+        'h1.clp-lead__title',
+        'h1',
+        '[data-purpose="course-header-title"]',
+        '.course-title',
+      ];
+      for (const sel of udemyTitleSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const t = el.textContent.trim();
+          if (t.length > 3) {
+            detectedName = t.slice(0, 60);
+            break;
+          }
+        }
+      }
+      if (!detectedName) detectedName = 'Udemy Course Purchase';
+
+      // 2. Scrape selling price (e.g. ₹499, ₹549, ₹799)
+      const udemyPriceSelectors = [
+        '[data-purpose="course-price-text"] span:not(.sr-only)',
+        '.price-text--price-part--Tu6MH',
+        'div[data-purpose="course-price-text"]',
+        '.base-price-text',
+        '.clp-lead__price',
+      ];
+      for (const sel of udemyPriceSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent && el.textContent.includes('₹')) {
+          const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
+          if (!isNaN(num) && num > 100 && num < 100000) {
+            detectedPrice = num;
+            break;
+          }
+        }
+      }
+
+      // Regex fallback if selectors changed
+      if (!detectedPrice) {
+        const priceMatch = bodyText.match(/(?:Current price|Price|Now at|Buy now at)[^\d₹]*₹\s*([0-9,]+)/i);
+        if (priceMatch && priceMatch[1]) {
+          const p = parseInt(priceMatch[1].replace(/,/g, ''), 10);
+          if (!isNaN(p) && p > 100) detectedPrice = p;
+        }
+      }
+
+      // 3. Scrape struck-through original price (e.g. ₹3,499)
+      const origPriceSelectors = [
+        '[data-purpose="original-price-container"] span',
+        's[data-purpose="original-price"]',
+        'span.ud-sr-only + span[data-purpose]',
+        's span',
+      ];
+      for (const sel of origPriceSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent && el.textContent.includes('₹')) {
+          const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
+          if (!isNaN(num) && num > detectedPrice) {
+            detectedOriginalPrice = num;
+            break;
+          }
+        }
+      }
+
+      const udemyPrice = detectedPrice > 0 ? detectedPrice : 499;
+      const udemyOrigPrice = detectedOriginalPrice > 0 ? detectedOriginalPrice : 3499;
+      const discountPct = Math.round(((udemyOrigPrice - udemyPrice) / udemyOrigPrice) * 100);
+
+      const udemyOffers: ScrapedOffer[] = [
+        {
+          id: 'upi-udemy',
+          bankOrCard: 'UPI / Debit Card (Immediate Full Pay)',
+          description: 'Single payment without BNPL or EMI installment debt',
+          effectiveBenefit: 'Zero interest, zero processing friction',
+          rating: 'BEST',
+          reason: 'Never finance small educational purchases under ₹2,000 with consumer credit.',
+          netPrice: udemyPrice,
+          recommended: true,
+        },
+        {
+          id: 't-bill-delay',
+          bankOrCard: 'Sovereign Liquid Fund / 30-Day Cool-Off',
+          description: 'Park course fee for 30 days to test real learning commitment',
+          effectiveBenefit: 'Saves 100% of price on uncompleted impulse buys',
+          rating: 'BEST',
+          reason: 'Over 87% of impulse-bought self-paced courses are abandoned after Lecture 2.',
+          netPrice: udemyPrice,
+          recommended: true,
+        },
+        {
+          id: 'bnpl-micro',
+          bankOrCard: 'LazyPay / Simpl / BNPL Micro-EMI',
+          description: '3-Part split payment or 15-day deferred bill',
+          effectiveBenefit: `₹${Math.round(udemyPrice / 3).toLocaleString('en-IN')}/mo with credit file risk`,
+          rating: 'AVOID',
+          reason: 'Late payment fees of ₹250+ on a ₹499 course represent a 50%+ penalty drag on your credit score.',
+          netPrice: udemyPrice + 250,
+          recommended: false,
+        },
+      ];
+
+      return {
+        surfaceType: 'UDEMY',
+        price: udemyPrice,
+        originalPrice: udemyOrigPrice,
+        discountPercent: discountPct,
+        name: detectedName,
+        offers: udemyOffers,
+      };
+    }
+
+    // ==========================================
+    // 4. SURFACE: E-COMMERCE (Flipkart / Amazon)
     // ==========================================
     const titleSelectors = [
       'h1',
@@ -526,7 +646,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     'book flight',
     'pay & book now',
 
-    // 3. Ed-Tech (UpGrad, Scaler, Simplilearn)
+    // 3. Ed-Tech & Udemy (UpGrad, Scaler, Simplilearn, Udemy)
     'education loan',
     'apply for education loan',
     'pay with loan',
@@ -536,6 +656,10 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     'enroll with emi',
     'apply for loan',
     'finance options',
+    'complete checkout',
+    'enroll now',
+    'buy this course',
+    'go to cart',
   ];
 
   // Helper to check if an element or its ancestors match target intent across ANY non-financial surface
