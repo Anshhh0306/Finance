@@ -8448,18 +8448,18 @@
           netPrice: amazonFinalPrice - bankDiscount,
           recommended: false
         });
-        const emiMonths2 = 12;
-        const estimatedGstFee2 = Math.round(199 + amazonFinalPrice * 0.15 * (emiMonths2 / 12) * 0.18);
+        const emiMonths = 12;
+        const estimatedGstFee = Math.round(199 + amazonFinalPrice * 0.15 * (emiMonths / 12) * 0.18);
         const emiSavingsMatch = bodyText.match(/Upto\s*₹\s*([0-9,]+(?:\.[0-9]{1,2})?)\s*EMI\s*interest\s*savings/i);
         const interestSavingsStr = emiSavingsMatch && emiSavingsMatch[1] ? ` (Advertised \u20B9${emiSavingsMatch[1]} savings)` : "";
         amazonOffers.push({
           id: "amazon-nocost-emi",
           bankOrCard: "No-Cost EMI (All Banks)",
-          description: `${emiMonths2} Months installment plan${interestSavingsStr}`,
-          effectiveBenefit: `\u20B9${Math.round(amazonFinalPrice / emiMonths2).toLocaleString("en-IN")}/mo + \u20B9${estimatedGstFee2} GST drag`,
+          description: `${emiMonths} Months installment plan${interestSavingsStr}`,
+          effectiveBenefit: `\u20B9${Math.round(amazonFinalPrice / emiMonths).toLocaleString("en-IN")}/mo + \u20B9${estimatedGstFee} GST drag`,
           rating: "AVOID",
-          reason: `Hidden administrative leak: charges \u20B9199 bank fee + \u20B9${estimatedGstFee2} non-refundable GST on monthly interest.`,
-          netPrice: amazonFinalPrice + estimatedGstFee2,
+          reason: `Hidden administrative leak: charges \u20B9199 bank fee + \u20B9${estimatedGstFee} non-refundable GST on monthly interest.`,
+          netPrice: amazonFinalPrice + estimatedGstFee,
           recommended: false
         });
         if (/GST\s*invoice|business\s*purchase/i.test(bodyText)) {
@@ -8489,65 +8489,109 @@
         "span.B_NuCI",
         "span._35KyD6",
         ".VU-ZEz",
-        "span.VU-ZEz"
+        "span.VU-ZEz",
+        '[class*="title"]'
       ];
       for (const sel of flipkartTitleSelectors) {
         const el = document.querySelector(sel);
         if (el && el.textContent) {
           const titleText = el.textContent.trim();
-          if (titleText.length > 5) {
-            detectedName = titleText.slice(0, 65);
+          if (titleText.length > 5 && !titleText.includes("Flipkart")) {
+            detectedName = titleText.slice(0, 70);
             break;
           }
         }
       }
       if (!detectedName) detectedName = "Identified Flipkart Item";
-      const flipkartPriceSelectors = [
-        "div.Nx9bqj.CxhGGd",
-        "div.Nx9bqj",
-        "div._30jeq3._16Jk6d",
-        "div._30jeq3",
-        ".Nx9bqj",
-        ".CxhGGd"
-      ];
-      for (const sel of flipkartPriceSelectors) {
-        const el = document.querySelector(sel);
-        if (el && el.textContent) {
-          const num = parseCurrencyNumber(el.textContent);
-          if (num > 100 && num < 1e7) {
+      const buyButtonEls = document.querySelectorAll("button, a, div, span");
+      for (const el of Array.from(buyButtonEls)) {
+        const txt = (el.textContent || "").trim();
+        const m = txt.match(/(?:Buy\s*now\s*at|Pay|Lowest\s*price\s*for\s*you)\s*₹\s*([0-9,]+)/i);
+        if (m && m[1]) {
+          const p = parseCurrencyNumber(m[1]);
+          if (p >= 500 && p <= 5e6) {
+            detectedPrice = p;
+            break;
+          }
+        }
+      }
+      if (!detectedPrice) {
+        const flipkartPriceSelectors = [
+          "div.Nx9bqj.CxhGGd",
+          "div.Nx9bqj",
+          "div._30jeq3._16Jk6d",
+          "div._30jeq3",
+          ".Nx9bqj",
+          ".CxhGGd",
+          '[class*="price"]'
+        ];
+        for (const sel of flipkartPriceSelectors) {
+          const els = document.querySelectorAll(sel);
+          for (const el of Array.from(els)) {
+            const text = el.textContent || "";
+            if (text.includes("\u20B9")) {
+              const num = parseCurrencyNumber(text);
+              if (num >= 500 && num <= 5e6) {
+                detectedPrice = num;
+                break;
+              }
+            }
+          }
+          if (detectedPrice > 0) break;
+        }
+      }
+      if (!detectedPrice) {
+        const priceTextMatches = Array.from(bodyText.matchAll(/₹\s*([0-9,]+(?:\.[0-9]{1,2})?)/g));
+        for (const match of priceTextMatches) {
+          const num = parseCurrencyNumber(match[1]);
+          if (num >= 1e3 && num <= 2e6) {
             detectedPrice = num;
             break;
           }
         }
       }
-      const flipkartMrpSelectors = ["div.yRaY8j.A68rqU", "div._3I9_wc._2p6lqe", ".yRaY8j"];
+      const flipkartMrpSelectors = ["div.yRaY8j.A68rqU", "div._3I9_wc._2p6lqe", ".yRaY8j", '[class*="mrp"]', "s", "del"];
       for (const sel of flipkartMrpSelectors) {
-        const el = document.querySelector(sel);
-        if (el && el.textContent) {
-          const num = parseCurrencyNumber(el.textContent);
-          if (num > detectedPrice) {
+        const els = document.querySelectorAll(sel);
+        for (const el of Array.from(els)) {
+          const num = parseCurrencyNumber(el.textContent || "");
+          if (num > (detectedPrice || 0)) {
             detectedOriginalPrice = num;
             break;
           }
         }
+        if (detectedOriginalPrice > 0) break;
       }
       const discountMatch = bodyText.match(/(\d+)%\s*off/i);
       if (discountMatch && discountMatch[1]) {
         detectedDiscount = parseInt(discountMatch[1], 10);
       }
-      const flipkartPrice = detectedPrice > 0 ? detectedPrice : 5399;
+      const flipkartPrice = detectedPrice > 0 ? detectedPrice : 19999;
+      let clickedFlipkartCard = "";
+      if (clickedEl) {
+        const row = clickedEl.closest("li, label, div, button, tr") || clickedEl;
+        const t = (row.textContent || "").trim();
+        if (/icici/i.test(t)) clickedFlipkartCard = "ICICI Bank Credit Card (No Cost EMI)";
+        else if (/bajaj/i.test(t)) clickedFlipkartCard = "Bajaj Finance (No Cost EMI)";
+        else if (/bobcard|bob/i.test(t)) clickedFlipkartCard = "BOBCARD Credit Card";
+        else if (/kotak/i.test(t)) clickedFlipkartCard = "Kotak Mahindra Bank Credit Card";
+        else if (/axis/i.test(t)) clickedFlipkartCard = "Flipkart Axis Bank Credit Card";
+        else if (/upi|qr|google\s*pay|phonepe/i.test(t)) clickedFlipkartCard = "UPI";
+      }
       const flipkartOffers = [];
       const hasAuBank = /AU Small Finance|AU Bank|AU Credit Card/i.test(bodyText);
-      const hasSuperCoins = /SuperCoins/i.test(bodyText);
+      const hasCoupon = /coupon\s*•\s*₹?\s*([0-9,]+)\s*off/i.exec(bodyText);
+      const couponDiscount = hasCoupon && hasCoupon[1] ? parseCurrencyNumber(hasCoupon[1]) : 0;
       flipkartOffers.push({
         id: "upi-instant",
         bankOrCard: "UPI / Direct Debit (Zero Debt)",
-        description: "Immediate payment without loan or credit line lock-in",
+        description: `Immediate single payment of \u20B9${flipkartPrice.toLocaleString("en-IN")}`,
         effectiveBenefit: "Saves 100% of GST & bank processing fees",
         rating: "BEST",
         reason: "Zero interest, zero processing fee, keeps credit limit 100% free.",
         netPrice: flipkartPrice,
-        recommended: true
+        recommended: true,
+        isSelected: clickedFlipkartCard === "UPI" || !clickedFlipkartCard && true
       });
       const axisCashback = Math.round(flipkartPrice * 0.05);
       flipkartOffers.push({
@@ -8558,9 +8602,47 @@
         rating: "BEST",
         reason: `Gives \u20B9${axisCashback.toLocaleString("en-IN")} instant statement cashback without any tenure lock-in.`,
         netPrice: flipkartPrice - axisCashback,
-        recommended: true
+        recommended: true,
+        isSelected: clickedFlipkartCard.includes("Axis")
       });
-      if (hasAuBank || bodyText.includes("AU")) {
+      const noCost6mOutflow = Math.round(flipkartPrice / 6);
+      const noCost6mGst = Math.round(199 + flipkartPrice * 0.15 * 0.5 * 0.18);
+      flipkartOffers.push({
+        id: "icici-nocost-emi",
+        bankOrCard: "ICICI Bank / Bajaj Finance No-Cost EMI (6 Months)",
+        description: `6 months x \u20B9${noCost6mOutflow.toLocaleString("en-IN")}/mo (Advertised Total: \u20B9${flipkartPrice.toLocaleString("en-IN")})`,
+        effectiveBenefit: `\u20B9${noCost6mOutflow.toLocaleString("en-IN")}/mo + \u20B9${noCost6mGst} Hidden GST/Fee Drag`,
+        rating: "AVOID",
+        reason: `Flipkart shows \u20B9${flipkartPrice.toLocaleString("en-IN")}, but your bank charges \u20B9199 processing fee + non-refundable 18% GST (\u20B9${Math.round(flipkartPrice * 0.15 * 0.5 * 0.18)}) on the monthly interest component.`,
+        netPrice: flipkartPrice + noCost6mGst,
+        recommended: false,
+        isSelected: clickedFlipkartCard.includes("ICICI") || clickedFlipkartCard.includes("Bajaj")
+      });
+      const emiLongTenureGst = Math.round(199 + flipkartPrice * 0.16 * 2 * 0.18);
+      flipkartOffers.push({
+        id: "bobcard-kotak-emi",
+        bankOrCard: "BOBCARD / Kotak Mahindra Bank Credit Card EMI (24M-36M)",
+        description: `From \u20B9703/mo to \u20B9979/mo (Advertised Total: ~\u20B923,500 - \u20B925,300)`,
+        effectiveBenefit: `Up to +\u20B95,300+ in Bank Interest & GST Drag`,
+        rating: "AVOID",
+        reason: `Long-tenure EMIs lock your credit limit for 2-3 years and incur substantial compounding interest + 18% GST on all interest charges.`,
+        netPrice: flipkartPrice + Math.round(flipkartPrice * 0.28),
+        recommended: false,
+        isSelected: clickedFlipkartCard.includes("BOBCARD") || clickedFlipkartCard.includes("Kotak")
+      });
+      if (couponDiscount > 0) {
+        flipkartOffers.push({
+          id: "coupon-offer",
+          bankOrCard: `Motorola Coupon \u2022 \u20B9${couponDiscount.toLocaleString("en-IN")} Off`,
+          description: `Apply coupon at checkout for instant \u20B9${couponDiscount.toLocaleString("en-IN")} price reduction`,
+          effectiveBenefit: `Save \u20B9${couponDiscount.toLocaleString("en-IN")} instantly`,
+          rating: "BEST",
+          reason: "Instant manufacturer price discount that stacks with your payment card of choice.",
+          netPrice: flipkartPrice - couponDiscount,
+          recommended: true
+        });
+      }
+      if (hasAuBank) {
         const auDiscount = Math.min(Math.round(flipkartPrice * 0.1), 1500);
         flipkartOffers.push({
           id: "au-bank",
@@ -8570,30 +8652,6 @@
           rating: "GOOD",
           reason: "Direct instant price reduction at checkout if you pay in single tranche.",
           netPrice: flipkartPrice - auDiscount,
-          recommended: false
-        });
-      }
-      const emiMonths = 12;
-      const estimatedGstFee = Math.round(199 + flipkartPrice * 0.15 * (emiMonths / 12) * 0.18);
-      flipkartOffers.push({
-        id: "no-cost-emi",
-        bankOrCard: "No-Cost EMI (All Banks)",
-        description: `${emiMonths} Months installment plan`,
-        effectiveBenefit: `\u20B9${Math.round(flipkartPrice / emiMonths).toLocaleString("en-IN")}/mo + \u20B9${estimatedGstFee} GST drag`,
-        rating: "AVOID",
-        reason: `Hidden administrative leak: charges \u20B9199 fee + \u20B9${estimatedGstFee} non-refundable GST on interest.`,
-        netPrice: flipkartPrice + estimatedGstFee,
-        recommended: false
-      });
-      if (hasSuperCoins) {
-        flipkartOffers.push({
-          id: "supercoins",
-          bankOrCard: "Flipkart SuperCoins Plus",
-          description: "Earn SuperCoins cashback rewards",
-          effectiveBenefit: "Extra 15 SuperCoins on purchase",
-          rating: "GOOD",
-          reason: "Bonus rewards stacking on top of any payment card.",
-          netPrice: flipkartPrice,
           recommended: false
         });
       }
