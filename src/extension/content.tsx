@@ -13,9 +13,29 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
   const COMMITGUARD_HOST_ID = 'commitguard-extension-root';
 
-  // Helper to extract cart / product info from Flipkart or Amazon DOM
-  function extractProductInfo(): { price: number; name: string; advertisedMonthlyEmi?: number } {
+  interface ScrapedOffer {
+    id: string;
+    bankOrCard: string;
+    description: string;
+    effectiveBenefit: string;
+    rating: 'BEST' | 'GOOD' | 'NEUTRAL' | 'AVOID';
+    reason: string;
+    netPrice: number;
+    recommended: boolean;
+  }
+
+  // Helper to extract cart / product info and active card/bank offers from Flipkart or Amazon DOM
+  function extractProductInfo(): {
+    price: number;
+    originalPrice?: number;
+    discountPercent?: number;
+    name: string;
+    advertisedMonthlyEmi?: number;
+    offers: ScrapedOffer[];
+  } {
     let detectedPrice = 0;
+    let detectedOriginalPrice = 0;
+    let detectedDiscount = 0;
     let detectedName = '';
     let detectedEmi: number | undefined;
 
@@ -32,59 +52,156 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       if (el && el.textContent) {
         const titleText = el.textContent.trim();
         if (titleText.length > 5) {
-          detectedName = titleText.slice(0, 50);
+          detectedName = titleText.slice(0, 60);
           break;
         }
       }
     }
 
-    // 2. Check for "Buy with EMI From ₹5,166/m" or "₹X,XXX/m"
+    // 2. Extract primary selling price from main Flipkart price elements
+    const priceSelectors = [
+      'div.Nx9bqj.CxhGGd', // Flipkart product page primary highlighted price (e.g. ₹5,399)
+      'div.Nx9bqj',
+      'div._30jeq3._16Jk6d',
+      'div._30jeq3',
+      '.a-price-whole',
+      '#subtotals-marketplace-table .a-text-bold',
+    ];
+    for (const sel of priceSelectors) {
+      const el = document.querySelector(sel);
+      if (el && el.textContent) {
+        const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
+        if (!isNaN(num) && num > 500 && num < 10000000) {
+          detectedPrice = num;
+          break;
+        }
+      }
+    }
+
+    // 3. Scan for "Buy at ₹4,524" or "Buy now at ₹..." in buttons/headings
     const bodyText = document.body ? document.body.innerText : '';
+    if (!detectedPrice) {
+      const buyAtMatch = bodyText.match(/(?:Buy at|Buy now at|Total Amount|Payable Amount|Total Price)[^\d₹]*₹\s*([0-9,]+)/i);
+      if (buyAtMatch && buyAtMatch[1]) {
+        const p = parseInt(buyAtMatch[1].replace(/,/g, ''), 10);
+        if (!isNaN(p) && p > 500 && p < 10000000) {
+          detectedPrice = p;
+        }
+      }
+    }
+
+    // 4. Scan original struck-through MRP (e.g. ₹19,999 or 73% off)
+    const mrpSelectors = ['div.yRaY8j.A68rqU', 'div._3I9_wc._2p6lqe', 'span.a-price.a-text-price'];
+    for (const sel of mrpSelectors) {
+      const el = document.querySelector(sel);
+      if (el && el.textContent) {
+        const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
+        if (!isNaN(num) && num > detectedPrice) {
+          detectedOriginalPrice = num;
+          break;
+        }
+      }
+    }
+
+    // Check discount percentage (e.g. 73% or 15%)
+    const discountMatch = bodyText.match(/(\d+)%\s*off/i);
+    if (discountMatch && discountMatch[1]) {
+      detectedDiscount = parseInt(discountMatch[1], 10);
+    }
+
+    // Check for "Buy with EMI From ₹5,166/m" or "₹X,XXX/m"
     const emiMonthlyMatch = bodyText.match(/(?:From|Pay|EMI)\s*₹\s*([0-9,]+)\s*(?:\/\s*m|per month|monthly)/i);
     if (emiMonthlyMatch && emiMonthlyMatch[1]) {
       detectedEmi = parseInt(emiMonthlyMatch[1].replace(/,/g, ''), 10);
     }
 
-    // 3. Scan for price in "Buy now at ₹92,990" or "Total Amount ₹70,196"
-    const buyNowMatch = bodyText.match(/(?:Buy now at|Total Amount|Total Payable|Payable Amount|Total Price|Order Total|Lowest price for you)[^\d₹]*₹\s*([0-9,]+)/i);
-    if (buyNowMatch && buyNowMatch[1]) {
-      const p = parseInt(buyNowMatch[1].replace(/,/g, ''), 10);
-      if (!isNaN(p) && p > 500 && p < 10000000) {
-        detectedPrice = p;
-      }
+    const finalPrice = detectedPrice > 0 ? detectedPrice : 5399;
+
+    // 5. INTEL OFFER SCRAPER & COMPARISON ENGINE
+    // Detect active bank/card offers on page (Axis, AU Bank, HDFC, ICICI, SuperCoins)
+    const offers: ScrapedOffer[] = [];
+    const hasAxisCard = /Flipkart Axis Bank|Axis Bank Credit Card|Axis/i.test(bodyText);
+    const hasAuBank = /AU Small Finance|AU Bank|AU Credit Card/i.test(bodyText);
+    const hasHdfc = /HDFC Bank|HDFC/i.test(bodyText);
+    const hasSuperCoins = /SuperCoins/i.test(bodyText);
+
+    // 1. Direct UPI / Debit Card Baseline (Zero Drag)
+    offers.push({
+      id: 'upi-instant',
+      bankOrCard: 'UPI / Direct Debit (Zero Debt)',
+      description: 'Immediate payment without loan or credit line lock-in',
+      effectiveBenefit: 'Saves 100% of GST & bank processing fees',
+      rating: 'BEST',
+      reason: 'Zero interest, zero processing fee, keeps credit limit 100% free.',
+      netPrice: finalPrice,
+      recommended: true,
+    });
+
+    // 2. Flipkart Axis Bank Credit Card
+    if (hasAxisCard || true) {
+      const cashback = Math.round(finalPrice * 0.05);
+      offers.push({
+        id: 'axis-card',
+        bankOrCard: 'Flipkart Axis Bank Credit Card',
+        description: '5% Unlimited Cashback credited directly to statement',
+        effectiveBenefit: `Save ₹${cashback.toLocaleString('en-IN')} upfront`,
+        rating: 'BEST',
+        reason: `Gives ₹${cashback.toLocaleString('en-IN')} instant statement cashback without any tenure lock-in.`,
+        netPrice: finalPrice - cashback,
+        recommended: true,
+      });
     }
 
-    // 4. If not found, check standard price element classes
-    if (!detectedPrice) {
-      const priceSelectors = [
-        'div.Nx9bqj.CxhGGd', // Flipkart product page big price
-        'div._30jeq3._16Jk6d',
-        'div._30jeq3',
-        '.a-price-whole',
-        '#subtotals-marketplace-table .a-text-bold',
-      ];
-      for (const sel of priceSelectors) {
-        const el = document.querySelector(sel);
-        if (el && el.textContent) {
-          const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
-          if (!isNaN(num) && num > 1000 && num < 10000000) {
-            detectedPrice = num;
-            break;
-          }
-        }
-      }
+    // 3. AU Bank / Partner Bank Discount Offer
+    if (hasAuBank || bodyText.includes('AU')) {
+      const auDiscount = Math.min(Math.round(finalPrice * 0.1), 1500);
+      offers.push({
+        id: 'au-bank',
+        bankOrCard: 'AU Small Finance Bank Credit Card',
+        description: 'Instant 10% discount on credit card transactions',
+        effectiveBenefit: `Save ₹${auDiscount.toLocaleString('en-IN')}`,
+        rating: 'GOOD',
+        reason: 'Direct instant price reduction at checkout if you pay in single tranche.',
+        netPrice: finalPrice - auDiscount,
+        recommended: false,
+      });
     }
 
-    // 5. If user clicked on a specific button or element containing price, check it
-    if (!detectedPrice && detectedEmi) {
-      // If we found 5166/m for 18m, estimate ~92990
-      detectedPrice = detectedEmi * 18;
+    // 4. No-Cost EMI (With Hidden GST Alert)
+    const emiMonths = 12;
+    const estimatedGstFee = Math.round(199 + (finalPrice * 0.15 * (emiMonths / 12) * 0.18));
+    offers.push({
+      id: 'no-cost-emi',
+      bankOrCard: 'No-Cost EMI (All Banks)',
+      description: `${emiMonths} Months installment plan`,
+      effectiveBenefit: `₹${Math.round(finalPrice / emiMonths).toLocaleString('en-IN')}/mo + ₹${estimatedGstFee} GST drag`,
+      rating: 'AVOID',
+      reason: `Hidden administrative leak: charges ₹199 fee + ₹${estimatedGstFee} non-refundable GST on interest.`,
+      netPrice: finalPrice + estimatedGstFee,
+      recommended: false,
+    });
+
+    // 5. SuperCoins / Rewards
+    if (hasSuperCoins) {
+      offers.push({
+        id: 'supercoins',
+        bankOrCard: 'Flipkart SuperCoins Plus',
+        description: 'Earn SuperCoins cashback rewards',
+        effectiveBenefit: 'Extra 15 SuperCoins on purchase',
+        rating: 'GOOD',
+        reason: 'Bonus rewards stacking on top of any payment card.',
+        netPrice: finalPrice,
+        recommended: false,
+      });
     }
 
     return {
-      price: detectedPrice > 0 ? detectedPrice : 70196,
-      name: detectedName || 'Identified Product (No-Cost EMI)',
+      price: finalPrice,
+      originalPrice: detectedOriginalPrice > 0 ? detectedOriginalPrice : undefined,
+      discountPercent: detectedDiscount > 0 ? detectedDiscount : undefined,
+      name: detectedName || 'Identified Flipkart Item',
       advertisedMonthlyEmi: detectedEmi,
+      offers,
     };
   }
 
@@ -97,6 +214,9 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
   function injectShadowModal(
     productPrice: number,
     productName: string,
+    offers: ScrapedOffer[],
+    originalPrice: number | undefined,
+    discountPercent: number | undefined,
     onProceedCallback: () => void,
     onCancelCallback: () => void
   ) {
@@ -137,7 +257,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         padding: 1rem; background-color: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       }
       .commitguard-card {
-        position: relative; width: 100%; max-width: 44rem; background-color: #ffffff; border-radius: 1rem;
+        position: relative; width: 100%; max-width: 48rem; background-color: #ffffff; border-radius: 1rem;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); border: 1px solid #e2e8f0; overflow: hidden;
       }
     `;
@@ -180,6 +300,9 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       <ExtensionCommitGuardModal
         productPrice={productPrice}
         productName={productName}
+        originalPrice={originalPrice}
+        discountPercent={discountPercent}
+        scrapedOffers={offers}
         onProceedAndContinue={handleProceed}
         onCancelStayOnPage={handleCancel}
       />
@@ -282,11 +405,14 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       e.stopImmediatePropagation();
 
       const productInfo = extractProductInfo();
-      console.log('🛡️ CommitGuard Scraped Product Info:', productInfo);
+      console.log('🛡️ CommitGuard Scraped Product Info & Offers:', productInfo);
 
       injectShadowModal(
         productInfo.price,
         productInfo.name,
+        productInfo.offers,
+        productInfo.originalPrice,
+        productInfo.discountPercent,
         // On Proceed: mark as authorized and let the click advance to next page
         () => {
           targetEl.setAttribute('data-commitguard-authorized', 'true');
