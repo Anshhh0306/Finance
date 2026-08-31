@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "CommitGuard - Embedded Pre-Commitment Interceptor",
+  "version": "1.0.0",
+  "description": "Deterministic trade-off clarity at the point of sale and checkout. Intercepts No-Cost EMI and lock-in traps in <50ms.",
+  "permissions": ["activeTab", "storage"],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.amazon.in/*",
+        "https://*.flipkart.com/*",
+        "https://*.hdfcbank.com/*",
+        "https://*.icicibank.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "CommitGuard Active"
+  }
+}
