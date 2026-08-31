@@ -7507,6 +7507,18 @@
   ];
   var X = createLucideIcon("X", __iconNode18);
 
+  // node_modules/lucide-react/dist/esm/icons/zap.js
+  var __iconNode19 = [
+    [
+      "path",
+      {
+        d: "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z",
+        key: "1xq2db"
+      }
+    ]
+  ];
+  var Zap = createLucideIcon("Zap", __iconNode19);
+
   // src/lib/financial-engine.ts
   var GST_RATE = 0.18;
   function calculateNoCostEmiDrag(input) {
@@ -7614,6 +7626,7 @@
     const [sliderIndex, setSliderIndex] = (0, import_react3.useState)(3);
     const tenure = TENURE_OPTIONS[sliderIndex];
     const [activeTab, setActiveTab] = (0, import_react3.useState)("CARD_OFFERS");
+    const [showAllMethods, setShowAllMethods] = (0, import_react3.useState)(false);
     const [isProofOpen, setIsProofOpen] = (0, import_react3.useState)(false);
     const processingFee = 199;
     const nominalRate = 15;
@@ -7663,7 +7676,8 @@
             rating: "BEST",
             reason: "Zero lock-in tenure. Instant Amazon Pay cashback without interest or processing fees.",
             netPrice: productPrice - amazonCashback,
-            recommended: true
+            recommended: true,
+            isSelected: true
           },
           {
             id: "upi-instant",
@@ -7707,7 +7721,8 @@
           rating: "BEST",
           reason: "Zero lock-in tenure. Statement credit without loan paperwork.",
           netPrice: productPrice - axisCashback,
-          recommended: true
+          recommended: true,
+          isSelected: true
         },
         {
           id: "upi-instant",
@@ -7741,6 +7756,12 @@
         }
       ];
     }, [scrapedOffers, surfaceType, productPrice, tenure, mathResult, processingFee]);
+    const selectedOffer = (0, import_react3.useMemo)(() => {
+      return displayOffers.find((o) => o.isSelected) || displayOffers[0];
+    }, [displayOffers]);
+    const otherOffers = (0, import_react3.useMemo)(() => {
+      return displayOffers.filter((o) => o.id !== selectedOffer?.id);
+    }, [displayOffers, selectedOffer]);
     return /* @__PURE__ */ import_react3.default.createElement(
       "div",
       {
@@ -7777,7 +7798,22 @@
         },
         /* @__PURE__ */ import_react3.default.createElement(TriangleAlert, { className: "w-4 h-4 text-amber-500" }),
         /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "UDEMY" ? `Installment / BNPL Friction (Save \u20B9${recoveryCompounding.savedFriction})` : `No-Cost EMI Friction (${mathResult.effectiveAnnualPercentageRate}% APR)`)
-      )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-6 space-y-5 max-h-[75vh] overflow-y-auto" }, activeTab === "CARD_OFFERS" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("h4", { className: "text-sm font-bold text-slate-900" }, "Which payment method saves you the most?"), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-500 mt-0.5" }, "Analyzed against hidden GST leaks, merchant discounts, and bank statement cashbacks.")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-[11px] font-semibold" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "flex items-center gap-1 text-emerald-700" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsUp, { className: "w-3 h-3 text-emerald-600" }), " Best Pick"), /* @__PURE__ */ import_react3.default.createElement("span", { className: "flex items-center gap-1 text-red-600 ml-2" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsDown, { className: "w-3 h-3 text-red-500" }), " High Drag"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-2.5" }, displayOffers.map((offer) => {
+      )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-6 space-y-5 max-h-[75vh] overflow-y-auto" }, activeTab === "CARD_OFFERS" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-4" }, selectedOffer && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-900 text-white inline-flex items-center gap-1.5 shadow-sm" }, /* @__PURE__ */ import_react3.default.createElement(Zap, { className: "w-3 h-3 text-amber-400" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Your Selected Payment Option")), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-semibold text-slate-500" }, "Live Pre-Commitment Reality Check")), /* @__PURE__ */ import_react3.default.createElement(
+        "div",
+        {
+          className: `p-4 rounded-xl border-2 transition-all ${selectedOffer.rating === "BEST" ? "bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-200" : selectedOffer.rating === "AVOID" ? "bg-red-50/90 border-red-300 ring-2 ring-red-100" : "bg-sky-50/90 border-sky-300 ring-2 ring-sky-100"}`
+        },
+        /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-start justify-between gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1.5 flex-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 flex-wrap" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "font-black text-base text-slate-900" }, selectedOffer.bankOrCard), selectedOffer.rating === "BEST" && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white shadow-sm" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsUp, { className: "w-3 h-3" }), "RECOMMENDED: BEST VALUE"), selectedOffer.rating === "GOOD" && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200" }, "GOOD OFFER"), selectedOffer.rating === "AVOID" && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsDown, { className: "w-3 h-3 text-red-600" }), "AVOID: HIDDEN CHARGES")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-700 font-medium" }, selectedOffer.description), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-xs text-slate-800 font-normal flex items-start gap-1.5 pt-1 bg-white/70 p-2 rounded-lg border border-slate-200/60" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-slate-500 mt-1 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, selectedOffer.reason))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-right shrink-0 bg-white/80 p-2.5 rounded-xl border border-slate-200/80 shadow-xs" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-semibold" }, "True Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-lg font-black ${selectedOffer.rating === "BEST" ? "text-emerald-700" : selectedOffer.rating === "AVOID" ? "text-red-600" : "text-slate-900"}` }, "\u20B9", selectedOffer.netPrice.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-[10px] font-bold mt-0.5 ${selectedOffer.rating === "BEST" ? "text-emerald-600" : selectedOffer.rating === "AVOID" ? "text-red-700" : "text-slate-600"}` }, selectedOffer.effectiveBenefit)))
+      )), otherOffers.length > 0 && /* @__PURE__ */ import_react3.default.createElement("div", { className: "pt-1" }, /* @__PURE__ */ import_react3.default.createElement(
+        "button",
+        {
+          type: "button",
+          onClick: () => setShowAllMethods(!showAllMethods),
+          className: "w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-between transition-colors border border-slate-200"
+        },
+        /* @__PURE__ */ import_react3.default.createElement("span", { className: "flex items-center gap-2" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-3.5 h-3.5 text-slate-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, showAllMethods ? "Hide Alternative Payment Methods" : `View & Compare Other Payment Methods (${otherOffers.length} Available)`)),
+        showAllMethods ? /* @__PURE__ */ import_react3.default.createElement(ChevronUp, { className: "w-4 h-4 text-slate-600" }) : /* @__PURE__ */ import_react3.default.createElement(ChevronDown, { className: "w-4 h-4 text-slate-600" })
+      ), showAllMethods && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-2.5 mt-3 animate-in fade-in duration-200" }, otherOffers.map((offer) => {
         const isBest = offer.rating === "BEST";
         const isAvoid = offer.rating === "AVOID";
         const isGood = offer.rating === "GOOD";
@@ -7789,7 +7825,7 @@
           },
           /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-start justify-between gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 flex-wrap" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "font-bold text-sm text-slate-900" }, offer.bankOrCard), isBest && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white shadow-xs" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsUp, { className: "w-2.5 h-2.5" }), "RECOMMENDED: BEST VALUE"), isGood && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200" }, "GOOD OFFER"), isAvoid && /* @__PURE__ */ import_react3.default.createElement("span", { className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-red-100 text-red-800 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement(ThumbsDown, { className: "w-2.5 h-2.5 text-red-600" }), "AVOID: HIDDEN CHARGES")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-xs text-slate-600" }, offer.description), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-700 font-medium flex items-center gap-1.5 pt-0.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-slate-400" }), /* @__PURE__ */ import_react3.default.createElement("span", null, offer.reason))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-right shrink-0" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-xs text-slate-500 font-medium" }, "Effective Price"), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-base font-black ${isBest ? "text-emerald-700" : isAvoid ? "text-red-600" : "text-slate-900"}` }, "\u20B9", offer.netPrice.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: `text-[10px] font-bold ${isBest ? "text-emerald-600" : isAvoid ? "text-red-700" : "text-slate-600"}` }, offer.effectiveBenefit)))
         );
-      })), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "TRAVEL" ? "CommitGuard Travel Advisory (TNPL Warning):" : surfaceType === "EDTECH" ? "CommitGuard EdTech Advisory (Subvention Reality):" : surfaceType === "UDEMY" ? "CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):" : surfaceType === "AMAZON" ? "CommitGuard Amazon Advisory (Cashback vs EMI Drag):" : "CommitGuard Flipkart Advisory (Cashback vs EMI Drag):")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-slate-600 text-[11px] leading-relaxed" }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Travel Now, Pay Later (TNPL)"), " advertises low monthly tranches but triggers ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "24% to 36% penalty APRs"), " and compounding bounce fees if any installment is missed post-trip. ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Recommended Alternative:"), " Start a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "6-month Liquid Fund SIP"), " at 7.10% yield to book your trip 100% debt-free.") : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, 'Education Loan "0% Subvention"'), " packages frequently embed an upfront ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "3% to 5% institutional subvention surcharge"), " into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.") : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Udemy Countdown Timers:"), ' The "Sale ends in 5 hours" timer resets automatically on next browser session. Over ', /* @__PURE__ */ import_react3.default.createElement("strong", null, "87% of purchased self-paced courses are never completed"), ". If paying, use direct UPI without EMI lock-ins, or invest in a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Liquid Fund"), " until you have scheduled hours to study.") : surfaceType === "AMAZON" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold an ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Amazon Pay ICICI Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% Amazon Pay balance cashback"), ". If you choose ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST on interest and bank processing fees.") : /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Flipkart Axis Bank Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% statement cashback"), ". If you use ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST and processing fees.")))), activeTab === "EMI_FRICTION" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-red-50 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-red-800 uppercase tracking-wide" }, "Effective APR"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-red-600 mt-1" }, mathResult.effectiveAnnualPercentageRate, "%"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-red-700/80 mt-0.5" }, "vs Advertised ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "0% APR"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-amber-50 border border-amber-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-amber-800 uppercase tracking-wide" }, "Total GST + Fee Drag"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-amber-700 mt-1" }, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-amber-800/80 mt-0.5" }, "\u20B9", processingFee, " fee + \u20B9", mathResult.totalGstOnInterest.toFixed(2), " GST")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-slate-700 uppercase tracking-wide" }, "Monthly Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-slate-900 mt-1" }, "\u20B9", mathResult.monthlyBaseEmi.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-slate-500 mt-0.5" }, "Locked for ", tenure, " installments"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "3-Bullet Plain-English Translation")), /* @__PURE__ */ import_react3.default.createElement("ul", { className: "space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed" }, /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-red-700 font-bold" }, "19.93% Effective APR Reality: "), "Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into ", /* @__PURE__ */ import_react3.default.createElement("strong", null, mathResult.effectiveAnnualPercentageRate, "% Effective APR"), ".")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-slate-900 font-bold" }, "Unrecoverable Monthly Drag: "), "Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), " in pure administrative leak.")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-emerald-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-800 font-bold" }, "Zero-Friction Baseline: "), "Paying upfront via direct UPI or debit card eliminates the \u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " drag completely while keeping your monthly credit limit untouched.")))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "ext-tenure-slider", className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Adjust EMI Tenure: ", /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-700 text-sm" }, tenure, " Months"))), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] text-slate-500 font-mono" }, "Click any tenure step")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "relative pt-1 pb-1" }, /* @__PURE__ */ import_react3.default.createElement(
+      }))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "TRAVEL" ? "CommitGuard Travel Advisory (TNPL Warning):" : surfaceType === "EDTECH" ? "CommitGuard EdTech Advisory (Subvention Reality):" : surfaceType === "UDEMY" ? "CommitGuard Udemy Advisory (Impulse & Artificial Scarcity):" : surfaceType === "AMAZON" ? "CommitGuard Amazon Advisory (Cashback vs EMI Drag):" : "CommitGuard Flipkart Advisory (Cashback vs EMI Drag):")), /* @__PURE__ */ import_react3.default.createElement("p", { className: "text-slate-600 text-[11px] leading-relaxed" }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Travel Now, Pay Later (TNPL)"), " advertises low monthly tranches but triggers ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "24% to 36% penalty APRs"), " and compounding bounce fees if any installment is missed post-trip. ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Recommended Alternative:"), " Start a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "6-month Liquid Fund SIP"), " at 7.10% yield to book your trip 100% debt-free.") : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, 'Education Loan "0% Subvention"'), " packages frequently embed an upfront ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "3% to 5% institutional subvention surcharge"), " into course pricing plus processing fees. If you pay via direct NEFT/UPI or company sponsorship, negotiate the 5% cash rebate.") : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, /* @__PURE__ */ import_react3.default.createElement("strong", null, "Udemy Countdown Timers:"), ' The "Sale ends in 5 hours" timer resets automatically on next browser session. Over ', /* @__PURE__ */ import_react3.default.createElement("strong", null, "87% of purchased self-paced courses are never completed"), ". If paying, use direct UPI without EMI lock-ins, or invest in a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Liquid Fund"), " until you have scheduled hours to study.") : surfaceType === "AMAZON" ? /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold an ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Amazon Pay ICICI Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% Amazon Pay balance cashback"), ". If you choose ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST on interest and bank processing fees.") : /* @__PURE__ */ import_react3.default.createElement(import_react3.default.Fragment, null, "If you hold a ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "Flipkart Axis Bank Card"), ", pay in full to lock an unconditional ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "5% statement cashback"), ". If you use ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "No-Cost EMI"), ", you will lose ~\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " to non-refundable 18% GST and processing fees.")))), activeTab === "EMI_FRICTION" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-3 gap-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-red-50 border border-red-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-red-800 uppercase tracking-wide" }, "Effective APR"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-red-600 mt-1" }, mathResult.effectiveAnnualPercentageRate, "%"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-red-700/80 mt-0.5" }, "vs Advertised ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "0% APR"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-amber-50 border border-amber-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-amber-800 uppercase tracking-wide" }, "Total GST + Fee Drag"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-amber-700 mt-1" }, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-amber-800/80 mt-0.5" }, "\u20B9", processingFee, " fee + \u20B9", mathResult.totalGstOnInterest.toFixed(2), " GST")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-3.5 rounded-xl bg-slate-50 border border-slate-200" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold text-slate-700 uppercase tracking-wide" }, "Monthly Outflow"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-2xl font-black text-slate-900 mt-1" }, "\u20B9", mathResult.monthlyBaseEmi.toLocaleString("en-IN")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[10px] text-slate-500 mt-0.5" }, "Locked for ", tenure, " installments"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-800" }, /* @__PURE__ */ import_react3.default.createElement(ShieldCheck, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "3-Bullet Plain-English Translation")), /* @__PURE__ */ import_react3.default.createElement("ul", { className: "space-y-2 text-xs sm:text-sm text-slate-700 leading-relaxed" }, /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-red-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-red-700 font-bold" }, "19.93% Effective APR Reality: "), "Even though the merchant provides an upfront discount, bank processing fees and statutory 18% GST convert 0% into ", /* @__PURE__ */ import_react3.default.createElement("strong", null, mathResult.effectiveAnnualPercentageRate, "% Effective APR"), ".")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-amber-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-slate-900 font-bold" }, "Unrecoverable Monthly Drag: "), "Every month, your bank card statement bills 18% statutory GST on the interest component. You incur a guaranteed ", /* @__PURE__ */ import_react3.default.createElement("strong", null, "\u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN")), " in pure administrative leak.")), /* @__PURE__ */ import_react3.default.createElement("li", { className: "flex items-start gap-2.5" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-2 h-2 rounded-full bg-emerald-600 mt-1.5 shrink-0" }), /* @__PURE__ */ import_react3.default.createElement("span", null, /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-800 font-bold" }, "Zero-Friction Baseline: "), "Paying upfront via direct UPI or debit card eliminates the \u20B9", mathResult.totalHiddenFriction.toLocaleString("en-IN"), " drag completely while keeping your monthly credit limit untouched.")))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("label", { htmlFor: "ext-tenure-slider", className: "font-bold text-slate-900 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(SlidersVertical, { className: "w-4 h-4 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Adjust EMI Tenure: ", /* @__PURE__ */ import_react3.default.createElement("strong", { className: "text-emerald-700 text-sm" }, tenure, " Months"))), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] text-slate-500 font-mono" }, "Click any tenure step")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "relative pt-1 pb-1" }, /* @__PURE__ */ import_react3.default.createElement(
         "input",
         {
           id: "ext-tenure-slider",
@@ -7963,20 +7999,83 @@
           }
         }
         const travelPrice = detectedPrice > 0 ? detectedPrice : 13061;
-        const selectedBankMatch = bodyText.match(/(Kotak Mahindra Bank|Bajaj Finserv|MakeMyTrip ICICI Bank|AU Small Finance Bank|HDFC Bank|ICICI Bank|Axis Bank|IDFC FIRST Bank)/i);
-        const selectedBankName = selectedBankMatch ? selectedBankMatch[1] : "Selected Bank";
-        const tenureMatch = bodyText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+        let clickedBankName = "";
+        let isNoCostEmiClicked = false;
+        let isUpiClicked = false;
+        let isTnplClicked = false;
+        if (clickedEl) {
+          const container = clickedEl.closest('li, label, div, tr, [role="radio"], [role="button"]') || clickedEl;
+          const cText = (container.textContent || "").trim();
+          if (/scan\s*to\s*pay|qr|upi|google\s*pay|phonepe|paytm/i.test(cText)) {
+            isUpiClicked = true;
+          } else if (/tnpl|travel\s*now\s*pay\s*later|trip\s*money/i.test(cText)) {
+            isTnplClicked = true;
+          } else if (/no\s*cost\s*emi/i.test(cText)) {
+            isNoCostEmiClicked = true;
+          }
+          const bMatch = cText.match(/(Federal Bank|Kotak Mahindra Bank|Kotak|HDFC Bank|HDFC|ICICI Bank|ICICI|Axis Bank|Axis|Bajaj Finserv|Bajaj|AU Small Finance Bank|AU Bank|MakeMyTrip ICICI Bank|State Bank of India|SBI|IDFC FIRST Bank|IDFC|IndusInd Bank|Standard Chartered|Yes Bank|RBL Bank|Bank of Baroda|Canara Bank|Union Bank|Home Credit|TVS Credit)/i);
+          if (bMatch && bMatch[1]) {
+            clickedBankName = bMatch[1].trim();
+          }
+        }
+        if (!clickedBankName && !isUpiClicked && !isTnplClicked) {
+          const activeBankEl = document.querySelector('[class*="selected"] [class*="bank"], [class*="active"] [class*="bank"], [class*="selected"], [class*="active"], input[type="radio"]:checked, [aria-checked="true"]');
+          if (activeBankEl) {
+            const aText = activeBankEl.closest("li, label, div")?.textContent || activeBankEl.textContent || "";
+            const bMatch = aText.match(/(Federal Bank|Kotak Mahindra Bank|Kotak|HDFC Bank|HDFC|ICICI Bank|ICICI|Axis Bank|Axis|Bajaj Finserv|Bajaj|AU Small Finance Bank|AU Bank|MakeMyTrip ICICI Bank|State Bank of India|SBI|IDFC FIRST Bank|IDFC|IndusInd Bank|Standard Chartered|Yes Bank|RBL Bank|Bank of Baroda|Canara Bank|Union Bank|Home Credit|TVS Credit)/i);
+            if (bMatch && bMatch[1]) {
+              clickedBankName = bMatch[1].trim();
+            }
+          }
+        }
+        let finalBankName = "Selected Bank";
+        if (/federal/i.test(clickedBankName)) finalBankName = "Federal Bank";
+        else if (/kotak/i.test(clickedBankName)) finalBankName = "Kotak Mahindra Bank";
+        else if (/hdfc/i.test(clickedBankName)) finalBankName = "HDFC Bank";
+        else if (/makemytrip.*icici|icici.*makemytrip/i.test(clickedBankName)) finalBankName = "MakeMyTrip ICICI Bank Credit Card";
+        else if (/icici/i.test(clickedBankName)) finalBankName = "ICICI Bank";
+        else if (/axis/i.test(clickedBankName)) finalBankName = "Axis Bank";
+        else if (/bajaj/i.test(clickedBankName)) finalBankName = "Bajaj Finserv";
+        else if (/au small|au bank/i.test(clickedBankName)) finalBankName = "AU Small Finance Bank";
+        else if (/idfc/i.test(clickedBankName)) finalBankName = "IDFC FIRST Bank";
+        else if (/sbi|state bank/i.test(clickedBankName)) finalBankName = "State Bank of India (SBI)";
+        else if (/indusind/i.test(clickedBankName)) finalBankName = "IndusInd Bank";
+        else if (/standard chartered/i.test(clickedBankName)) finalBankName = "Standard Chartered Bank";
+        else if (/yes bank/i.test(clickedBankName)) finalBankName = "Yes Bank";
+        else if (/rbl/i.test(clickedBankName)) finalBankName = "RBL Bank";
+        else if (/baroda/i.test(clickedBankName)) finalBankName = "Bank of Baroda";
+        else if (/canara/i.test(clickedBankName)) finalBankName = "Canara Bank";
+        else if (/union bank/i.test(clickedBankName)) finalBankName = "Union Bank of India";
+        else if (/home credit/i.test(clickedBankName)) finalBankName = "Home Credit Ujjwal EMI Card";
+        else if (/tvs/i.test(clickedBankName)) finalBankName = "TVS Credit";
+        else if (clickedBankName) finalBankName = clickedBankName;
+        const clickedContainerText = clickedEl ? clickedEl.closest("li, label, div")?.textContent || "" : "";
+        const clickedTenureMatch = clickedContainerText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+        const pageTenureMatch = bodyText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+        const tenureMatch = clickedTenureMatch || pageTenureMatch;
         const emiTenureMonths = tenureMatch ? parseInt(tenureMatch[1], 10) : 12;
         const emiMonthlyAmount = tenureMatch ? parseCurrencyNumber(tenureMatch[2]) : Math.round(travelPrice / 12);
-        const interestMatch = bodyText.match(/Incl\.\s*₹\s*([0-9,]+)\s*interest\s*@\s*([0-9.]+)%/i);
+        const interestMatch = (clickedContainerText + " " + bodyText).match(/Incl\.\s*₹\s*([0-9,]+)\s*interest\s*@\s*([0-9.]+)%/i);
         const statedInterestAmount = interestMatch ? parseCurrencyNumber(interestMatch[1]) : Math.round(travelPrice * 0.088);
         const statedInterestRate = interestMatch ? interestMatch[2] : "16.0";
-        const totalPayableMatch = bodyText.match(/₹\s*([0-9,]+)\s*Total payable/i);
+        const totalPayableMatch = (clickedContainerText + " " + bodyText).match(/₹\s*([0-9,]+)\s*Total payable/i);
         const statedTotalPayable = totalPayableMatch ? parseCurrencyNumber(totalPayableMatch[1]) : travelPrice + statedInterestAmount;
         const gstOnInterest = Math.round(statedInterestAmount * 0.18);
         const bankProcessingFeeTotal = Math.round(199 * 1.18);
         const realTrueOutflow = statedTotalPayable + gstOnInterest + bankProcessingFeeTotal;
+        const isBankSelected = !isUpiClicked && !isTnplClicked && !isNoCostEmiClicked;
         const travelOffers = [
+          {
+            id: "bank-emi-scraped",
+            bankOrCard: `${finalBankName} (${emiTenureMonths}M EMI @ ${statedInterestRate}%)`,
+            description: `${emiTenureMonths} months x \u20B9${emiMonthlyAmount.toLocaleString("en-IN")}/mo (Advertised Total: \u20B9${statedTotalPayable.toLocaleString("en-IN")})`,
+            effectiveBenefit: `\u20B9${emiMonthlyAmount.toLocaleString("en-IN")}/mo + \u20B9${gstOnInterest + bankProcessingFeeTotal} Hidden GST/Fee Drag`,
+            rating: "AVOID",
+            reason: `MakeMyTrip shows \u20B9${statedTotalPayable.toLocaleString("en-IN")}, but ${finalBankName} additionally bills non-refundable 18% GST (\u20B9${gstOnInterest}) on interest + \u20B9${bankProcessingFeeTotal} processing fee (+GST), making your true outflow \u20B9${realTrueOutflow.toLocaleString("en-IN")}.`,
+            netPrice: realTrueOutflow,
+            recommended: false,
+            isSelected: isBankSelected
+          },
           {
             id: "upi-travel",
             bankOrCard: "UPI / Scan to Pay (QR) - Zero Debt",
@@ -7985,7 +8084,8 @@
             rating: "BEST",
             reason: "Zero interest, zero processing fees, keeps credit limit 100% free with instant confirmation.",
             netPrice: travelPrice,
-            recommended: true
+            recommended: true,
+            isSelected: isUpiClicked
           },
           {
             id: "sip-liquid",
@@ -7995,27 +8095,19 @@
             rating: "BEST",
             reason: "Travel completely debt-free and earn returns instead of leaking ~\u20B91,600 to bank interest and statutory GST.",
             netPrice: travelPrice,
-            recommended: true
-          },
-          {
-            id: "bank-emi-scraped",
-            bankOrCard: `${selectedBankName} (${emiTenureMonths}M EMI @ ${statedInterestRate}%)`,
-            description: `${emiTenureMonths} months x \u20B9${emiMonthlyAmount.toLocaleString("en-IN")}/mo (Advertised Total: \u20B9${statedTotalPayable.toLocaleString("en-IN")})`,
-            effectiveBenefit: `\u20B9${emiMonthlyAmount.toLocaleString("en-IN")}/mo + \u20B9${gstOnInterest + bankProcessingFeeTotal} Hidden GST/Fee Drag`,
-            rating: "AVOID",
-            reason: `MakeMyTrip shows \u20B9${statedTotalPayable.toLocaleString("en-IN")}, but your bank additionally charges non-refundable 18% GST (\u20B9${gstOnInterest}) on interest + \u20B9${bankProcessingFeeTotal} fee (+GST), making your true outflow \u20B9${realTrueOutflow.toLocaleString("en-IN")}.`,
-            netPrice: realTrueOutflow,
-            recommended: false
+            recommended: true,
+            isSelected: false
           },
           {
             id: "nocost-travel-emi",
-            bankOrCard: "No-Cost EMI (MakeMyTrip ICICI / Bajaj Finserv / AU Bank)",
+            bankOrCard: `No-Cost EMI (${finalBankName === "Selected Bank" ? "Bajaj Finserv / AU Bank" : finalBankName})`,
             description: `${emiTenureMonths} Months installment plan with upfront interest offset`,
             effectiveBenefit: `\u20B9${Math.round(travelPrice / emiTenureMonths).toLocaleString("en-IN")}/mo + \u20B9${Math.round(199 + travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18)} GST drag`,
             rating: "AVOID",
             reason: "Even with merchant interest discount, bank charges \u20B9199 processing fee + monthly 18% GST on interest component.",
             netPrice: travelPrice + Math.round(199 + travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18),
-            recommended: false
+            recommended: false,
+            isSelected: isNoCostEmiClicked
           },
           {
             id: "tnpl-trip",
@@ -8025,7 +8117,8 @@
             rating: "AVOID",
             reason: "Exposes user to 24%-36% penalty APRs plus \u20B9450-\u20B9850 bounce fees if post-vacation cash is tight.",
             netPrice: travelPrice + Math.round(travelPrice * 0.14),
-            recommended: false
+            recommended: false,
+            isSelected: isTnplClicked
           }
         ];
         return {
@@ -8777,6 +8870,7 @@ lucide-react/dist/esm/icons/thumbs-up.js:
 lucide-react/dist/esm/icons/trending-up.js:
 lucide-react/dist/esm/icons/triangle-alert.js:
 lucide-react/dist/esm/icons/x.js:
+lucide-react/dist/esm/icons/zap.js:
 lucide-react/dist/esm/lucide-react.js:
   (**
    * @license lucide-react v0.475.0 - ISC

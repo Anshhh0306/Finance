@@ -145,20 +145,79 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
       const travelPrice = detectedPrice > 0 ? detectedPrice : 13061;
 
-      // Extract specific selected bank or tenures on page (e.g. Kotak Mahindra Bank, 12 months x ₹1,185 @ 16.0%)
-      const selectedBankMatch = bodyText.match(/(Kotak Mahindra Bank|Bajaj Finserv|MakeMyTrip ICICI Bank|AU Small Finance Bank|HDFC Bank|ICICI Bank|Axis Bank|IDFC FIRST Bank)/i);
-      const selectedBankName = selectedBankMatch ? selectedBankMatch[1] : 'Selected Bank';
+      // Extract specific bank or payment option from clickedEl and active DOM elements
+      let clickedBankName = '';
+      let isNoCostEmiClicked = false;
+      let isUpiClicked = false;
+      let isTnplClicked = false;
 
-      // Check if page mentions specific EMI tenure (e.g., "12 months x ₹ 1,185" with "Incl. ₹ 1,159 interest @16.0%" and "₹ 14,220 Total payable")
-      const tenureMatch = bodyText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+      if (clickedEl) {
+        const container = clickedEl.closest('li, label, div, tr, [role="radio"], [role="button"]') || clickedEl;
+        const cText = (container.textContent || '').trim();
+        
+        if (/scan\s*to\s*pay|qr|upi|google\s*pay|phonepe|paytm/i.test(cText)) {
+          isUpiClicked = true;
+        } else if (/tnpl|travel\s*now\s*pay\s*later|trip\s*money/i.test(cText)) {
+          isTnplClicked = true;
+        } else if (/no\s*cost\s*emi/i.test(cText)) {
+          isNoCostEmiClicked = true;
+        }
+
+        const bMatch = cText.match(/(Federal Bank|Kotak Mahindra Bank|Kotak|HDFC Bank|HDFC|ICICI Bank|ICICI|Axis Bank|Axis|Bajaj Finserv|Bajaj|AU Small Finance Bank|AU Bank|MakeMyTrip ICICI Bank|State Bank of India|SBI|IDFC FIRST Bank|IDFC|IndusInd Bank|Standard Chartered|Yes Bank|RBL Bank|Bank of Baroda|Canara Bank|Union Bank|Home Credit|TVS Credit)/i);
+        if (bMatch && bMatch[1]) {
+          clickedBankName = bMatch[1].trim();
+        }
+      }
+
+      // If bank name wasn't on the clicked element directly, check active/checked radio or active element in DOM
+      if (!clickedBankName && !isUpiClicked && !isTnplClicked) {
+        const activeBankEl = document.querySelector('[class*="selected"] [class*="bank"], [class*="active"] [class*="bank"], [class*="selected"], [class*="active"], input[type="radio"]:checked, [aria-checked="true"]');
+        if (activeBankEl) {
+          const aText = activeBankEl.closest('li, label, div')?.textContent || activeBankEl.textContent || '';
+          const bMatch = aText.match(/(Federal Bank|Kotak Mahindra Bank|Kotak|HDFC Bank|HDFC|ICICI Bank|ICICI|Axis Bank|Axis|Bajaj Finserv|Bajaj|AU Small Finance Bank|AU Bank|MakeMyTrip ICICI Bank|State Bank of India|SBI|IDFC FIRST Bank|IDFC|IndusInd Bank|Standard Chartered|Yes Bank|RBL Bank|Bank of Baroda|Canara Bank|Union Bank|Home Credit|TVS Credit)/i);
+          if (bMatch && bMatch[1]) {
+            clickedBankName = bMatch[1].trim();
+          }
+        }
+      }
+
+      // Normalize clean bank name
+      let finalBankName = 'Selected Bank';
+      if (/federal/i.test(clickedBankName)) finalBankName = 'Federal Bank';
+      else if (/kotak/i.test(clickedBankName)) finalBankName = 'Kotak Mahindra Bank';
+      else if (/hdfc/i.test(clickedBankName)) finalBankName = 'HDFC Bank';
+      else if (/makemytrip.*icici|icici.*makemytrip/i.test(clickedBankName)) finalBankName = 'MakeMyTrip ICICI Bank Credit Card';
+      else if (/icici/i.test(clickedBankName)) finalBankName = 'ICICI Bank';
+      else if (/axis/i.test(clickedBankName)) finalBankName = 'Axis Bank';
+      else if (/bajaj/i.test(clickedBankName)) finalBankName = 'Bajaj Finserv';
+      else if (/au small|au bank/i.test(clickedBankName)) finalBankName = 'AU Small Finance Bank';
+      else if (/idfc/i.test(clickedBankName)) finalBankName = 'IDFC FIRST Bank';
+      else if (/sbi|state bank/i.test(clickedBankName)) finalBankName = 'State Bank of India (SBI)';
+      else if (/indusind/i.test(clickedBankName)) finalBankName = 'IndusInd Bank';
+      else if (/standard chartered/i.test(clickedBankName)) finalBankName = 'Standard Chartered Bank';
+      else if (/yes bank/i.test(clickedBankName)) finalBankName = 'Yes Bank';
+      else if (/rbl/i.test(clickedBankName)) finalBankName = 'RBL Bank';
+      else if (/baroda/i.test(clickedBankName)) finalBankName = 'Bank of Baroda';
+      else if (/canara/i.test(clickedBankName)) finalBankName = 'Canara Bank';
+      else if (/union bank/i.test(clickedBankName)) finalBankName = 'Union Bank of India';
+      else if (/home credit/i.test(clickedBankName)) finalBankName = 'Home Credit Ujjwal EMI Card';
+      else if (/tvs/i.test(clickedBankName)) finalBankName = 'TVS Credit';
+      else if (clickedBankName) finalBankName = clickedBankName;
+
+      // Extract specific tenure (e.g. from clicked element or page)
+      const clickedContainerText = clickedEl ? (clickedEl.closest('li, label, div')?.textContent || '') : '';
+      const clickedTenureMatch = clickedContainerText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+      const pageTenureMatch = bodyText.match(/(\d+)\s*months\s*x\s*₹\s*([0-9,]+)/i);
+      const tenureMatch = clickedTenureMatch || pageTenureMatch;
+
       const emiTenureMonths = tenureMatch ? parseInt(tenureMatch[1], 10) : 12;
       const emiMonthlyAmount = tenureMatch ? parseCurrencyNumber(tenureMatch[2]) : Math.round(travelPrice / 12);
 
-      const interestMatch = bodyText.match(/Incl\.\s*₹\s*([0-9,]+)\s*interest\s*@\s*([0-9.]+)%/i);
+      const interestMatch = (clickedContainerText + ' ' + bodyText).match(/Incl\.\s*₹\s*([0-9,]+)\s*interest\s*@\s*([0-9.]+)%/i);
       const statedInterestAmount = interestMatch ? parseCurrencyNumber(interestMatch[1]) : Math.round(travelPrice * 0.088);
       const statedInterestRate = interestMatch ? interestMatch[2] : '16.0';
 
-      const totalPayableMatch = bodyText.match(/₹\s*([0-9,]+)\s*Total payable/i);
+      const totalPayableMatch = (clickedContainerText + ' ' + bodyText).match(/₹\s*([0-9,]+)\s*Total payable/i);
       const statedTotalPayable = totalPayableMatch ? parseCurrencyNumber(totalPayableMatch[1]) : (travelPrice + statedInterestAmount);
 
       // Deterministic calculation of hidden GST on interest (18%) + bank fee (₹199 + 18% GST)
@@ -166,7 +225,20 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       const bankProcessingFeeTotal = Math.round(199 * 1.18); // ₹235
       const realTrueOutflow = statedTotalPayable + gstOnInterest + bankProcessingFeeTotal;
 
+      const isBankSelected = !isUpiClicked && !isTnplClicked && !isNoCostEmiClicked;
+
       const travelOffers: ScrapedOffer[] = [
+        {
+          id: 'bank-emi-scraped',
+          bankOrCard: `${finalBankName} (${emiTenureMonths}M EMI @ ${statedInterestRate}%)`,
+          description: `${emiTenureMonths} months x ₹${emiMonthlyAmount.toLocaleString('en-IN')}/mo (Advertised Total: ₹${statedTotalPayable.toLocaleString('en-IN')})`,
+          effectiveBenefit: `₹${emiMonthlyAmount.toLocaleString('en-IN')}/mo + ₹${gstOnInterest + bankProcessingFeeTotal} Hidden GST/Fee Drag`,
+          rating: 'AVOID',
+          reason: `MakeMyTrip shows ₹${statedTotalPayable.toLocaleString('en-IN')}, but ${finalBankName} additionally bills non-refundable 18% GST (₹${gstOnInterest}) on interest + ₹${bankProcessingFeeTotal} processing fee (+GST), making your true outflow ₹${realTrueOutflow.toLocaleString('en-IN')}.`,
+          netPrice: realTrueOutflow,
+          recommended: false,
+          isSelected: isBankSelected,
+        },
         {
           id: 'upi-travel',
           bankOrCard: 'UPI / Scan to Pay (QR) - Zero Debt',
@@ -176,6 +248,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           reason: 'Zero interest, zero processing fees, keeps credit limit 100% free with instant confirmation.',
           netPrice: travelPrice,
           recommended: true,
+          isSelected: isUpiClicked,
         },
         {
           id: 'sip-liquid',
@@ -186,26 +259,18 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           reason: 'Travel completely debt-free and earn returns instead of leaking ~₹1,600 to bank interest and statutory GST.',
           netPrice: travelPrice,
           recommended: true,
-        },
-        {
-          id: 'bank-emi-scraped',
-          bankOrCard: `${selectedBankName} (${emiTenureMonths}M EMI @ ${statedInterestRate}%)`,
-          description: `${emiTenureMonths} months x ₹${emiMonthlyAmount.toLocaleString('en-IN')}/mo (Advertised Total: ₹${statedTotalPayable.toLocaleString('en-IN')})`,
-          effectiveBenefit: `₹${emiMonthlyAmount.toLocaleString('en-IN')}/mo + ₹${gstOnInterest + bankProcessingFeeTotal} Hidden GST/Fee Drag`,
-          rating: 'AVOID',
-          reason: `MakeMyTrip shows ₹${statedTotalPayable.toLocaleString('en-IN')}, but your bank additionally charges non-refundable 18% GST (₹${gstOnInterest}) on interest + ₹${bankProcessingFeeTotal} fee (+GST), making your true outflow ₹${realTrueOutflow.toLocaleString('en-IN')}.`,
-          netPrice: realTrueOutflow,
-          recommended: false,
+          isSelected: false,
         },
         {
           id: 'nocost-travel-emi',
-          bankOrCard: 'No-Cost EMI (MakeMyTrip ICICI / Bajaj Finserv / AU Bank)',
+          bankOrCard: `No-Cost EMI (${finalBankName === 'Selected Bank' ? 'Bajaj Finserv / AU Bank' : finalBankName})`,
           description: `${emiTenureMonths} Months installment plan with upfront interest offset`,
           effectiveBenefit: `₹${Math.round(travelPrice / emiTenureMonths).toLocaleString('en-IN')}/mo + ₹${Math.round(199 + (travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18))} GST drag`,
           rating: 'AVOID',
           reason: 'Even with merchant interest discount, bank charges ₹199 processing fee + monthly 18% GST on interest component.',
           netPrice: travelPrice + Math.round(199 + (travelPrice * 0.15 * (emiTenureMonths / 12) * 0.18)),
           recommended: false,
+          isSelected: isNoCostEmiClicked,
         },
         {
           id: 'tnpl-trip',
@@ -216,6 +281,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
           reason: 'Exposes user to 24%-36% penalty APRs plus ₹450-₹850 bounce fees if post-vacation cash is tight.',
           netPrice: travelPrice + Math.round(travelPrice * 0.14),
           recommended: false,
+          isSelected: isTnplClicked,
         },
       ];
 
