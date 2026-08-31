@@ -7369,21 +7369,8 @@
   ];
   var GraduationCap = createLucideIcon("GraduationCap", __iconNode6);
 
-  // node_modules/lucide-react/dist/esm/icons/pen-line.js
-  var __iconNode7 = [
-    ["path", { d: "M12 20h9", key: "t2du7b" }],
-    [
-      "path",
-      {
-        d: "M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z",
-        key: "1ykcvy"
-      }
-    ]
-  ];
-  var PenLine = createLucideIcon("PenLine", __iconNode7);
-
   // node_modules/lucide-react/dist/esm/icons/piggy-bank.js
-  var __iconNode8 = [
+  var __iconNode7 = [
     [
       "path",
       {
@@ -7394,10 +7381,10 @@
     ["path", { d: "M2 9v1c0 1.1.9 2 2 2h1", key: "nm575m" }],
     ["path", { d: "M16 11h.01", key: "xkw8gn" }]
   ];
-  var PiggyBank = createLucideIcon("PiggyBank", __iconNode8);
+  var PiggyBank = createLucideIcon("PiggyBank", __iconNode7);
 
   // node_modules/lucide-react/dist/esm/icons/plane.js
-  var __iconNode9 = [
+  var __iconNode8 = [
     [
       "path",
       {
@@ -7406,17 +7393,17 @@
       }
     ]
   ];
-  var Plane = createLucideIcon("Plane", __iconNode9);
+  var Plane = createLucideIcon("Plane", __iconNode8);
 
   // node_modules/lucide-react/dist/esm/icons/rotate-ccw.js
-  var __iconNode10 = [
+  var __iconNode9 = [
     ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
     ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
   ];
-  var RotateCcw = createLucideIcon("RotateCcw", __iconNode10);
+  var RotateCcw = createLucideIcon("RotateCcw", __iconNode9);
 
   // node_modules/lucide-react/dist/esm/icons/shield-check.js
-  var __iconNode11 = [
+  var __iconNode10 = [
     [
       "path",
       {
@@ -7426,18 +7413,18 @@
     ],
     ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
   ];
-  var ShieldCheck = createLucideIcon("ShieldCheck", __iconNode11);
+  var ShieldCheck = createLucideIcon("ShieldCheck", __iconNode10);
 
   // node_modules/lucide-react/dist/esm/icons/shopping-bag.js
-  var __iconNode12 = [
+  var __iconNode11 = [
     ["path", { d: "M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z", key: "hou9p0" }],
     ["path", { d: "M3 6h18", key: "d0wm0j" }],
     ["path", { d: "M16 10a4 4 0 0 1-8 0", key: "1ltviw" }]
   ];
-  var ShoppingBag = createLucideIcon("ShoppingBag", __iconNode12);
+  var ShoppingBag = createLucideIcon("ShoppingBag", __iconNode11);
 
   // node_modules/lucide-react/dist/esm/icons/sliders-vertical.js
-  var __iconNode13 = [
+  var __iconNode12 = [
     ["line", { x1: "4", x2: "4", y1: "21", y2: "14", key: "1p332r" }],
     ["line", { x1: "4", x2: "4", y1: "10", y2: "3", key: "gb41h5" }],
     ["line", { x1: "12", x2: "12", y1: "21", y2: "12", key: "hf2csr" }],
@@ -7448,10 +7435,10 @@
     ["line", { x1: "10", x2: "14", y1: "8", y2: "8", key: "1yglbp" }],
     ["line", { x1: "18", x2: "22", y1: "16", y2: "16", key: "1jxqpz" }]
   ];
-  var SlidersVertical = createLucideIcon("SlidersVertical", __iconNode13);
+  var SlidersVertical = createLucideIcon("SlidersVertical", __iconNode12);
 
   // node_modules/lucide-react/dist/esm/icons/sparkles.js
-  var __iconNode14 = [
+  var __iconNode13 = [
     [
       "path",
       {
@@ -7464,10 +7451,10 @@
     ["path", { d: "M4 17v2", key: "vumght" }],
     ["path", { d: "M5 18H3", key: "zchphs" }]
   ];
-  var Sparkles = createLucideIcon("Sparkles", __iconNode14);
+  var Sparkles = createLucideIcon("Sparkles", __iconNode13);
 
   // node_modules/lucide-react/dist/esm/icons/thumbs-down.js
-  var __iconNode15 = [
+  var __iconNode14 = [
     ["path", { d: "M17 14V2", key: "8ymqnk" }],
     [
       "path",
@@ -7477,10 +7464,10 @@
       }
     ]
   ];
-  var ThumbsDown = createLucideIcon("ThumbsDown", __iconNode15);
+  var ThumbsDown = createLucideIcon("ThumbsDown", __iconNode14);
 
   // node_modules/lucide-react/dist/esm/icons/thumbs-up.js
-  var __iconNode16 = [
+  var __iconNode15 = [
     ["path", { d: "M7 10v12", key: "1qc93n" }],
     [
       "path",
@@ -7490,17 +7477,17 @@
       }
     ]
   ];
-  var ThumbsUp = createLucideIcon("ThumbsUp", __iconNode16);
+  var ThumbsUp = createLucideIcon("ThumbsUp", __iconNode15);
 
   // node_modules/lucide-react/dist/esm/icons/trending-up.js
-  var __iconNode17 = [
+  var __iconNode16 = [
     ["polyline", { points: "22 7 13.5 15.5 8.5 10.5 2 17", key: "126l90" }],
     ["polyline", { points: "16 7 22 7 22 13", key: "kwv8wd" }]
   ];
-  var TrendingUp = createLucideIcon("TrendingUp", __iconNode17);
+  var TrendingUp = createLucideIcon("TrendingUp", __iconNode16);
 
   // node_modules/lucide-react/dist/esm/icons/triangle-alert.js
-  var __iconNode18 = [
+  var __iconNode17 = [
     [
       "path",
       {
@@ -7511,17 +7498,17 @@
     ["path", { d: "M12 9v4", key: "juzpu7" }],
     ["path", { d: "M12 17h.01", key: "p32p05" }]
   ];
-  var TriangleAlert = createLucideIcon("TriangleAlert", __iconNode18);
+  var TriangleAlert = createLucideIcon("TriangleAlert", __iconNode17);
 
   // node_modules/lucide-react/dist/esm/icons/x.js
-  var __iconNode19 = [
+  var __iconNode18 = [
     ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ];
-  var X = createLucideIcon("X", __iconNode19);
+  var X = createLucideIcon("X", __iconNode18);
 
   // node_modules/lucide-react/dist/esm/icons/zap.js
-  var __iconNode20 = [
+  var __iconNode19 = [
     [
       "path",
       {
@@ -7530,7 +7517,7 @@
       }
     ]
   ];
-  var Zap = createLucideIcon("Zap", __iconNode20);
+  var Zap = createLucideIcon("Zap", __iconNode19);
 
   // src/lib/financial-engine.ts
   var GST_RATE = 0.18;
@@ -7643,91 +7630,51 @@
     const [selectedOfferId, setSelectedOfferId] = (0, import_react3.useState)(null);
     const [compoundingHorizon, setCompoundingHorizon] = (0, import_react3.useState)("5Y");
     const [isProofOpen, setIsProofOpen] = (0, import_react3.useState)(false);
-    const [isCustomSwitcherOpen, setIsCustomSwitcherOpen] = (0, import_react3.useState)(false);
-    const [customType, setCustomType] = (0, import_react3.useState)("CREDIT_EMI");
-    const [customBank, setCustomBank] = (0, import_react3.useState)("HDFC Bank");
     const [customTenure, setCustomTenure] = (0, import_react3.useState)(12);
-    const [customSimulatedOffer, setCustomSimulatedOffer] = (0, import_react3.useState)(null);
+    const [simulatedTenureOffer, setSimulatedTenureOffer] = (0, import_react3.useState)(null);
     const processingFee = 199;
     const nominalRate = 15;
-    const handleApplyCustomSimulation = (type, bank, tenureMonths) => {
-      setCustomType(type);
-      setCustomBank(bank);
-      setCustomTenure(tenureMonths);
-      if (type === "UPI") {
-        const offer = {
-          id: "simulated-upi",
-          bankOrCard: "UPI / Direct Debit (Zero Debt)",
-          description: `Single-tranche direct payment of \u20B9${productPrice.toLocaleString("en-IN")}`,
-          effectiveBenefit: "Saves 100% of GST & bank processing fees",
-          rating: "BEST",
-          reason: "Zero interest, zero processing fee, keeps credit limit 100% free with instant confirmation.",
-          netPrice: productPrice,
-          recommended: true,
-          isSelected: true
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId("simulated-upi");
-        return;
+    const handleSimulateTenure = (months, baseOffer) => {
+      setCustomTenure(months);
+      let apr = 15;
+      const aprMatch = baseOffer.bankOrCard.match(/@\s*([0-9.]+)%/i) || baseOffer.reason.match(/([0-9.]+)%\s*APR/i);
+      if (aprMatch && aprMatch[1]) {
+        apr = parseFloat(aprMatch[1]);
+      } else if (/axis\s*cashback|flipkart\s*axis/i.test(baseOffer.bankOrCard)) {
+        apr = 0;
+      } else if (/no\s*cost/i.test(baseOffer.bankOrCard)) {
+        apr = 0;
+      } else if (/pay\s*later|tnpl/i.test(baseOffer.bankOrCard)) {
+        apr = 24;
+      } else if (/debit/i.test(baseOffer.bankOrCard)) {
+        apr = 16;
       }
-      if (type === "NO_COST") {
-        const monthly = Math.round(productPrice / tenureMonths);
-        const estGst = Math.round(199 + productPrice * 0.15 * (tenureMonths / 12) * 0.18);
-        const offer = {
-          id: `simulated-nocost-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M No-Cost EMI)`,
-          description: `${tenureMonths} Months installment plan with upfront interest offset`,
-          effectiveBenefit: `\u20B9${monthly.toLocaleString("en-IN")}/mo + \u20B9${estGst.toLocaleString("en-IN")} Hidden GST/Fee Drag`,
-          rating: "AVOID",
-          reason: `Even with merchant interest discount, ${bank} charges \u20B9199 processing fee + monthly 18% GST on the interest component.`,
-          netPrice: productPrice + estGst,
-          recommended: false,
-          isSelected: true
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
+      const isNoCost = apr === 0;
+      let interest = 0;
+      let gst = 0;
+      let fee = /axis\s*cashback/i.test(baseOffer.bankOrCard) ? 0 : 235;
+      if (isNoCost) {
+        const implicitInterest = Math.round(productPrice * 0.15 * (months / 12));
+        gst = Math.round(implicitInterest * 0.18);
+      } else {
+        interest = Math.round(productPrice * (apr / 100) * (months / 12));
+        gst = Math.round(interest * 0.18);
       }
-      if (type === "CREDIT_EMI" || type === "DEBIT_EMI") {
-        const isDebit = type === "DEBIT_EMI";
-        const aprRate = isDebit ? 16 : 15;
-        const statedInterest = Math.round(productPrice * (aprRate / 100) * (tenureMonths / 12));
-        const monthly = Math.round((productPrice + statedInterest) / tenureMonths);
-        const gstOnInterest = Math.round(statedInterest * 0.18);
-        const bankFee = Math.round(199 * 1.18);
-        const trueOutflow = productPrice + statedInterest + gstOnInterest + bankFee;
-        const offer = {
-          id: `simulated-emi-${bank}-${tenureMonths}`,
-          bankOrCard: `${bank} (${tenureMonths}M ${isDebit ? "Debit Card" : "Credit Card"} EMI @ ${aprRate}%)`,
-          description: `${tenureMonths} months x \u20B9${monthly.toLocaleString("en-IN")}/mo (Advertised Total: \u20B9${(productPrice + statedInterest).toLocaleString("en-IN")})`,
-          effectiveBenefit: `\u20B9${monthly.toLocaleString("en-IN")}/mo + \u20B9${(gstOnInterest + bankFee).toLocaleString("en-IN")} Hidden Drag`,
-          rating: "AVOID",
-          reason: `Checkout advertises \u20B9${(productPrice + statedInterest).toLocaleString("en-IN")}, but ${bank} additionally bills non-refundable 18% GST (\u20B9${gstOnInterest}) on interest + \u20B9${bankFee} fee (+GST), making your true outflow \u20B9${trueOutflow.toLocaleString("en-IN")}.`,
-          netPrice: trueOutflow,
-          recommended: false,
-          isSelected: true
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
-      if (type === "BNPL") {
-        const penaltyFee = Math.round(productPrice * 0.14);
-        const offer = {
-          id: `simulated-bnpl-${bank}`,
-          bankOrCard: `${bank} (Pay Later / BNPL Loan)`,
-          description: `Deferred split payment with 28.4% APR penalty risk`,
-          effectiveBenefit: `Exposes credit score to late fees and penalty APR`,
-          rating: "AVOID",
-          reason: `Exposes user to 24%-36% penalty APRs plus \u20B9450-\u20B9850 bounce fees if post-purchase cash is tight.`,
-          netPrice: productPrice + penaltyFee,
-          recommended: false,
-          isSelected: true
-        };
-        setCustomSimulatedOffer(offer);
-        setSelectedOfferId(offer.id);
-        return;
-      }
+      const total = productPrice + interest + gst + fee;
+      const monthly = Math.round((productPrice + interest) / months);
+      const baseBankName = baseOffer.bankOrCard.replace(/\(\d+M[^)]*\)/g, "").trim();
+      const simOffer = {
+        id: `${baseOffer.id}-sim-${months}m`,
+        bankOrCard: `${baseBankName} (${months}M ${isNoCost ? "No-Cost EMI" : `EMI @ ${apr.toFixed(1)}%`})`,
+        description: `${months} months x \u20B9${monthly.toLocaleString("en-IN")}/mo (Advertised Total: \u20B9${(productPrice + interest).toLocaleString("en-IN")})`,
+        effectiveBenefit: `\u20B9${monthly.toLocaleString("en-IN")}/mo + \u20B9${(gst + fee).toLocaleString("en-IN")} Hidden Drag`,
+        rating: isNoCost ? "GOOD" : "AVOID",
+        reason: isNoCost ? `Flipkart/Merchant discounts interest, but bank levies \u20B9199 processing fee + non-refundable 18% GST (\u20B9${gst}) on interest.` : `Long-tenure EMIs lock credit limit and incur compounding ${apr.toFixed(1)}% APR + 18% non-refundable GST (\u20B9${gst}) on interest + \u20B9${fee} fee.`,
+        netPrice: total,
+        recommended: isNoCost,
+        isSelected: true
+      };
+      setSimulatedTenureOffer(simOffer);
     };
     const mathResult = (0, import_react3.useMemo)(() => {
       return calculateNoCostEmiDrag({
@@ -7857,21 +7804,21 @@
     }, [scrapedOffers, surfaceType, productPrice, tenure, mathResult, processingFee]);
     const allOffers = (0, import_react3.useMemo)(() => {
       let list = [...displayOffers];
-      if (customSimulatedOffer && !list.some((o) => o.id === customSimulatedOffer.id)) {
-        list = [customSimulatedOffer, ...list];
+      if (simulatedTenureOffer) {
+        list = [simulatedTenureOffer, ...list.filter((o) => !o.id.includes("sim-"))];
       }
       return list;
-    }, [displayOffers, customSimulatedOffer]);
+    }, [displayOffers, simulatedTenureOffer]);
     const selectedOffer = (0, import_react3.useMemo)(() => {
-      if (customSimulatedOffer && selectedOfferId === customSimulatedOffer.id) {
-        return customSimulatedOffer;
+      if (simulatedTenureOffer && (selectedOfferId === simulatedTenureOffer.id || !selectedOfferId)) {
+        return simulatedTenureOffer;
       }
       if (selectedOfferId) {
         const found = allOffers.find((o) => o.id === selectedOfferId);
         if (found) return found;
       }
       return allOffers.find((o) => o.isSelected) || allOffers[0];
-    }, [allOffers, selectedOfferId, customSimulatedOffer]);
+    }, [allOffers, selectedOfferId, simulatedTenureOffer]);
     const otherOffers = (0, import_react3.useMemo)(() => {
       return allOffers.filter((o) => o.id !== selectedOffer?.id);
     }, [allOffers, selectedOffer]);
@@ -7883,7 +7830,7 @@
           if (e.target === e.currentTarget) onCancelStayOnPage();
         }
       },
-      /* @__PURE__ */ import_react3.default.createElement("div", { className: "commitguard-card" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: `p-1.5 rounded-lg text-white shadow-sm ${surfaceType === "TRAVEL" ? "bg-sky-600" : surfaceType === "EDTECH" ? "bg-indigo-600" : surfaceType === "UDEMY" ? "bg-purple-600" : surfaceType === "AMAZON" ? "bg-amber-600" : "bg-emerald-600"}` }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(Plane, { className: "w-5 h-5" }) : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(GraduationCap, { className: "w-5 h-5" }) : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(BookOpen, { className: "w-5 h-5" }) : surfaceType === "AMAZON" ? /* @__PURE__ */ import_react3.default.createElement(ShoppingBag, { className: "w-5 h-5" }) : /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-5 h-5" })), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-slate-900" }, surfaceType === "TRAVEL" ? "CommitGuard Travel: TNPL & EMI Reality Check" : surfaceType === "EDTECH" ? "CommitGuard EdTech: Education Loan Subvention Truth" : surfaceType === "UDEMY" ? "CommitGuard Udemy: Impulse Buy & BNPL Interceptor" : surfaceType === "AMAZON" ? "CommitGuard Amazon: Live Card & EMI Optimization" : surfaceType === "FLIPKART" ? "CommitGuard Flipkart: Live Card & EMI Optimization" : "CommitGuard Smart Checkout Intel"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-normal" }, surfaceType === "TRAVEL" ? "MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP" : surfaceType === "EDTECH" ? "UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI" : surfaceType === "UDEMY" ? "Exposing Urgency Timer Artificial Scarcity vs Completion ROI & Direct Pay" : surfaceType === "AMAZON" ? "Amazon.in: Live Amazon Pay ICICI 5% Cashback vs Hidden EMI GST" : surfaceType === "FLIPKART" ? "Flipkart.com: Live Flipkart Axis 5% Cashback vs Hidden EMI GST" : "Live Card & EMI Optimization for E-Commerce"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-mono font-medium" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "<1.2ms Real-Time Scraper")), /* @__PURE__ */ import_react3.default.createElement(
+      /* @__PURE__ */ import_react3.default.createElement("div", { className: "commitguard-card" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between px-6 py-3.5 border-b border-slate-100 bg-white" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2.5 text-slate-900 font-bold text-base sm:text-lg" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: `p-1.5 rounded-lg text-white shadow-sm ${surfaceType === "TRAVEL" ? "bg-sky-600" : surfaceType === "EDTECH" ? "bg-indigo-600" : surfaceType === "UDEMY" ? "bg-purple-600" : surfaceType === "AMAZON" ? "bg-amber-600" : "bg-emerald-600"}` }, surfaceType === "TRAVEL" ? /* @__PURE__ */ import_react3.default.createElement(Plane, { className: "w-5 h-5" }) : surfaceType === "EDTECH" ? /* @__PURE__ */ import_react3.default.createElement(GraduationCap, { className: "w-5 h-5" }) : surfaceType === "UDEMY" ? /* @__PURE__ */ import_react3.default.createElement(BookOpen, { className: "w-5 h-5" }) : surfaceType === "AMAZON" ? /* @__PURE__ */ import_react3.default.createElement(ShoppingBag, { className: "w-5 h-5" }) : /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-5 h-5" })), /* @__PURE__ */ import_react3.default.createElement("div", null, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-slate-900" }, surfaceType === "TRAVEL" ? "CommitGuard Travel: TNPL & EMI Reality Check" : surfaceType === "EDTECH" ? "CommitGuard EdTech: Education Loan Subvention Truth" : surfaceType === "UDEMY" ? "CommitGuard Udemy: Impulse Buy & BNPL Interceptor" : surfaceType === "AMAZON" ? "CommitGuard Amazon: Live Card & EMI Optimization" : surfaceType === "FLIPKART" ? "CommitGuard Flipkart: Live Card & EMI Optimization" : "CommitGuard Smart Checkout Intel"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] text-slate-500 font-normal" }, surfaceType === "TRAVEL" ? "MakeMyTrip & Cleartrip: High-APR TNPL Cascades vs 6M Liquid SIP" : surfaceType === "EDTECH" ? "UpGrad: Exposing Hidden Subvention Surcharges & True Debt ROI" : surfaceType === "UDEMY" ? "30-Day Cool-Off & Micro-BNPL Fee Elimination" : "Live Scraped Banking & Friction Engine"))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-[11px] font-mono font-medium" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "<1.2ms Real-Time Scraper")), /* @__PURE__ */ import_react3.default.createElement(
         "button",
         {
           onClick: onCancelStayOnPage,
@@ -7911,65 +7858,30 @@
         },
         /* @__PURE__ */ import_react3.default.createElement(TriangleAlert, { className: "w-4 h-4 text-amber-500" }),
         /* @__PURE__ */ import_react3.default.createElement("span", null, surfaceType === "UDEMY" ? `Installment / BNPL Friction (Save \u20B9${recoveryCompounding.savedFriction})` : `No-Cost EMI Friction (${mathResult.effectiveAnnualPercentageRate}% APR)`)
-      )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-6 space-y-5 max-h-[75vh] overflow-y-auto" }, activeTab === "CARD_OFFERS" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "px-4 py-2.5 bg-slate-50/90 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2 text-xs" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "font-bold text-slate-700 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Simulate / Switch Payment Method:")), /* @__PURE__ */ import_react3.default.createElement("span", { className: "px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[11px] font-bold truncate max-w-[200px] sm:max-w-xs shadow-xs" }, selectedOffer?.bankOrCard || "Auto-Detected")), /* @__PURE__ */ import_react3.default.createElement(
+      )), /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-6 space-y-5 max-h-[75vh] overflow-y-auto" }, activeTab === "CARD_OFFERS" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "rounded-xl border border-slate-200 bg-white shadow-xs p-3.5 space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-xs" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "font-bold text-slate-700 flex items-center gap-1.5" }, /* @__PURE__ */ import_react3.default.createElement(Sparkles, { className: "w-3.5 h-3.5 text-emerald-600" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Payment Methods Discovered on Page:")), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[10px] text-emerald-700 font-mono font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200" }, "Live Scraped")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex flex-wrap gap-1.5" }, allOffers.map((offer) => /* @__PURE__ */ import_react3.default.createElement(
         "button",
         {
+          key: offer.id,
           type: "button",
-          onClick: () => setIsCustomSwitcherOpen(!isCustomSwitcherOpen),
-          className: "px-3 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-[11px] font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+          onClick: () => {
+            setSimulatedTenureOffer(null);
+            setSelectedOfferId(offer.id);
+          },
+          className: `px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border flex items-center gap-1.5 ${selectedOffer?.id === offer.id ? "bg-slate-900 text-white border-slate-900 shadow-xs" : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 font-medium"}`
         },
-        /* @__PURE__ */ import_react3.default.createElement(PenLine, { className: "w-3 h-3 text-emerald-600" }),
-        /* @__PURE__ */ import_react3.default.createElement("span", null, isCustomSwitcherOpen ? "Hide Switcher" : "Change / Simulate Card"),
-        isCustomSwitcherOpen ? /* @__PURE__ */ import_react3.default.createElement(ChevronUp, { className: "w-3 h-3 text-slate-500" }) : /* @__PURE__ */ import_react3.default.createElement(ChevronDown, { className: "w-3 h-3 text-slate-500" })
-      )), isCustomSwitcherOpen && /* @__PURE__ */ import_react3.default.createElement("div", { className: "p-4 bg-gradient-to-b from-slate-50 to-white space-y-3.5 animate-in fade-in duration-150" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-wider" }, /* @__PURE__ */ import_react3.default.createElement("span", null, "1. Choose Payment Type"), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[10px] text-emerald-700 font-mono font-normal" }, "Instant Recalculation")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-2 sm:grid-cols-5 gap-1.5" }, [
-        { id: "UPI", label: "\u{1F7E2} UPI / Full Pay", desc: "0% Interest, \u20B90 Fees" },
-        { id: "NO_COST", label: "\u{1F381} No-Cost EMI", desc: "Subvention Offset" },
-        { id: "CREDIT_EMI", label: "\u{1F4B3} Credit Card EMI", desc: "Standard Bank APR" },
-        { id: "DEBIT_EMI", label: "\u{1F3E6} Debit Card EMI", desc: "Pre-Approved Limits" },
-        { id: "BNPL", label: "\u23F3 Pay Later / BNPL", desc: "Deferred Credit" }
-      ].map((type) => /* @__PURE__ */ import_react3.default.createElement(
-        "button",
-        {
-          key: type.id,
-          type: "button",
-          onClick: () => handleApplyCustomSimulation(type.id, customBank, customTenure),
-          className: `p-2 rounded-lg text-left border transition-all cursor-pointer ${customType === type.id ? "bg-emerald-50 border-emerald-500 ring-2 ring-emerald-200 text-emerald-950 font-bold shadow-xs" : "bg-white hover:bg-slate-100/80 border-slate-200 text-slate-700 font-medium"}`
-        },
-        /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[11px] font-bold truncate" }, type.label),
-        /* @__PURE__ */ import_react3.default.createElement("div", { className: "text-[9px] text-slate-500 truncate" }, type.desc)
-      )))), customType !== "UPI" && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1.5" }, /* @__PURE__ */ import_react3.default.createElement("label", { className: "text-[11px] font-bold text-slate-600 uppercase tracking-wider block" }, "2. Select Bank or Card Provider"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex flex-wrap gap-1.5" }, [
-        "HDFC Bank",
-        "ICICI Bank",
-        "Axis Bank",
-        "State Bank of India (SBI)",
-        "Kotak Mahindra Bank",
-        "American Express",
-        "OneCard",
-        "Federal Bank",
-        "Bajaj Finserv",
-        "AU Small Finance Bank",
-        "IDFC FIRST Bank",
-        "IndusInd Bank"
-      ].map((bank) => /* @__PURE__ */ import_react3.default.createElement(
-        "button",
-        {
-          key: bank,
-          type: "button",
-          onClick: () => handleApplyCustomSimulation(customType, bank, customTenure),
-          className: `px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer border ${customBank === bank ? "bg-slate-900 text-white border-slate-900 font-bold shadow-xs" : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 font-medium"}`
-        },
-        bank
-      )))), (customType === "NO_COST" || customType === "CREDIT_EMI" || customType === "DEBIT_EMI") && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-1.5" }, /* @__PURE__ */ import_react3.default.createElement("label", { className: "text-[11px] font-bold text-slate-600 uppercase tracking-wider block" }, "3. Select EMI Tenure"), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-2" }, [3, 6, 9, 12, 18, 24].map((m) => /* @__PURE__ */ import_react3.default.createElement(
+        /* @__PURE__ */ import_react3.default.createElement("span", null, offer.bankOrCard),
+        offer.rating === "BEST" && /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-emerald-400 text-[10px]" }, "\u2605")
+      ))), selectedOffer && !/upi|direct|cool-off/i.test(selectedOffer.bankOrCard) && /* @__PURE__ */ import_react3.default.createElement("div", { className: "pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-bold text-slate-600 flex items-center gap-1" }, /* @__PURE__ */ import_react3.default.createElement("span", null, "Simulate EMI Tenure on this Card:")), /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center gap-1.5" }, [3, 6, 9, 12, 18, 24, 36].map((m) => /* @__PURE__ */ import_react3.default.createElement(
         "button",
         {
           key: m,
           type: "button",
-          onClick: () => handleApplyCustomSimulation(customType, customBank, m),
-          className: `flex-1 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer border ${customTenure === m ? "bg-emerald-600 text-white border-emerald-600 shadow-xs" : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"}`
+          onClick: () => handleSimulateTenure(m, selectedOffer),
+          className: `px-2.5 py-1 rounded-md text-[11px] font-mono font-bold transition-all cursor-pointer border ${customTenure === m && simulatedTenureOffer ? "bg-emerald-600 text-white border-emerald-600 shadow-xs" : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"}`
         },
         m,
         "m"
-      )))))), selectedOffer && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-900 text-white inline-flex items-center gap-1.5 shadow-sm" }, /* @__PURE__ */ import_react3.default.createElement(Zap, { className: "w-3 h-3 text-amber-400" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Your Selected Payment Option")), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-semibold text-slate-500" }, "Live Pre-Commitment Reality Check")), /* @__PURE__ */ import_react3.default.createElement(
+      ))))), selectedOffer && /* @__PURE__ */ import_react3.default.createElement("div", { className: "space-y-2.5" }, /* @__PURE__ */ import_react3.default.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-900 text-white inline-flex items-center gap-1.5 shadow-sm" }, /* @__PURE__ */ import_react3.default.createElement(Zap, { className: "w-3 h-3 text-amber-400" }), /* @__PURE__ */ import_react3.default.createElement("span", null, "Your Selected Payment Option")), /* @__PURE__ */ import_react3.default.createElement("span", { className: "text-[11px] font-semibold text-slate-500" }, "Live Pre-Commitment Reality Check")), /* @__PURE__ */ import_react3.default.createElement(
         "div",
         {
           className: `p-4 rounded-xl border-2 transition-all ${selectedOffer.rating === "BEST" ? "bg-emerald-50/90 border-emerald-400 ring-2 ring-emerald-200" : selectedOffer.rating === "AVOID" ? "bg-red-50/90 border-red-300 ring-2 ring-red-100" : "bg-sky-50/90 border-sky-300 ring-2 ring-sky-100"}`
@@ -9202,7 +9114,6 @@ lucide-react/dist/esm/icons/chevron-down.js:
 lucide-react/dist/esm/icons/chevron-up.js:
 lucide-react/dist/esm/icons/credit-card.js:
 lucide-react/dist/esm/icons/graduation-cap.js:
-lucide-react/dist/esm/icons/pen-line.js:
 lucide-react/dist/esm/icons/piggy-bank.js:
 lucide-react/dist/esm/icons/plane.js:
 lucide-react/dist/esm/icons/rotate-ccw.js:
