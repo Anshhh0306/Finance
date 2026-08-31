@@ -195,18 +195,34 @@ export const ExtensionCommitGuardModal: React.FC<ExtensionModalProps> = ({
                 className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 focus:outline-none"
               />
 
-              {/* Exact 1-to-1 Column Aligned Step Labels */}
-              <div className="grid grid-cols-6 pt-2 text-center text-xs font-mono">
+              {/* Exact 1-to-1 Horizontally Aligned Step Labels */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingTop: '8px',
+                  width: '100%',
+                }}
+              >
                 {TENURE_OPTIONS.map((opt, idx) => (
                   <button
                     key={opt}
                     type="button"
                     onClick={() => setSliderIndex(idx)}
-                    className={`py-1 px-1 rounded transition-colors ${
-                      sliderIndex === idx
-                        ? 'text-emerald-700 font-extrabold bg-emerald-50 ring-1 ring-emerald-300'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontFamily: 'monospace',
+                      cursor: 'pointer',
+                      border: sliderIndex === idx ? '1px solid #6ee7b7' : '1px solid transparent',
+                      backgroundColor: sliderIndex === idx ? '#ecfdf5' : 'transparent',
+                      color: sliderIndex === idx ? '#047857' : '#64748b',
+                      fontWeight: sliderIndex === idx ? '800' : '500',
+                      transition: 'all 0.15s ease',
+                    }}
                   >
                     {opt}m
                   </button>

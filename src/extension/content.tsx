@@ -13,45 +13,79 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
 
   const COMMITGUARD_HOST_ID = 'commitguard-extension-root';
 
-  // Helper to extract cart value from Flipkart / Amazon page DOM
-  function extractCartAmount(): number {
-    // 1. Try finding specific total amount patterns
-    const bodyText = document.body ? document.body.innerText : '';
-    const match = bodyText.match(/(?:Total Amount|Total Payable|Payable Amount|Total Price|Order Total)[^\d₹]*[₹Rs.]*\s*([0-9,]+)/i);
-    if (match && match[1]) {
-      const parsed = parseInt(match[1].replace(/,/g, ''), 10);
-      if (!isNaN(parsed) && parsed > 500) {
-        return parsed;
+  // Helper to extract cart / product info from Flipkart or Amazon DOM
+  function extractProductInfo(): { price: number; name: string; advertisedMonthlyEmi?: number } {
+    let detectedPrice = 0;
+    let detectedName = '';
+    let detectedEmi: number | undefined;
+
+    // 1. Try finding product title on Flipkart / Amazon
+    const titleSelectors = [
+      'h1',
+      'span.B_NuCI',
+      'span._35KyD6',
+      '#productTitle',
+      '.VU-ZEz',
+    ];
+    for (const sel of titleSelectors) {
+      const el = document.querySelector(sel);
+      if (el && el.textContent) {
+        const titleText = el.textContent.trim();
+        if (titleText.length > 5) {
+          detectedName = titleText.slice(0, 50);
+          break;
+        }
       }
     }
 
-    // 2. Try common price selectors
-    const priceSelectors = [
-      '._35kyal',
-      '._1_hQ79',
-      '.a-price-whole',
-      '#subtotals-marketplace-table .a-text-bold',
-      '[data-price]',
-      'div:contains("₹")',
-    ];
+    // 2. Check for "Buy with EMI From ₹5,166/m" or "₹X,XXX/m"
+    const bodyText = document.body ? document.body.innerText : '';
+    const emiMonthlyMatch = bodyText.match(/(?:From|Pay|EMI)\s*₹\s*([0-9,]+)\s*(?:\/\s*m|per month|monthly)/i);
+    if (emiMonthlyMatch && emiMonthlyMatch[1]) {
+      detectedEmi = parseInt(emiMonthlyMatch[1].replace(/,/g, ''), 10);
+    }
 
-    for (const selector of priceSelectors) {
-      try {
-        const els = document.querySelectorAll(selector);
-        for (const el of Array.from(els)) {
-          const text = el.textContent || '';
-          const digits = text.replace(/[^0-9]/g, '');
-          const val = parseInt(digits, 10);
-          if (!isNaN(val) && val > 1000 && val < 5000000) {
-            return val;
+    // 3. Scan for price in "Buy now at ₹92,990" or "Total Amount ₹70,196"
+    const buyNowMatch = bodyText.match(/(?:Buy now at|Total Amount|Total Payable|Payable Amount|Total Price|Order Total|Lowest price for you)[^\d₹]*₹\s*([0-9,]+)/i);
+    if (buyNowMatch && buyNowMatch[1]) {
+      const p = parseInt(buyNowMatch[1].replace(/,/g, ''), 10);
+      if (!isNaN(p) && p > 500 && p < 10000000) {
+        detectedPrice = p;
+      }
+    }
+
+    // 4. If not found, check standard price element classes
+    if (!detectedPrice) {
+      const priceSelectors = [
+        'div.Nx9bqj.CxhGGd', // Flipkart product page big price
+        'div._30jeq3._16Jk6d',
+        'div._30jeq3',
+        '.a-price-whole',
+        '#subtotals-marketplace-table .a-text-bold',
+      ];
+      for (const sel of priceSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const num = parseInt(el.textContent.replace(/[^0-9]/g, ''), 10);
+          if (!isNaN(num) && num > 1000 && num < 10000000) {
+            detectedPrice = num;
+            break;
           }
         }
-      } catch {
-        // Continue
       }
     }
 
-    return 70196; // Benchmark default if unparsed
+    // 5. If user clicked on a specific button or element containing price, check it
+    if (!detectedPrice && detectedEmi) {
+      // If we found 5166/m for 18m, estimate ~92990
+      detectedPrice = detectedEmi * 18;
+    }
+
+    return {
+      price: detectedPrice > 0 ? detectedPrice : 70196,
+      name: detectedName || 'Identified Product (No-Cost EMI)',
+      advertisedMonthlyEmi: detectedEmi,
+    };
   }
 
   // Active React Root and Host Container References
@@ -62,6 +96,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
   // Mount the CommitGuard Modal inside Shadow Root
   function injectShadowModal(
     productPrice: number,
+    productName: string,
     onProceedCallback: () => void,
     onCancelCallback: () => void
   ) {
@@ -144,6 +179,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
     reactRoot.render(
       <ExtensionCommitGuardModal
         productPrice={productPrice}
+        productName={productName}
         onProceedAndContinue={handleProceed}
         onCancelStayOnPage={handleCancel}
       />
@@ -155,6 +191,7 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
         type: 'CHECKOUT_INTERCEPTED',
         payload: {
           price: productPrice,
+          name: productName,
           effectiveApr: 19.93,
           hiddenFriction: 1339,
           timestamp: new Date().toISOString(),
@@ -244,10 +281,12 @@ import { ExtensionCommitGuardModal } from './CommitGuardModal';
       e.stopPropagation();
       e.stopImmediatePropagation();
 
-      const price = extractCartAmount();
+      const productInfo = extractProductInfo();
+      console.log('🛡️ CommitGuard Scraped Product Info:', productInfo);
 
       injectShadowModal(
-        price,
+        productInfo.price,
+        productInfo.name,
         // On Proceed: mark as authorized and let the click advance to next page
         () => {
           targetEl.setAttribute('data-commitguard-authorized', 'true');

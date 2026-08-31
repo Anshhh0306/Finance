@@ -7535,17 +7535,41 @@
           onChange: (e) => setSliderIndex(Number(e.target.value)),
           className: "w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600 focus:outline-none"
         }
-      ), /* @__PURE__ */ import_react3.default.createElement("div", { className: "grid grid-cols-6 pt-2 text-center text-xs font-mono" }, TENURE_OPTIONS.map((opt, idx) => /* @__PURE__ */ import_react3.default.createElement(
-        "button",
+      ), /* @__PURE__ */ import_react3.default.createElement(
+        "div",
         {
-          key: opt,
-          type: "button",
-          onClick: () => setSliderIndex(idx),
-          className: `py-1 px-1 rounded transition-colors ${sliderIndex === idx ? "text-emerald-700 font-extrabold bg-emerald-50 ring-1 ring-emerald-300" : "text-slate-500 hover:text-slate-900"}`
+          style: {
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingTop: "8px",
+            width: "100%"
+          }
         },
-        opt,
-        "m"
-      ))))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "border border-slate-200 rounded-xl overflow-hidden bg-white" }, /* @__PURE__ */ import_react3.default.createElement(
+        TENURE_OPTIONS.map((opt, idx) => /* @__PURE__ */ import_react3.default.createElement(
+          "button",
+          {
+            key: opt,
+            type: "button",
+            onClick: () => setSliderIndex(idx),
+            style: {
+              padding: "4px 8px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontFamily: "monospace",
+              cursor: "pointer",
+              border: sliderIndex === idx ? "1px solid #6ee7b7" : "1px solid transparent",
+              backgroundColor: sliderIndex === idx ? "#ecfdf5" : "transparent",
+              color: sliderIndex === idx ? "#047857" : "#64748b",
+              fontWeight: sliderIndex === idx ? "800" : "500",
+              transition: "all 0.15s ease"
+            }
+          },
+          opt,
+          "m"
+        ))
+      ))), /* @__PURE__ */ import_react3.default.createElement("div", { className: "border border-slate-200 rounded-xl overflow-hidden bg-white" }, /* @__PURE__ */ import_react3.default.createElement(
         "button",
         {
           onClick: () => setIsProofOpen(!isProofOpen),
@@ -7579,43 +7603,72 @@
   (() => {
     console.log("\u{1F6E1}\uFE0F CommitGuard Content Script Active on:", window.location.href);
     const COMMITGUARD_HOST_ID = "commitguard-extension-root";
-    function extractCartAmount() {
-      const bodyText = document.body ? document.body.innerText : "";
-      const match = bodyText.match(/(?:Total Amount|Total Payable|Payable Amount|Total Price|Order Total)[^\d₹]*[₹Rs.]*\s*([0-9,]+)/i);
-      if (match && match[1]) {
-        const parsed = parseInt(match[1].replace(/,/g, ""), 10);
-        if (!isNaN(parsed) && parsed > 500) {
-          return parsed;
+    function extractProductInfo() {
+      let detectedPrice = 0;
+      let detectedName = "";
+      let detectedEmi;
+      const titleSelectors = [
+        "h1",
+        "span.B_NuCI",
+        "span._35KyD6",
+        "#productTitle",
+        ".VU-ZEz"
+      ];
+      for (const sel of titleSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.textContent) {
+          const titleText = el.textContent.trim();
+          if (titleText.length > 5) {
+            detectedName = titleText.slice(0, 50);
+            break;
+          }
         }
       }
-      const priceSelectors = [
-        "._35kyal",
-        "._1_hQ79",
-        ".a-price-whole",
-        "#subtotals-marketplace-table .a-text-bold",
-        "[data-price]",
-        'div:contains("\u20B9")'
-      ];
-      for (const selector of priceSelectors) {
-        try {
-          const els = document.querySelectorAll(selector);
-          for (const el of Array.from(els)) {
-            const text = el.textContent || "";
-            const digits = text.replace(/[^0-9]/g, "");
-            const val = parseInt(digits, 10);
-            if (!isNaN(val) && val > 1e3 && val < 5e6) {
-              return val;
+      const bodyText = document.body ? document.body.innerText : "";
+      const emiMonthlyMatch = bodyText.match(/(?:From|Pay|EMI)\s*₹\s*([0-9,]+)\s*(?:\/\s*m|per month|monthly)/i);
+      if (emiMonthlyMatch && emiMonthlyMatch[1]) {
+        detectedEmi = parseInt(emiMonthlyMatch[1].replace(/,/g, ""), 10);
+      }
+      const buyNowMatch = bodyText.match(/(?:Buy now at|Total Amount|Total Payable|Payable Amount|Total Price|Order Total|Lowest price for you)[^\d₹]*₹\s*([0-9,]+)/i);
+      if (buyNowMatch && buyNowMatch[1]) {
+        const p = parseInt(buyNowMatch[1].replace(/,/g, ""), 10);
+        if (!isNaN(p) && p > 500 && p < 1e7) {
+          detectedPrice = p;
+        }
+      }
+      if (!detectedPrice) {
+        const priceSelectors = [
+          "div.Nx9bqj.CxhGGd",
+          // Flipkart product page big price
+          "div._30jeq3._16Jk6d",
+          "div._30jeq3",
+          ".a-price-whole",
+          "#subtotals-marketplace-table .a-text-bold"
+        ];
+        for (const sel of priceSelectors) {
+          const el = document.querySelector(sel);
+          if (el && el.textContent) {
+            const num = parseInt(el.textContent.replace(/[^0-9]/g, ""), 10);
+            if (!isNaN(num) && num > 1e3 && num < 1e7) {
+              detectedPrice = num;
+              break;
             }
           }
-        } catch {
         }
       }
-      return 70196;
+      if (!detectedPrice && detectedEmi) {
+        detectedPrice = detectedEmi * 18;
+      }
+      return {
+        price: detectedPrice > 0 ? detectedPrice : 70196,
+        name: detectedName || "Identified Product (No-Cost EMI)",
+        advertisedMonthlyEmi: detectedEmi
+      };
     }
     let hostContainer = null;
     let shadowRoot = null;
     let reactRoot = null;
-    function injectShadowModal(productPrice, onProceedCallback, onCancelCallback) {
+    function injectShadowModal(productPrice, productName, onProceedCallback, onCancelCallback) {
       if (document.getElementById(COMMITGUARD_HOST_ID)) {
         return;
       }
@@ -7679,6 +7732,7 @@
           ExtensionCommitGuardModal,
           {
             productPrice,
+            productName,
             onProceedAndContinue: handleProceed,
             onCancelStayOnPage: handleCancel
           }
@@ -7689,6 +7743,7 @@
           type: "CHECKOUT_INTERCEPTED",
           payload: {
             price: productPrice,
+            name: productName,
             effectiveApr: 19.93,
             hiddenFriction: 1339,
             timestamp: (/* @__PURE__ */ new Date()).toISOString()
@@ -7755,9 +7810,11 @@
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        const price = extractCartAmount();
+        const productInfo = extractProductInfo();
+        console.log("\u{1F6E1}\uFE0F CommitGuard Scraped Product Info:", productInfo);
         injectShadowModal(
-          price,
+          productInfo.price,
+          productInfo.name,
           // On Proceed: mark as authorized and let the click advance to next page
           () => {
             targetEl.setAttribute("data-commitguard-authorized", "true");
