@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { RotateCcw, ShieldCheck, Sparkles } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { RotateCcw, ShieldCheck, Sparkles, Command } from 'lucide-react';
 
 interface DemoControllerProps {
   onReset: () => void;
@@ -12,6 +12,17 @@ export const DemoController: React.FC<DemoControllerProps> = ({
   onReset,
   isInterceptionActive = false,
 }) => {
+  // Global presentation shortcut: 'r' to quickly reset the demo during judging pitch
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'r' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        onReset();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onReset]);
+
   return (
     <aside
       aria-label="Hackathon Evaluation Controller"
@@ -20,8 +31,8 @@ export const DemoController: React.FC<DemoControllerProps> = ({
       <button
         id="btn-reset-demo"
         onClick={onReset}
-        title="Instantly clear modal state and replay the checkout interception without refreshing the browser"
-        className="group relative flex items-center gap-2.5 px-4 py-3 bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold rounded-full shadow-2xl hover:shadow-emerald-500/20 border border-slate-700/80 transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        title="Instantly clear modal state and replay the checkout interception (Hotkey: 'R')"
+        className="group relative flex items-center gap-2.5 px-4 py-3 bg-slate-950 hover:bg-black text-white text-xs sm:text-sm font-bold rounded-full shadow-2xl hover:shadow-emerald-500/25 border border-slate-700/80 spring-in hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-emerald-400"
       >
         {/* Animated pulse indicator when interception is active */}
         <span className="relative flex h-2.5 w-2.5">
@@ -40,12 +51,13 @@ export const DemoController: React.FC<DemoControllerProps> = ({
         </span>
 
         <RotateCcw className="w-4 h-4 text-emerald-400 group-hover:rotate-180 transition-transform duration-500" />
-        <span>Reset Hackathon Demo</span>
+        <span>Reset Demo</span>
 
-        <span className="hidden md:inline text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-          Replay Loop
-        </span>
+        <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+          R
+        </kbd>
       </button>
     </aside>
   );
 };
+
