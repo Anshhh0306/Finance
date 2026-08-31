@@ -49,6 +49,14 @@ export const CommitGuardWidget: React.FC<CommitGuardWidgetProps> = ({
   // Scenario state synchronized with initialPayload
   const [exitMonth, setExitMonth] = useState(initialPayload.completedMonthsBeforeExit || 6);
 
+  // Computed results state
+  const [emiResult, setEmiResult] = useState(() =>
+    commitmentType === 'NO_COST_EMI' ? calculateNoCostEmiDrag(initialPayload) : null
+  );
+  const [lockInResult, setLockInResult] = useState(() =>
+    commitmentType === 'FD_LOCKIN' ? calculateLockInVsLiquidity(initialPayload) : null
+  );
+
   // Synchronize when initialPayload changes (tab switch)
   useEffect(() => {
     if (initialPayload.completedMonthsBeforeExit) {
