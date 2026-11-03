@@ -1,58 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "CommitGuard - Embedded Pre-Commitment Interceptor",
+  "name": "CommitGuard",
   "version": "1.0.0",
-  "description": "Embedded financial pre-commitment interceptor for checkout and banking flows. Halts high-friction No-Cost EMI and lock-in traps in <2ms with deterministic math clarity.",
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
-  "host_permissions": [
-    "*://*.amazon.in/*",
-    "*://*.flipkart.com/*",
-    "*://*.makemytrip.com/*",
-    "*://*.udemy.com/*"
-  ],
+  "description": "Shows the real cost of No-Cost EMI, pay-later and card payments on Amazon, Flipkart, MakeMyTrip and Udemy before you pay.",
+  "permissions": ["storage"],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "background": {
-    "service_worker": "src/extension/background.ts",
-    "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": [
-        "*://*.amazon.in/*",
-        "*://*.flipkart.com/*",
-        "*://*.makemytrip.com/*",
-        "*://*.udemy.com/*"
-      ],
-      "js": ["src/extension/content.tsx"],
-      "run_at": "document_idle"
-    }
-  ],
   "action": {
-    "default_title": "CommitGuard Active (Monitoring Checkouts)",
+    "default_title": "CommitGuard",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
-  "web_accessible_resources": [
+  "content_scripts": [
     {
-      "resources": [
-        "src/extension/styles.css"
-      ],
-      "matches": [
-        "*://*.amazon.in/*",
-        "*://*.flipkart.com/*",
-        "*://*.makemytrip.com/*",
-        "*://*.udemy.com/*"
-      ]
+      "matches": ["*://*.amazon.in/*", "*://*.flipkart.com/*", "*://*.makemytrip.com/*", "*://*.udemy.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ]
 }
