@@ -4,7 +4,7 @@ A Chrome extension that shows the real cost of a payment option at the moment yo
 
 "No-Cost EMI" is rarely free. The merchant discounts the bank's interest, but a processing fee and 18% GST on the fee and on every month's interest are still added. CommitGuard holds the checkout click, reads the price and payment options off the page, prices each option with a tested finance engine, and lets you continue or change your mind.
 
-[![CommitGuard on a Flipkart checkout: the selected No-Cost EMI really costs ₹10,355, a 25.24% effective APR]
+[CommitGuard on a Flipkart checkout: the selected No-Cost EMI really costs ₹10,355, a 25.24% effective APR]
 
 
 https://github.com/user-attachments/assets/4fc6007d-d23c-4aaa-b56e-29214d5ebbfd
