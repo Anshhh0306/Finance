@@ -4,7 +4,8 @@ A Chrome extension that shows the real cost of a payment option at the moment yo
 
 "No-Cost EMI" is rarely free. The merchant discounts the bank's interest, but a processing fee and 18% GST on the fee and on every month's interest are still added. CommitGuard holds the checkout click, reads the price and payment options off the page, prices each option with a tested finance engine, and lets you continue or change your mind.
 
-![CommitGuard on a Flipkart checkout: the selected No-Cost EMI really costs ₹10,355, a 25.24% effective APR](docs/screenshot.png)
+![CommitGuard on a Flipkart checkout: the selected No-Cost EMI really costs ₹10,355, a 25.24% effective APR](docs/screenshot.png)(docs/commitguard-intro.mp4)
+
 
 <sub>Screenshot of the built extension running on a recreated checkout page.</sub>
 
@@ -76,24 +77,7 @@ src/
     └── manifest.json       Manifest V3; only the storage permission
 tests/                      Engine and offer tests
 scripts/build-extension.mjs esbuild + Tailwind build
-video/                      Promo video, made in code with Remotion
 ```
-
-## Promo video
-
-[`video/`](video) is a 60-second promo built with Remotion. It renders the extension's real modal component with numbers from the same finance engine, so the video and the product can't disagree.
-
-- **Narration** comes from ElevenLabs. The word timestamps it returns time the captions, the on-screen cues and each scene's length.
-- **Music and most sound effects** are synthesized in plain JavaScript (oscillators, filters, a small reverb). The music drop lands on the on-screen click.
-
-```bash
-cd video
-npm install
-echo ELEVENLABS_API_KEY=your-key > .env
-npm run voice        # narration clips (uses ElevenLabs credits)
-npm run render       # out/commitguard-intro.mp4
-```
-
 ## Limitations
 
 - Checkout markup changes often, so a site update can break a scraper until its selectors are updated.

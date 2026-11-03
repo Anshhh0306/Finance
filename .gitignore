@@ -2,7 +2,6 @@
 node_modules/
 
 # Build output (npm run build) and video renders
-dist/
 out/
 
 # Secrets (*.pem is the private key Chrome creates when packing the extension)
