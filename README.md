@@ -6,6 +6,11 @@ A Chrome extension that shows the real cost of a payment option at the moment yo
 
 [![CommitGuard on a Flipkart checkout: the selected No-Cost EMI really costs ₹10,355, a 25.24% effective APR](docs/screenshot.png)](docs/commitguard-intro.mp4)
 
+
+
+https://github.com/user-attachments/assets/4fc6007d-d23c-4aaa-b56e-29214d5ebbfd
+
+
 <sub>Screenshot of the built extension running on a recreated checkout page. Click the image or [watch the demo video here](docs/commitguard-intro.mp4).</sub>
 
 ## What it shows
